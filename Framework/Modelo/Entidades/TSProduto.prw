@@ -38,7 +38,7 @@ Class TSProduto From TSigaMDBas
 	method New() Constructor
 	
 	Method iniCampos() 	
-	method execute()
+	method execAuto()
 EndClass
 
 
@@ -48,15 +48,8 @@ Method New( ) Class TSProduto
 	::entidade			:=			"Produto"
 	::funcao			:=		"Cadastro de produto"	
 	::execAuto := 			.T.
+	
 return (Self)
-
-
-
-
-method execute(aVetor, opcao) class TSProduto
-	// TODO
-	MSExecAuto({|x,y| Mata010(x,y)},::aVetor, opcao)	
-return 
 
 
 Method iniCampos() class TSProduto
@@ -71,3 +64,7 @@ Method iniCampos() class TSProduto
 	::setChave({"B1_FILIAL", "B1_COD"})				
 return
 
+
+method execAuto(opcao) class TSProduto
+	MSExecAuto({|x,y| Mata010(x,y)},::aVetor,opcao)
+return

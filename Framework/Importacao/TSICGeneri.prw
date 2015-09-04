@@ -63,14 +63,12 @@ method callExec() class TSICGeneri
 return 
 
 /*/{Protheus.doc} update
-(long_description)
+Update na base
 @type method
-@param lIns, ${param_type}, (Descrição do parâmetro)
-@param nIndIni, numérico, (Descrição do parâmetro)
-@example
-(examples)
-@see (links_or_references)
-/*/Method update(lIns, nIndIni) class TSICGeneri
+@param lIns, lógico, .T. inserir, .F. atualizaçãp
+@param nIndIni, numérico, Indice de coluna a partir do qual se faz a atualização
+/*/
+Method update(lIns, nIndIni) class TSICGeneri
    	local sTable := ::sTable
    	nTamArX := len(::aVetor)
    

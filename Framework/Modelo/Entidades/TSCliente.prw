@@ -36,6 +36,7 @@ Herda de TSigaMDBas
 Class TSCliente From TSigaMDBas
 	method New() Constructor
 	method iniCampos()
+	method execAuto()
 EndClass
 
 
@@ -58,6 +59,10 @@ Method iniCampos() class TSCliente
 
 	::addCpoDef(cpoDef)	
 
-	::setChave({"A1_FILIAL", "A1_COD", "A1_LOJA"})
-					
+	::setChave({"A1_FILIAL", "A1_COD", "A1_LOJA"})			
+return
+
+
+method execAuto(opcao) class TSCliente
+	MSExecAuto({|x,y| Mata030(x,y)},::aVetor,opcao)
 return

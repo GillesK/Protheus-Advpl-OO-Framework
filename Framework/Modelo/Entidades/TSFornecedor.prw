@@ -37,6 +37,7 @@ Class TSFornecedor From TSigaMDBas
 	method New() Constructor
 		
 	method iniCampos()
+	method execAuto()
 EndClass
 
 
@@ -61,4 +62,9 @@ Method iniCampos() class TSFornecedor
 
 	::setChave({"A2_FILIAL", "A2_COD"})
 		
+return
+
+
+method execAuto(opcao) class TSFornecedor
+	MSExecAuto({|x,y| Mata020(x,y)},::aVetor,opcao)
 return

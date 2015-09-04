@@ -13,6 +13,9 @@
 #define VALOR		5
 #define MUDADO	6
 
+#define INSERIR		3
+#define ATUALIZAR		4
+#define DELETAR		5
 
 /*
 ‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
@@ -118,6 +121,13 @@ FunÁ„o da entidade. Deve ser informado no contrutor da classe filha
 	//data chave
 	//data codigo
 	// 1 Nome externo, 2 nome interno, 3 tipo, 4 valor, 5 mudado, 6 chave
+
+/*/{Protheus.doc} aVetor
+Array contendo os dados do ExecAuto
+@type property
+@proptype array
+/*/		
+	data aVetor
 	
 	data campos
 
@@ -139,7 +149,9 @@ Deve ser informado no contrutor da classe filha
 	method deletar()
 	method setar()		
 	method prepExecAuto()
-	Method procErroBatch()
+	method execAuto()
+	method resExecAuto()	
+//	Method procErroBatch()
 	method fillCampos()
 	method resetCampos()				
 	
@@ -152,6 +164,10 @@ Deve ser informado no contrutor da classe filha
 	method iniCampos()
 	method addCpoDef()
 	method setChave()
+	
+	method salvaRegistro()
+	method isInsert()
+	method deletaRegistro(valChave)	
 		
 EndClass
 
@@ -173,6 +189,59 @@ Toda classe filha precisa definir.
 /*/	
 method iniCampos()  class TSigaMDBas
 
+return
+
+/*/{Protheus.doc} addCpoDef
+MÈtodo permitindo definir os campos. Deve ser chamado no mÈtodo iniCampos()
+O array em entrada do mÈtodo comtem arrays com a seguinte estrutura:  
+1- Nome do campo em portugues  
+2- Nome do campo na base  
+3- Tipo do campo
+Este array podera ser gerado a partir do dicionario SX3  
+@type method
+@param aCampoDef, array, array de arrays com a definiÁ„o dos campos
+@example
+Method iniCampos() class TSProduto <br>
+	// Nome externo, nome interno, tipo <br>
+	local cpoDef <br>
+	cpoDef := {{"filial", "B1_FILIAL", "C"}; <br>
+				,{"codigo", "B1_COD", "C"}; <br>
+				,{"origem", "B1_ORIGEM", "C"}; <br>
+				,{"grupoTributario", "B1_GRTRIB", "C"}} <br>
+	::addCpoDef(cpoDef)	 <br>
+		 <br>
+	::setChave({"B1_FILIAL", "B1_COD"}) <br>				
+return
+/*/
+method addCpoDef(aCampoDef)  class TSigaMDBas
+	for i := 0 to Len(aCampoDef)	
+		// adicionar chave
+		aadd(aCampoDef[i], .F.)
+		// valor
+		aadd(aCampoDef[i], nil)
+		//mudado
+		aadd(aCampoDef[i], .F.)
+		
+		aadd(::campos, aCampoDef[i])
+	next
+return
+
+/*/{Protheus.doc} setChave
+MÈtodo permitindo definir a chave primaria. Deve ser chamado no mÈtodo iniCampos()
+@type method
+@param aChave, array, array com os campos compondo a chave primaria
+@example
+	::setChave({"B1_FILIAL", "B1_COD"}) <br>
+/*/
+method setChave(aChave)  class TSigaMDBas
+	local nPos
+	::chave := aChave
+	for i := 0 to len(::chave)
+		nPos := ascan(::campos, {|x| x[CPOTEC] == ::chave[i]})
+		if nPos > 0
+			::campos[nPos][CHAVE] := .T.
+		endif
+	next 
 return
 
 
@@ -248,6 +317,8 @@ Obter o valor do campo
 @type method
 @param campo, character, Nome do campo em portugues ou nome tÈcnico na base
 @return mix, valor do campo
+@example 
+	::oFornecedor:valor('estado')
 /*/
 method valor(campo) class TSigaMDBas
 	local nPos
@@ -270,6 +341,8 @@ Permite setar o valor de um campo
 @param campo, character, Nome do campo em portugues ou nome tÈcnico na base
 @param valor, mix, Valor do campo
 @return array, {lRet, cMessage} lRet: .T. se conseguiu setar .F. se n„o, cMessage : Mensagem de erro
+@example 
+	::oFornecedor:setar('estado', 'PB')
 /*/
 method setar(campo, valor) class  TSigaMDBas
 	local nPos
@@ -285,7 +358,7 @@ method setar(campo, valor) class  TSigaMDBas
 			campos[nPos][VALOR] := valor
 			campos[nPos][MUDADO] := .T.
 		else 
-			xReturn := {.F. "campo n„o encontrado"}
+			xReturn := {.F., "campo n„o encontrado"}
 		endif
 	endif		
 return xReturn
@@ -296,21 +369,79 @@ Salvar as modificaÁıes do modelo na base. Gerencia a inserÁ„o como a modificaÁ„o
 @return array, {lRet, cMessage} lRet: .T. se conseguiu salvar .F. se n„o, cMessage : Mensagem de erro
 /*/
 Method salvar() class TSigaMDBas
-	// TODO
-	// se campos chave com indicador de modificado entao È InserÁ„o
-	// se nao update
-	local aRet := {.T., ::entidade + " salva no " +  ::funcao}	
+	local aRet := {.T., ::entidade + " salva no " +  ::funcao}
+	local aRet2 := {}
+	local aRet3 := {}
+	local aRet4 := {}
 	
-	local tabela := ::tabela
-	local nPos	
+	local tabela := ::tabela	
 	//local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao} 
 	local axArea := &(tabela)->(getarea())
 	local lIns := .F.
 	local valChave := ""
+	local opcao := INSERIR
 	
 	// TODO chamada do log
 	
 	// determina inserÁ„o ou update
+	aRet2 := ::isInsert(@lIns, @valChave)
+	if aRet2[1]
+	   // Exec auto ou insert direto
+		if ::execAuto
+			if !lIns
+				opcao := ATUALIZAR
+			endif								
+			::prepExecAuto()
+			::execAuto(opcao)
+			aRet4 := ::resExecAuto()
+			if !aRet4[1]
+				aRet[2] := aRet4[2]
+			endif 					
+		else
+			// Reclock
+			aRet3 := ::salvaRegistro(lIns, valChave)
+			if !aRet3[1]
+				aRet[2] := aRet3[2]
+			endif 		
+		endif		
+	else
+		aRet[2] := aRet2[2]
+	endif
+
+	//aRet := {.F., ::entidade + " n„o enconstrado no " + ::funcao}
+	restarea(axArea)
+return aRet
+
+
+
+method salvaRegistro(lIns, valChave)  class TSigaMDBas
+	local aRet := {.T., ""}
+	local tabela := ::tabela
+	
+	dbselectarea(tabela)	
+	&(tabela)->(dbsetorder(1))
+	&(tabela)->(dbgotop())
+	if !lIns			
+		if !(&(tabela)->(DBSeek(valChave)))
+			aRet := {.F., "Registro n„o encontrado na base para fazer atualizaÁ„o"}
+			return aRet							
+		endif
+	endif	
+	recLock(tabela, lIns)			
+	for i := 1 to len(::campos)
+		if Self:campos[i][MUDADO] == .T.
+			&(tabela)->(&(Self:campos[i][CPOTEC])) := Self:campos[i][VALOR]
+		endif 						
+	next
+	&(tabela)->(MsUnlock())
+	//MsUnlock(&(tabela))	
+return aRet
+
+
+method isInsert(lIns, valChave) class TSigaMDBas
+	local aRet := {.T.,""}
+	local nPos
+
 	for i := 1 to len(::chave)
 		nPos := ascan(::campos, {|x| x[CPOTEC] == ::chave[i] })
 		if nPos != 0
@@ -325,34 +456,6 @@ Method salvar() class TSigaMDBas
 			return aRet			
 		endif
 	next
-	
-   // Exec auto ou insert direto
-	if ::execAuto
-		::preExecAuto()
-		::execute()
-	else
-		// msunlock
-		dbselectarea(tabela)	
-		&(tabela)->(dbsetorder(1))
-		&(tabela)->(dbgotop())
-		if !lIns			
-			if !(&(tabela)->(DBSeek(valChave)))
-				aRet := {.F., "Registro n„o encontrado na base para fazer atualizaÁ„o"}
-				return aRet							
-			endif
-		endif	
-		recLock(tabela, lIns)			
-		for i := 1 to len(::campos)
-			if Self:campos[i][5] == .T.
-				&(tabela)->(&(Self:campos[i][CPOTEC])) := Self:campos[i][VALOR]
-			endif 						
-		next
-		MsUnlock(&(tabela))		
-	endif
-	
-	//aRet := {.F., ::entidade + " n„o enconstrado no " + ::funcao}
-
-	restarea(axArea)
 return aRet
 
 /*/{Protheus.doc} deletar
@@ -360,16 +463,95 @@ Deleta o modelo na base
 @type method
 /*/
 method deletar() class TSigaMDBas
-	// TODO
+	local tabela := ::tabela
+	local aRet := {.T., "deletado com sucesso"}
+	local aRet2
+	local lIns := .F.
+	local axArea := &(tabela)->(getarea())	
+	// determina inserÁ„o ou update
+	aRet2 := ::isInsert(@lIns, @valChave)
+	if aRet2[1]
+		if ::execAuto
+			::prepExecAuto()
+			::execAuto(DELETAR)
+			::resExecAuto()
+		else
+			// Reclock
+			aRet3 := ::deletaRegistro(valChave)
+			if !aRet3[1]
+				aRet[2] := aRet3[2]
+			endif 		
+		endif
+	else
+		aRet[2] := aRet2[2]
+	endif		
+	
+	restarea(axArea)	
+return aRet
+
+
+method deletaRegistro(valChave) class  TSigaMDBas
+	local aRet := {.T., ""}
+	local tabela := ::tabela
+	
+	dbselectarea(tabela)	
+	&(tabela)->(dbsetorder(1))
+	&(tabela)->(dbgotop())
+				
+	if !(&(tabela)->(DBSeek(valChave)))
+		aRet := {.F., "Registro n„o encontrado na base para fazer atualizaÁ„o"}
+	else
+		recLock(tabela, .F.)
+		&(tabela)->(DbDelete())			
+		&(tabela)->(MsUnlock())
+		//MsUnlock(&(tabela))									
+	endif
+return aRet
+
+/*/{Protheus.doc} execAuto
+DefiniÁ„o do ExecAuto. A definir na classe filha
+@type method
+@param opcao, numÈrico, opÁao do ExecAuto 3: Inserir, 4: alterar, 5: Deletar
+@example
+	method execAuto(opcao) class TSCliente <br>
+		MSExecAuto({|x,y| Mata030(x,y)},::aVetor,opcao) <br>
+	return
+/*/
+method execAuto(opcao) class TSigaMDBas
+
 return
 
-
+	
 method prepExecAuto() class TSigaMDBas
-	//TODO
+	private lMsErroAuto := .F.
+	
+	::aVetor := {}
+	for i := 1 to len(::campos)
+		aadd(::aVetor , {::campos[i][CPOTEC],::campos[i][VALOR],nil})	
+	next
 return
 
 
-Method procErroBatch() class TSigaMDBas
+method resExecAuto()   class TSigaMDBas
+	local aiRet := {.T., ""}
+	local ciText0
+	local aiErro
+	If lMsErroAuto	
+		ciTexto		:=	" Erro Rotina Autom·tica "+ Chr(13)+Chr(10)	
+		aiErro 		:= GetAutoGRLog()
+		For niX := 1 To Len(aiErro)
+			ciTexto += aiErro[niX] + Chr(13)+Chr(10)
+		Next niX								
+		
+		aiRet		:=	{.F.,ciTexto}
+	endif							  
+return aiRet
+
+
+
+
+
+/*Method procErroBatch() class TSigaMDBas
 	//TODO
 	if lMsErroAuto            
 		// delete file
@@ -399,58 +581,4 @@ Method procErroBatch() class TSigaMDBas
 	else
 		lImp := .T.  
 	Endif
-return
-
-
-/*/{Protheus.doc} addCpoDef
-MÈtodo permitindo definir os campos. Deve ser chamado no mÈtodo iniCampos()
-O array em entrada do mÈtodo comtem arrays com a seguinte estrutura:  
-1- Nome do campo em portugues  
-2- Nome do campo na base  
-3- Tipo do campo
-Este array podera ser gerado a partir do dicionario SX3  
-@type method
-@param aCampoDef, array, array de arrays com a definiÁ„o dos campos
-@example
-Method iniCampos() class TSProduto <br>
-	// Nome externo, nome interno, tipo <br>
-	local cpoDef <br>
-	cpoDef := {{"filial", "B1_FILIAL", "C"}; <br>
-				,{"codigo", "B1_COD", "C"}; <br>
-				,{"origem", "B1_ORIGEM", "C"}; <br>
-				,{"grupoTributario", "B1_GRTRIB", "C"}} <br>
-	::addCpoDef(cpoDef)	 <br>
-		 <br>
-	::setChave({"B1_FILIAL", "B1_COD"}) <br>				
-return
-/*/
-method addCpoDef(aCampoDef)  class TSigaMDBas
-	for i := 0 to Len(aCampoDef)	
-		// adicionar chave
-		aadd(aCampoDef[i], .F.)
-		// valor
-		aadd(aCampoDef[i], nil)
-		//mudado
-		aadd(aCampoDef[i], .F.)
-		
-		aadd(::campos, aCampoDef[i])
-	next
-return
-
-/*/{Protheus.doc} setChave
-MÈtodo permitindo definir a chave primaria. Deve ser chamado no mÈtodo iniCampos()
-@type method
-@param aChave, array, array com os campos compondo a chave primaria
-@example
-	::setChave({"B1_FILIAL", "B1_COD"}) <br>
-/*/
-method setChave(aChave)  class TSigaMDBas
-	local nPos
-	::chave := aChave
-	for i := 0 to len(:chave)
-		nPos := ascan(::campos, {|x| x[CPOTEC] == ::chave[i]})
-		if nPos > 0
-			::campos[nPos][CHAVE] := .T.
-		endif
-	next 
-return
+return*/

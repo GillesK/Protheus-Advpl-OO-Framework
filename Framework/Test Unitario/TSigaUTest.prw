@@ -100,6 +100,7 @@ Descrição do teste
 	
 	method New() Constructor
 	method assert()
+	method exec()
 		
 EndClass
 
