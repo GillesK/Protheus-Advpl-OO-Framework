@@ -8,7 +8,7 @@
     
 #DEFINE ENTER CHR(13)+CHR(10)
 
-/*/
+/*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
@@ -23,19 +23,63 @@
 ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
-/*/
+*/
 
+
+
+/*/{Protheus.doc} TSImpCsv
+Classe de base para importação via arquivo CSV.
+@type class
+@author Gilles Koffmann - Sigaware Pb
+@since 02/11/2013
+@version 1.2
+/*/
 Class TSImpCsv
 	
 //	Data sOption
 	Data sArquivo
 //	Data sTable
 //	Data aDef
-	Data nLinCol 
+
+	Data nLinCol
+
+/*/{Protheus.doc} nLinDat
+Linha do arquivo onde começam os dados
+@type property
+/*/	 
 	Data nLinDat
+
+/*/{Protheus.doc} nLinTit
+Linha do arquivo onde estão os titulos para verifição de layout
+@type property
+
+/*/	 	
 	Data nLinTit
-	Data aTitulos 
-	Data aColunas  	
+
+/*/{Protheus.doc} aTitulos
+Array onde estão os nomes dos titulos do arquivo para verificação do layout
+O Array tem que ser pre-ecnhido na mesma ordem que as colunas do arquivo 
+@type property
+@example
+	aAdd(::aTitulos, "APRESENTAÇÃO")
+/*/	 		
+	Data aTitulos
+
+/*/{Protheus.doc} aColunas
+Array onde estão os nomes e os tipos dos campos nas tabelas protheus.
+O Array tem que ser pre-ecnhido na mesma ordem que as colunas do arquivo
+@type property
+@example
+	aAdd(::aColunas, {"ZZZ_APRESE", "C" })
+/*/	 		 
+	Data aColunas
+	
+/*/{Protheus.doc} aVetor
+Array contendo os dados de 1 linha do arquivo de entrada.
+@type property
+@example
+	aadd(::aVetor, {::aColunas[nX][1], conversao, NIL})
+/*/	 		  	
 	Data aVetor	
 	
 	Method New() Constructor
@@ -45,7 +89,7 @@ Class TSImpCsv
 	Method criaVect()
 	Method procString()
 	
-//	Method callExec()
+	Method callExec()
 //	Method callExe2() 
 //	Method callExe3()
 	
@@ -65,9 +109,15 @@ Class TSImpCsv
 	method confFile()
 	method linhaComp()	
 		
+	method prepTits()
 EndClass
 
-Method New(/*sOption, sTable,*/ sArquivo ) Class TSImpCsv
+/*/{Protheus.doc} New
+Constructor
+@type method
+@param sArquivo, character, caminho completo do arquivo para importar
+/*/
+Method New( sArquivo ) Class TSImpCsv
 	//::sOption := sOption
 	::sArquivo := sArquivo       
 	//::sTable := sTable
@@ -82,8 +132,74 @@ Method New(/*sOption, sTable,*/ sArquivo ) Class TSImpCsv
 	::aVetor := {}	
 return Self                      
 
+/*/{Protheus.doc} prepTits
+Método para informar os titúlos do arquivo se quiser fazer o controle de layout.
+Os títulos devem ser informado dentro de aTitulos respeitando a ordem das colunas
+do arquivo sendo importado
+@type method
+@example
+	aAdd(::aTitulos, "APRESENTAÇÃO")
+@see aTitulos
+/*/
+Method prepTits()  Class TSImpCsv
+
+return
 
 
+/*/{Protheus.doc} callExec
+Método responsavel pela atualização no Protheus. Chamado para cada linha do arquivo de entrada
+@type method
+/*/
+Method callExec()  Class TSImpCsv
+
+return
+
+
+/*/{Protheus.doc} prepCols
+Método para informar os campos da tabela Protheus sendo importada.
+Os campos devem ser informados dentro de aColunas respeitando a ordem das colunas
+do arquivo sendo importado
+@type method
+@example
+	aAdd(::aColunas, {"ZZZ_APRESE", "C" })
+@see aColunas
+/*/
+Method prepCols() class TSImpCsv
+
+	cLinha  := aHead[::nLinCol]
+	aColu := Separa(cLinha,";",.T.)
+	                           
+	// identificar tipos
+	DbSelectArea("SX3")
+  	SX3->(DbSetOrder(2))      
+	For nX := 1 to Len(aColu)
+		If SX3->(DbSeek(AllTrim(aColu[nX])))
+			aAdd(::aColunas, {Alltrim(aColu[nX]), SX3->X3_TIPO })
+//		else
+//			aadd(::aColunas, {"", ""})
+	    Endif                            
+    Next nX
+    
+    cBobLol := ""
+return
+
+
+/*/{Protheus.doc} tratEspec
+Tratamento específico de um campo. Para classes filhas
+@type method
+@param nX, numérico, O indice da coluna sendo tratada para acessar aColunas
+@param cInput, character, dado a tratar
+@return character, dado tratado
+/*/
+Method tratEspec(nX, cInput) class TSImpCsv
+		
+return 
+
+
+/*/{Protheus.doc} doImport
+Método principal para executar a importação
+@type method
+/*/
 Method doImport()  class TSImpCsv
 
 	static aExcCol := {}
@@ -176,6 +292,12 @@ Method doImport()  class TSImpCsv
 	
 return  
 
+
+
+// PROTECTED
+
+
+
 Method linhaComp(input) class TSImpCsv
 	local aDadosT, nextLine 
 	// para tratar o LFCR numa linha
@@ -267,9 +389,8 @@ Method criaVect() class TSImpCsv
 	next nX
 return
 
-//Method tratEspec(nX, cInput) class TImpCsv
-	
-//return conversao
+
+
 
 
 Method procString(cNoAspa) class TSImpCsv
@@ -349,7 +470,7 @@ method confFile() class TSImpCsv
 		aTit := Separa(cLinha,";",.T.)
 	
 		For nX := 1 to Len(aTit)
-       	if AllTrim(aTit[nX]) != ::aTitulos[nX][1]
+       	if AllTrim(aTit[nX]) != ::aTitulos[nX]
        		ret := .F.
        		exit
        	EndIf                     
@@ -358,24 +479,6 @@ method confFile() class TSImpCsv
 return ret
 
 
-Method prepCols() class TSImpCsv
-
-	cLinha  := aHead[::nLinCol]
-	aColu := Separa(cLinha,";",.T.)
-	                           
-	// identificar tipos
-	DbSelectArea("SX3")
-  	SX3->(DbSetOrder(2))      
-	For nX := 1 to Len(aColu)
-		If SX3->(DbSeek(AllTrim(aColu[nX])))
-			aAdd(::aColunas, {Alltrim(aColu[nX]), SX3->X3_TIPO })
-//		else
-//			aadd(::aColunas, {"", ""})
-	    Endif                            
-    Next nX
-    
-    cBobLol := ""
-return
 
 Method prepFiles() class TSImpCsv
 

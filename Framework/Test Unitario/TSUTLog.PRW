@@ -5,7 +5,13 @@
                      
 #DEFINE ENTER CHR(13)+CHR(10)
 
-Class TSUTLog
+/*/{Protheus.doc} TSUTLog
+Classe de log dos testes
+@type class
+@author Gilles Koffmann - Sigaware Pb
+@since 04/09/2015
+@version 1.0
+/*/Class TSUTLog
                                
 //	Data oEnv
   	Data nHandle        
@@ -21,7 +27,11 @@ Class TSUTLog
 
 EndClass       
 
-Method New(logDir) Class TSUTLog
+/*/{Protheus.doc} New
+Constructor
+@type method
+@param logDir, character, pasta (caminho absoluto) onde sera escrito o arquivo de log dos testes
+/*/Method New(logDir) Class TSUTLog
 
 //	::logFile := logFile	  
 //	local cUserId := __cUserId	
@@ -64,6 +74,16 @@ Method writeLog(sOrigin, nRegistro) Class TSUTLog
 					// Numero de registro | Mensagem | Dado invalido  
 return         
 
+/*/{Protheus.doc} write
+Escreve na log. Uso interno
+@type method
+@param nome, character, Nome do teste
+@param dados, character, Descrição do teste
+@param resultado, mix, resultado do teste
+@param esperado, mix, resultado esperado do teste
+@param lRet, character, resultado final do teste "Ok" ou "Ko"
+
+/*/
 Method write(nome, dados, resultado, esperado, lRet) Class TSUTLog
 	local cTipo, res, esp 
 	FWrite(::nHandle, "Test: " + nome  + ENTER)

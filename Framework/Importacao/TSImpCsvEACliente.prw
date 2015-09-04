@@ -6,7 +6,7 @@
 
 
 
-/*/
+/*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
@@ -21,17 +21,23 @@
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+/*/{Protheus.doc} TSImpCsvEACliente
+Importa็ใo de arquivo csv de cliente (SA1) via rotina automatica.
+Gerencia s๓ inser็ใo
+@type class
+@author Gilles Koffmann - Sigaware Pb
+@since 02/12/2013
+@version 1.0
 /*/
-
 Class TSImpCsvEACliente From TSICExeAut
-
 	method execute()
 EndClass
 
-method execute() class TSImpCsvEACliente
 
-	MSExecAuto({|x,y| Mata030(x,y)},::aVetor,3)
-	
+method execute() class TSImpCsvEACliente
+	MSExecAuto({|x,y| Mata030(x,y)},::aVetor,3)	
 return 
 
 

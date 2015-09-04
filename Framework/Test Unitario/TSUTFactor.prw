@@ -7,7 +7,7 @@
 
 
 
-/*/
+/*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
@@ -22,9 +22,39 @@
 ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+
+/*/{Protheus.doc} TSUTFactor
+Classe "Factory" para criar testes. Esta classe é responsavel por ler o arquivo de configuração de ambiente
+e inicializar a Log.
+@type class
+@author Gilles Koffmann - Sigaware Pb
+@since 04/09/2015
+@version 1.0
+@example
+Para criar uma execução de varios testes unitarios, precisa-se criar uma user function
+que podera ser chamada diretamente no smartclient e que tera o seguite tipo de execução  <br>
+ <br>
+user function TSTLIC1(sConfFile, sLogDir)  <br>
+  <br>
+	oTstFactory := TSUTFactor():New("C:\Totvs\TotvsTest\env.ini", "C:\Totvs\TotvsTest\")  <br>
+	 <br>
+	// a sequencia dos testes unitarios  <br>
+	// TTestLicCalcMgrPro herda de TSigaUTest  <br> 								
+	oTstLicCalcMgrPro := TTestLicCalcMgrPro():new(oTstFactory)  <br>
+	// execuçãop do teste  <br>
+	oTstLicCalcMgrPro:exec()  <br>
+	 <br>
+	// TTestLicCalcMgrMax herda de TSigaUTest  <br>
+	oTstLicCalcMgrMax := TTestLicCalcMgrMax():new(oTstFactory)  <br>
+	oTstLicCalcMgrMax:exec()	 <br>
+	 <br>		
+	// reset do ambiente  <br>				
+	oTstFactory:resEnv()  <br>
+return
+ 
 /*/
-
-
 Class TSUTFactor 
 
 	data empresa
@@ -47,6 +77,17 @@ Class TSUTFactor
 EndClass
 
 
+/*/{Protheus.doc} New
+Constructor
+O arquivo de definição do ambiente (sEnvFile) no formato .ini deve definir os seguintes elementos: 
+empresa=xx  
+filial=xx 
+usuario=xxxxxx 
+senha=xxxxxxx 
+@type method
+@param sEnvFile, character, caminha absoluto para o arquivo de definição de ambiente.
+@param sLogDir, character, Pasta onde vai ser escrito o arquivo de log
+/*/
 Method New(sEnvFile, sLogDir) Class TSUTFactor
 	::envFile := sEnvFile
 	::logDir := sLogDir
@@ -56,12 +97,17 @@ Method New(sEnvFile, sLogDir) Class TSUTFactor
 	self:prepEnv()
 return (Self)
 
+
 Method prepEnv() class TSUTFactor
 	PREPARE ENVIRONMENT EMPRESA (self:empresa) FILIAL (self:filial) USER (self:usuario)  PASSWORD (self:senha) 
 	//PREPARE ENVIRONMENT EMPRESA (::oEnv:_EMPRESA:TEXT) FILIAL (::oEnv:_FILIAL:TEXT) USER (::oEnv:_USUARIO:TEXT)  PASSWORD (::oEnv:_SENHA:TEXT) TABLES (::oEnv:_TABLES:TEXT) MODULO (::oEnv:_MODULO:TEXT)	               	                                       
 	//PREPARE ENVIRONMENT EMPRESA (self:empresa) FILIAL (self:filial) USER (self:usuario)  PASSWORD (self:senha) TABLEA 'SA1' MODULO 'SIGAFAT' 
 return
 
+/*/{Protheus.doc} resEnv
+Reset do ambiente
+@type method
+/*/
 Method resEnv() class TSUTFactor
 	RESET ENVIRONMENT
 return

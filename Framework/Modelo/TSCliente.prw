@@ -6,7 +6,7 @@
 
 
 
-/*/
+/*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
@@ -21,32 +21,43 @@
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
+*/
+
+
+/*/{Protheus.doc} TSCliente
+Classe representando um cliente (SA1).
+Herda de TSigaMDBas
+@type class
+@author Gilles Koffmann - Sigaware Pb
+@since 04/03/2015
+@version 1.0
+@see TSigaMDBas.html
 /*/
-
-
 Class TSCliente From TSigaMDBas
-
-
 	method New() Constructor
 	method iniCampos()
 EndClass
+
 
 Method New( ) Class TSCliente 
 	_Super:New()
 	::tabela 	  := 		"SA1"	
 	::entidade			:=	"Cliente"
-	::funcao			:= "Cadastro de Cliente"	
-// 	::estadoCol := 	"A1_EST"
-	//::codigoCol := 	"A1_COD"
-	//::lojaCol 		:= 	"A1_LOJA"
-	
+	::funcao			:= "Cadastro de Cliente"		
+	::execAuto := 			.T.	
 return (Self)
 
 
 Method iniCampos() class TSCliente
-	// Nome externo, nome interno, tipo, mudaddo, valor, chave
-	aadd(::campos, {"filial", "A1_FILIAL", "C",nil,.F.,.T.})
-	aadd(::campos, {"codigo", "A1_COD", "C",nil,.F.,.T.})
-	aadd(::campos, {"loja", "A1_LOJA", "C",nil,.F.,.T.})
-	aadd(::campos, {"estado", "A1_EST", "C",nil,.F.,.F.})				
+	local cpoDef
+	// Nome externo, nome interno, tipo	
+	cpoDef := {{"filial", "A1_FILIAL", "C"};
+				,{"codigo", "A1_COD", "C"};
+				,{"loja", "A1_LOJA", "C"};
+				,{"estado", "A1_EST", "C"}}
+
+	::addCpoDef(cpoDef)	
+
+	::setChave({"A1_FILIAL", "A1_COD", "A1_LOJA"})
+					
 return

@@ -5,8 +5,16 @@
 #include "msobject.ch"     
 
 
+#define CPOPOR	1 
+#define CPOTEC 	2
+#define TIPO	 	3
+#define CHAVE		4
+		
+#define VALOR		5
+#define MUDADO	6
 
-/*/
+
+/*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
@@ -21,28 +29,115 @@
 ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+
+/*/{Protheus.doc} TSigaMDBas
+Classe de base Modelo. Uma classe modelo representa uma tabela Protheus
+e providencia métodos para localizar, acessar, inserir, atualizar e deletar
+uma entidade dentro do banco de dados sem ter que se preocupar com os detalhes de acesso
+a base 
+@type class
+@author Gilles Koffmann - Sigaware Pb
+@since 03/09/2014
+@version 1.0
+@example
+Definição de uma classe filha  <br>
+ <br>
+Method New( ) Class TELicGrupoTributario  <br> 
+	_Super:New()  <br>
+	::tabela 			:= 	"ZZN"  <br>	
+	::entidade			:=	"Aliquota de Grupo Tributario"  <br>
+	::funcao			:=	"Cadastro de Aliquota de Grupo Tributario"  <br>	
+return (Self)  <br>
+ <br>
+ <br>
+Method iniCampos() class TELicGrupoTributario  <br>
+	// Nome externo, nome interno, tipo <br>
+	local cpoDef <br>
+	cpoDef := {{"filial", "ZZN_FILIAL", "C"}; <br>
+				,{"grupoTributario", "ZZN_GRTRIB", "C"}; <br>
+				,{"aliquota", "ZZN_ALIQ", "N"}} <br>
+	::addCpoDef(cpoDef)	 <br>
+		 <br>
+	::setChave({"ZZN_FILIAL", "ZZN_GRTRIB"}) <br>
+return  <br>
+ <br>
+Exemplo de utilização da classe filha  <br>
+ <br>
+	local oGrpTrib, nAliq  <br>
+	loca xReturn  <br>
+	 <br>
+	oGrpTrib := TELicGrupoTributario():New()  <br>
+	 <br>
+	xReturn := oGrpTrib:find('1')  <br>
+	 <br>
+	if xReturn[1]  <br>
+		nAliq := oGrpTrib:valor('aliquota')  <br>
+	else  <br>
+		MsgInfo(xReturn[2])  <br>
+	endif  <br>
+	 <br>
+	xReturn := oGrpTrig:setar('aliquota', 10)  <br>
+	if xReturn[1]  <br>
+		oGrpTrig:salvar()  <br>
+	else  <br>
+		MsgInfo(xReturn[2])  <br>
+	endif  <br>
+	 <br>
+	oGrpTrib:deletar()  <br>
 /*/
-
-
 Class TSigaMDBas 
 
+/*/{Protheus.doc} tabela
+Nome da tabela Protheus. Deve ser informado no contrutor da classe filha
+@type property
+@proptype character
+@example
+	::tabela 	  		:= 			"SB1"
+/*/
 	data tabela
+	
+/*/{Protheus.doc} entidade
+Nome da entidade em Portugues. Deve ser informado no contrutor da classe filha
+@type property
+@proptype character
+@example
+	::entidade			:=			"Produto"	
+/*/	
 	data entidade
+	
+/*/{Protheus.doc} funcao
+Função da entidade. Deve ser informado no contrutor da classe filha
+@type property
+@proptype character
+@example
+	::funcao			:=		"Cadastro de produto"
+/*/	
 	data funcao
 	//data chave
 	//data codigo
-	// 1 Nome externo, 2 nome interno, 3 tipo, 4 valor, 5 mudado, 6 chave 	
+	// 1 Nome externo, 2 nome interno, 3 tipo, 4 valor, 5 mudado, 6 chave
+	
 	data campos
+
+	data chave
+	
+/*/{Protheus.doc} execAuto
+Se a entidade é atualizada atraves de ExecAuto ou acesso direto a base. Valor lógico.
+Deve ser informado no contrutor da classe filha
+@type  property
+@proptype lógico
+/*/	 		
 	data execAuto
 
-	
 	method New() Constructor
 	method find()
 	method findAllBy()
-	method save()
-	method delete()
-	method get()
-	method set()		
+	method valor()	
+	method salvar()
+	method deletar()
+	method setar()		
 	method prepExecAuto()
 	Method procErroBatch()
 	method fillCampos()
@@ -55,18 +150,38 @@ Class TSigaMDBas
 	method defDBGatilhos()
 	
 	method iniCampos()
+	method addCpoDef()
+	method setChave()
 		
 EndClass
 
-Method New() Class TSigaMDBas
+/*/{Protheus.doc} New
+Constructor
+@type method
+/*/Method New() Class TSigaMDBas
 	::campos := {}
-	//::codigo := ""
-	//::isSet := .F.
 	::iniCampos()
-	::resetCampos()
+	//::resetCampos()
 return (Self)
 
 
+/*/{Protheus.doc} iniCampos
+Método para inicializar a definição dos campos e da chave primaria.
+Toda classe filha precisa definir.
+@type method
+@see #TSigaMDBas:addCpoDef
+/*/	
+method iniCampos()  class TSigaMDBas
+
+return
+
+
+/*/{Protheus.doc} find
+Procura uma entidade pela chave primaria representada pelo indice numero 1. 
+@type method
+@param pChave, character, chave de acesso a entidade
+@return array, {lRet, cMessage} lRet: .T. se encontrou .F. se não, cMessage : Mensagem de erro 
+/*/
 Method find(pChave) class TSigaMDBas
 	local tabela := ::tabela
 	local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao} 
@@ -79,11 +194,7 @@ Method find(pChave) class TSigaMDBas
 		&(tabela)->(dbgotop())
 		
 		If &(tabela)->(DBSeek(xFilial(tabela)+pChave))
-			self:fillCampos()
-	/*		for i := 1 to len(::campos)
-				::campos[i][4] := (&(tabela))->(&(Self:campos[i][2])) 
-			next*/	
-			//self:getInfo() 
+			self:fillCampos() 
 		else
 			self:resetCampos()
 			aRet := {.F., ::entidade + " não enconstrado no " + ::funcao}
@@ -96,68 +207,95 @@ Method find(pChave) class TSigaMDBas
 	
 return aRet
 
+/*/{Protheus.doc} isSet
+Permite saber se o modelo esta pre-enchido com uma entidade ou não
+@type method
+@return lógico, .T. se esta pre-enchido, .F. se não
+/*/
 method isSet() Class TSigaMDBas
 	local xReturn := .F.
-	nPos := ascan(::campos, {|x| x[6] == .T. })
-	if nPos != 0 .And. ::campos[nPos][4] != nil  
+	nPos := ascan(::campos, {|x| x[CHAVE] == .T. })
+	if nPos != 0 .And. ::campos[nPos][VALOR] != nil  
 		xReturn := .T.
 	endif
 return xReturn
 
+/*/{Protheus.doc} resetCampos
+Reseta os campos do modelo
+@type method
+/*/
 method resetCampos() class TSigaMDBas
 	local i	
 	for i := 1 to len(::campos)
-		::campos[i][4] := nil
-		::campos[i][5] := .F.
+		::campos[i][VALOR] := nil
+		::campos[i][MUDADO] := .F.
 	next	
 return
+
 
 method fillCampos() class TSigaMDBas
 	local tabela := ::tabela
 	local i
 
 	for i := 1 to len(::campos)
-		::campos[i][4] := (&(tabela))->(&(Self:campos[i][2])) 
+		::campos[i][VALOR] := (&(tabela))->(&(Self:campos[i][CPOTEC])) 
 	next	
 return 
 
-method get(campo) class TSigaMDBas
+
+/*/{Protheus.doc} valor
+Obter o valor do campo
+@type method
+@param campo, character, Nome do campo em portugues ou nome técnico na base
+@return mix, valor do campo
+/*/
+method valor(campo) class TSigaMDBas
 	local nPos
 	local xReturn := nil
-	
-	nPos := ascan(::campos, {|x| x[1] == campo })
+		
+	nPos := ascan(::campos, {|x| x[CPOPOR] == campo })
 	if nPos != 0
-		xReturn :=  ::campos[nPos][4]
+		xReturn :=  ::campos[nPos][VALOR]
 	else
-		nPos := ascan(::campos, {|x| x[2] == campo })
+		nPos := ascan(::campos, {|x| x[CPOTEC] == campo })
 		if 	nPos != 0
-			xReturn :=  ::campos[nPos][4]
+			xReturn :=  ::campos[nPos][VALOR]
 		endif
 	endif
 return xReturn
 
-
-method set(campo, valor) class  TSigaMDBas
+/*/{Protheus.doc} setar
+Permite setar o valor de um campo
+@type method
+@param campo, character, Nome do campo em portugues ou nome técnico na base
+@param valor, mix, Valor do campo
+@return array, {lRet, cMessage} lRet: .T. se conseguiu setar .F. se não, cMessage : Mensagem de erro
+/*/
+method setar(campo, valor) class  TSigaMDBas
 	local nPos
-	local xReturn := .T.
+	local xReturn := {.T., "Campo encontrado e setado"}
 		
-	nPos := ascan(::campos, {|x| x[1] == campo })
+	nPos := ascan(::campos, {|x| x[CPOPOR] == campo })
 	if nPos != 0
-		campos[nPos][4] := valor
-		campos[nPos][5] := .T.
+		campos[nPos][VALOR] := valor
+		campos[nPos][MUDADO] := .T.
 	else
-		nPos := ascan(::campos, {|x| x[2] == campo })
+		nPos := ascan(::campos, {|x| x[CPOTEC] == campo })
 		if 	nPos != 0
-			campos[nPos][4] := valor
-			campos[nPos][5] := .T.
+			campos[nPos][VALOR] := valor
+			campos[nPos][MUDADO] := .T.
 		else 
-			xReturn := .F.
+			xReturn := {.F. "campo não encontrado"}
 		endif
 	endif		
 return xReturn
 
-
-Method save() class TSigaMDBas
+/*/{Protheus.doc} salvar
+Salvar as modificações do modelo na base. Gerencia a inserção como a modificação
+@type method
+@return array, {lRet, cMessage} lRet: .T. se conseguiu salvar .F. se não, cMessage : Mensagem de erro
+/*/
+Method salvar() class TSigaMDBas
 	// TODO
 	// se campos chave com indicador de modificado entao é Inserção
 	// se nao update
@@ -174,13 +312,13 @@ Method save() class TSigaMDBas
 	
 	// determina inserção ou update
 	for i := 1 to len(::chave)
-		nPos := ascan(::campos, {|x| x[2] == ::chave[i] })
+		nPos := ascan(::campos, {|x| x[CPOTEC] == ::chave[i] })
 		if nPos != 0
 			// campo da chave foi mudado
-			if ::campos[nPos][5] := .T.
+			if ::campos[nPos][MUDADO] := .T.
 				lIns := .T.
 			endif
-			valChave := valChave + ::campos[nPos][4]
+			valChave := valChave + ::campos[nPos][VALOR]
 		else
 			// TODO : erro			
 			aRet := {.F., "Campos de chave não encontrados"}
@@ -206,7 +344,7 @@ Method save() class TSigaMDBas
 		recLock(tabela, lIns)			
 		for i := 1 to len(::campos)
 			if Self:campos[i][5] == .T.
-				&(tabela)->(&(Self:campos[i][2])) := Self:campos[i][4]
+				&(tabela)->(&(Self:campos[i][CPOTEC])) := Self:campos[i][VALOR]
 			endif 						
 		next
 		MsUnlock(&(tabela))		
@@ -217,7 +355,11 @@ Method save() class TSigaMDBas
 	restarea(axArea)
 return aRet
 
-method delete() class TSigaMDBas
+/*/{Protheus.doc} deletar
+Deleta o modelo na base
+@type method
+/*/
+method deletar() class TSigaMDBas
 	// TODO
 return
 
@@ -257,4 +399,58 @@ Method procErroBatch() class TSigaMDBas
 	else
 		lImp := .T.  
 	Endif
+return
+
+
+/*/{Protheus.doc} addCpoDef
+Método permitindo definir os campos. Deve ser chamado no método iniCampos()
+O array em entrada do método comtem arrays com a seguinte estrutura:  
+1- Nome do campo em portugues  
+2- Nome do campo na base  
+3- Tipo do campo
+Este array podera ser gerado a partir do dicionario SX3  
+@type method
+@param aCampoDef, array, array de arrays com a definição dos campos
+@example
+Method iniCampos() class TSProduto <br>
+	// Nome externo, nome interno, tipo <br>
+	local cpoDef <br>
+	cpoDef := {{"filial", "B1_FILIAL", "C"}; <br>
+				,{"codigo", "B1_COD", "C"}; <br>
+				,{"origem", "B1_ORIGEM", "C"}; <br>
+				,{"grupoTributario", "B1_GRTRIB", "C"}} <br>
+	::addCpoDef(cpoDef)	 <br>
+		 <br>
+	::setChave({"B1_FILIAL", "B1_COD"}) <br>				
+return
+/*/
+method addCpoDef(aCampoDef)  class TSigaMDBas
+	for i := 0 to Len(aCampoDef)	
+		// adicionar chave
+		aadd(aCampoDef[i], .F.)
+		// valor
+		aadd(aCampoDef[i], nil)
+		//mudado
+		aadd(aCampoDef[i], .F.)
+		
+		aadd(::campos, aCampoDef[i])
+	next
+return
+
+/*/{Protheus.doc} setChave
+Método permitindo definir a chave primaria. Deve ser chamado no método iniCampos()
+@type method
+@param aChave, array, array com os campos compondo a chave primaria
+@example
+	::setChave({"B1_FILIAL", "B1_COD"}) <br>
+/*/
+method setChave(aChave)  class TSigaMDBas
+	local nPos
+	::chave := aChave
+	for i := 0 to len(:chave)
+		nPos := ascan(::campos, {|x| x[CPOTEC] == ::chave[i]})
+		if nPos > 0
+			::campos[nPos][CHAVE] := .T.
+		endif
+	next 
 return

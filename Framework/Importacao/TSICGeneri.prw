@@ -6,7 +6,7 @@
 
 
 
-/*/
+/*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
@@ -21,8 +21,21 @@
 ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
-/*/
+*/
 
+/*/{Protheus.doc} TSICGeneri
+Classe de base para importação via arquivo CSV com inserção generica (Reclock, msUnlock).
+Deve-se herdar desta classe para importar numa tabela que não tenha rotina ExecAuto.
+Definir obrigatoriamente o metodo prepCols() e a propiedade ::nLinDat.
+São facultativos os metodos tratEspec(), prepTits() e as propiedades ::nLinCol e ::nLinTit.
+
+Herda de : TSImpCsv
+@type class
+@author Gilles Koffmann - Sigaware Pb
+@since 12/10/2013
+@version 1.2
+@see TSImpCsv
+/*/
 Class TSICGeneri From TSImpCsv
 
 	Data sTable
@@ -49,7 +62,15 @@ method callExec() class TSICGeneri
 	
 return 
 
-Method update(lIns, nIndIni) class TSICGeneri
+/*/{Protheus.doc} update
+(long_description)
+@type method
+@param lIns, ${param_type}, (Descrição do parâmetro)
+@param nIndIni, numérico, (Descrição do parâmetro)
+@example
+(examples)
+@see (links_or_references)
+/*/Method update(lIns, nIndIni) class TSICGeneri
    	local sTable := ::sTable
    	nTamArX := len(::aVetor)
    

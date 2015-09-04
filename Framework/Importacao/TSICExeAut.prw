@@ -6,7 +6,7 @@
 
 
 
-/*/
+/*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
@@ -21,16 +21,29 @@
 ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
-/*/
+*/
 
+
+/*/{Protheus.doc} TSICExeAut
+Classe de base para importação via arquivo CSV com ExecAuto.
+Deve-se herdar desta classe para importar numa tabela que tenha rotina ExecAuto.
+Definir obrigatoriamente o metodo prepCols() e execute() e a propiedade ::nLinDat.
+São facultativos os métodos tratEspec(), prepTits() e as propiedades ::nLinCol e ::nLinTit.
+
+Herda de TSImpCsv
+@type class
+@author Gilles Koffmann - Sigaware Pb
+@since 12/10/2013
+@version 1.2
+@see TSImpCsv
+/*/
 Class TSICExeAut From TSImpCsv
 
 	method callExec()
 	Method procErro()
 	Method identErro()
-	Method idFrnCGC()
-	Method idCodMun()	
-	Method idFrnIE()
+	method execute()
+	method erroCampo()		
 EndClass
 
 method callExec() class TSICExeAut
@@ -44,6 +57,16 @@ method callExec() class TSICExeAut
 		self:procErro()
 		lImp := .t.
 	EndDo		
+return 
+
+/*/{Protheus.doc} execute
+Método onde deve ser colocado o chamado ao ExecAuto
+@type method
+@example
+	MSExecAuto({|x,y| Mata030(x,y)},::aVetor,3)
+/*/
+method execute() class TSICExeAut
+	
 return 
 
 Method procErro() class TSICExeAut
@@ -86,10 +109,11 @@ Method identErro() class TSICExeAut
 	while !lEnd .And. !lIdent
 		cLinhaLog := FReadStr(nHLogExec, 65536)					
 				
-		lIdent := self:idFrnCGC()
+		lIdent := self:erroCampo()				
+/*		lIdent := self:idFrnCGC()
 		if !lIdent
 			lIdent := self:idFrnIE()
-		EndIf		
+		EndIf*/		
 //		if !lIdent
 	//		lIdent := idCodMun()
 		//EndIf				
@@ -101,44 +125,17 @@ Method identErro() class TSICExeAut
 	FClose(nHLogExec)    
 return lIdent
 
-Method idFrnCGC() class TSICExeAut
-	local nPos
-	local nRet := .F.
-	if (at("HELP: CGC",cLinhaLog) > 0) .Or. (at("HELP: CPFINVALID",cLinhaLog) > 0)
-		// colocar nada dentro do campo A2_CGC
-		nRet := .T.
-		nPos := AScanX(::aVetor, {|x,y|x[1]=='A2_CGC'})
-		if nPos > 0
-			::aVetor[nPos][2] := ""
-		endIf				
-	endif
-return nRet
 
-Method idCodMun() class TSICExeAut
-	local nPos
-	local nRet := .F.
-	if (at("HELP: REGNOIS",cLinhaLog) > 0)
-		// colocar nada dentro do campo A2_CGC
-		nRet := .T.
-		nPos := AScanX(::aVetor, {|x,y|x[1]=='A2_COD_MUN'})
-//		adel(aVetor, nPos)
-		if nPos > 0
-			::aVetor[nPos][2] := "99999"
-		endIf				
-	endif
-return nRet
+/*/{Protheus.doc} erroCampo
+(long_description)
+@type method
+@author Gilles
+@since 03/09/2015
+@version 1.0
+@example
+(examples)
+@see (links_or_references)
+/*/
+Method erroCampo() class TSICExeAut
 
-Method idFrnIE() class TSICExeAut
-	local nPos
-	local nRet := .F.
-	if at("HELP: IE",cLinhaLog) > 0
-		// colocar nada dentro do campo A2_CGC
-		nRet := .T.
-		nPos := AScanX(::aVetor, {|x,y|x[1]=='A2_INSCR'})
-		if nPos > 0
-			::aVetor[nPos][2] := ""
-		endIf				
-	endif
-return nRet
-
-	
+return	.T.

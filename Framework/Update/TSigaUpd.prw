@@ -17,7 +17,7 @@
 ±±ºEmpresa   ³ Sigaware Pb ºE-Mail³ gilles@sigawarepb.com.br              º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
 ±±ºDescricao ³ Classe de compatibilizacao Protheus (criação/update no dicionario)		  º±±
-±±º          ³  Criado a partir da rotina Totvs HSPGERAT() e complementos  º±±
+±±º          ³  Criado a partir da rotina Totvs HSPGERAT() (executado em formulas) e complementos  º±±
 ±±º          ³  de handerson Duarte                                        º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
 ±±ºUso       ³ Framework Copyright Sigaware Pb                             º±±
@@ -96,24 +96,39 @@ If (lOpen := IIF(Alias() <> "SM0", MyOpenSm0Ex(), .T. ))
 			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 			//³Atualiza o dicionario de arquivos.³
 			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-			IncProc("Analisando Dicionario de Arquivos...")
-			cTexto += GeraSX2(aRegsTab)
+			if aRegsTab != nil
+				if Len(aRegsTab) >0
+					IncProc("Analisando Dicionario de Arquivos...")
+					cTexto += GeraSX2(aRegsTab)
+				endif
+			endif
 			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 			//³Atualiza o dicionario de dados.³
 			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-			IncProc("Analisando Dicionario de Dados...")
-			cTexto += GeraSX3(aRegsCpo, sTabela)
+			if aRegsCpo != nil
+				if Len(aRegsCpo) >0			
+					IncProc("Analisando Dicionario de Dados...")
+					cTexto += GeraSX3(aRegsCpo, sTabela)
+				endif
+			endif					
 			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 			//³Atualiza os gatilhos.          ³
 			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-			IncProc("Analisando Gatilhos...")
-			cTexto += GeraSX7(aRegsGatilhos)			
+			if aRegsGatilhos != nil
+				if Len(aRegsGatilhos) >0			
+					IncProc("Analisando Gatilhos...")
+					cTexto += GeraSX7(aRegsGatilhos)
+				endif
+			endif						
 			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 			//³Atualiza os indices.³
 			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-			IncProc("Analisando arquivos de índices. "+"Empresa : "+SM0->M0_CODIGO+" Filial : "+SM0->M0_CODFIL+"-"+SM0->M0_NOME)
-			cTexto += GeraSIX(aRegsInd,sTabela)
-
+			if aRegsInd != nil
+				if Len(aRegsInd) >0			
+					IncProc("Analisando arquivos de índices. "+"Empresa : "+SM0->M0_CODIGO+" Filial : "+SM0->M0_CODFIL+"-"+SM0->M0_NOME)
+					cTexto += GeraSIX(aRegsInd,sTabela)
+				endif
+			endif
 			End Transaction
 	
 			__SetX31Mode(.F.)

@@ -5,16 +5,15 @@
 #include "msobject.ch"     
 
 
-
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
-ฑฑบPrograma  ณ TSFilialบ Autor ณ gilles koffmann บ Data  ณ  17/08/15   บฑฑ
+ฑฑบPrograma  ณ TSFornecedorบ Autor ณ gilles koffmann บ Data  ณ  17/08/15   บฑฑ
 ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
-ฑฑบEmpresa   ณ Sigaware Pb บE-Mailณ gilles@sigawarepb.com.br                 บฑฑ
+ฑฑบEmpresa   ณ Sigaware บE-Mailณ gilles@sigawarepb.com.br                 บฑฑ
 ฑฑฬออออออออออุอออออออออออออออออออสออออออฯอออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบDescricao ณ Classe de Filial          					    		    บฑฑ
+ฑฑบDescricao ณ Classe de Fornecedor          					    		    บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
 ฑฑบUso       ณ Framework copyright Sigaware Pb                            บฑฑ
@@ -23,8 +22,9 @@
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
 */
 
-/*/{Protheus.doc} TSFilial
-Classe representando uma filial (SM0).
+
+/*/{Protheus.doc} TSFornecedor
+Classe representando um fornecedor (SA2).
 Herda de TSigaMDBas
 @type class
 @author Gilles Koffmann - Sigaware Pb
@@ -32,32 +32,33 @@ Herda de TSigaMDBas
 @version 1.0
 @see TSigaMDBas.html
 /*/
-Class TSFilial From TSigaMDBas
+Class TSFornecedor From TSigaMDBas
+
+	method New() Constructor
 		
-	method New() Constructor			
 	method iniCampos()
 EndClass
 
 
-Method New( ) Class TSFilial 
+Method New( ) Class TSFornecedor 
 	_Super:New()
-	::tabela 			:= 		"SM0"
-	::entidade			:=		"Filial"
-	::funcao				:= "Cadastro de Filial"		
-//	dbselectarea(::tabela)
-//	self:fillCampos()
+	::tabela 	  := 		"SA2"	
+	::entidade			:=	"Fornecedor"
+	::funcao			:=	"Cadastro de Fornecedor"		
+	::execAuto := 			.T.	
 return (Self)
 
 
-
-Method iniCampos() class TSFilial
+Method iniCampos() class TSFornecedor
 	local cpoDef
 	// Nome externo, nome interno, tipo	
-	cpoDef := {{"empresa", "M0_CODIGO", "C"};
-				,{"filial", "M0_CODFIL", "C"};
-				,{"estadoEntrega", "M0_ESTENT", "C"}}
+	cpoDef := {{"filial", "A2_FILIAL", "C"};
+				,{"codigo", "A2_COD", "C"};
+				,{"loja", "A2_LOJA", "C"};
+				,{"estado", "A2_EST", "C"}}
 
 	::addCpoDef(cpoDef)	
 
-	::setChave({"M0_CODIGO", "M0_CODFIL"})
+	::setChave({"A2_FILIAL", "A2_COD"})
+		
 return
