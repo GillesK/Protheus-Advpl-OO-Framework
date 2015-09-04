@@ -23,18 +23,18 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 
-Class TSImpCsvGenSN1 From TSICGeneri
+Class TSImpCsvGenAtivo From TSICGeneri
 
 	Method New() Constructor
 	method callExec()
 EndClass
 
-method New() class TSImpCsvGenSN1
+method New() class TSImpCsvGenAtivo
 	_Super:New()
 	::sTable := "SN1"
 return Self
 
-method callExec() class TSImpCsvGenSN1
+method callExec() class TSImpCsvGenAtivo
 
 	local sTable := ::sTable
 	nTamArX := len(::aVetor)
