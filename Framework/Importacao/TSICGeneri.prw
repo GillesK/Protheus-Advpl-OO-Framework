@@ -65,7 +65,7 @@ return
 /*/{Protheus.doc} update
 Update na base
 @type method
-@param lIns, lógico, .T. inserir, .F. atualizaçãp
+@param lIns, lógico, .T. inserir, .F. atualização
 @param nIndIni, numérico, Indice de coluna a partir do qual se faz a atualização
 /*/
 Method update(lIns, nIndIni) class TSICGeneri

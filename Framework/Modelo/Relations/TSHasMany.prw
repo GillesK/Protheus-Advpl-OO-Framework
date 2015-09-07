@@ -5,66 +5,31 @@
 #include "msobject.ch"     
 
 
-
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
-ฑฑบPrograma  ณ TSProduto บ Autor ณ gilles koffmann บ Data  ณ  17/08/15   บฑฑ
+ฑฑบPrograma  ณ TSHasManyบ Autor ณ gilles koffmann บ Data  ณ  17/08/15   บฑฑ
 ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
 ฑฑบEmpresa   ณ Sigaware Pb บE-Mailณ gilles@sigawarepb.com.br                 บฑฑ
 ฑฑฬออออออออออุอออออออออออออออออออสออออออฯอออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบDescricao ณ Classe de Produto          					    		    บฑฑ
+ฑฑบDescricao ณ Classe de Rela็ใo Has Many   					    		    บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Framework copyright sigaware Pb                            บฑฑ
+ฑฑบUso       ณ Framework copyright Sigaware Pb                            บฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
 */
 
-/*/{Protheus.doc} TSProduto
-Classe representando um produto (SB1).
-Herda de TSigaMDBas
+
+/*/{Protheus.doc} TSHasMany
 @type class
 @author Gilles Koffmann - Sigaware Pb
-@since 04/03/2015
+@since 03/09/2014
 @version 1.0
-@see TSigaMDBas.html
 /*/
+Class TSHasMany From TSHasOneOrMany
 
-Class TSProduto From TSigaMDBas
-
-	method New() Constructor
 	
-	Method iniCampos() 	
-	method execAuto()
 EndClass
-
-
-Method New( ) Class TSProduto 
-	_Super:New()
-	::tabela 	  		:= 			"SB1"
-	::entidade			:=			"Produto"
-	::funcao			:=		"Cadastro de produto"	
-	::execAuto := 			.T.
-	
-return (Self)
-
-
-Method iniCampos() class TSProduto
-	// Nome externo, nome interno, tipo
-	local cpoDef
-	cpoDef := {{"filial", "B1_FILIAL", "C"};
-				,{"codigo", "B1_COD", "C"};
-				,{"origem", "B1_ORIGEM", "C"};
-				,{"grupoTributario", "B1_GRTRIB", "C"}}
-	::addCpoDef(cpoDef)	
-		
-	::setChave({"B1_FILIAL", "B1_COD"})				
-return
-
-
-method execAuto(opcao) class TSProduto
-	MSExecAuto({|x,y| Mata010(x,y)},::aVetor,opcao)
-return

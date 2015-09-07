@@ -5,16 +5,15 @@
 #include "msobject.ch"     
 
 
-
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
-ฑฑบPrograma  ณ TSFilialบ Autor ณ gilles koffmann บ Data  ณ  17/08/15   บฑฑ
+ฑฑบPrograma  ณ TSHasOneบ Autor ณ gilles koffmann บ Data  ณ  17/08/15   บฑฑ
 ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
 ฑฑบEmpresa   ณ Sigaware Pb บE-Mailณ gilles@sigawarepb.com.br                 บฑฑ
 ฑฑฬออออออออออุอออออออออออออออออออสออออออฯอออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบDescricao ณ Classe de Filial          					    		    บฑฑ
+ฑฑบDescricao ณ Classe de Rela็ใo Has One   					    		    บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
 ฑฑบUso       ณ Framework copyright Sigaware Pb                            บฑฑ
@@ -23,41 +22,24 @@
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
 */
 
-/*/{Protheus.doc} TSFilial
-Classe representando uma filial (SM0).
-Herda de TSigaMDBas
+
+/*/{Protheus.doc} TSHasOne
 @type class
 @author Gilles Koffmann - Sigaware Pb
-@since 04/03/2015
+@since 03/09/2014
 @version 1.0
-@see TSigaMDBas.html
+
 /*/
-Class TSFilial From TSigaMDBas
-		
-	method New() Constructor			
-	method iniCampos()
+Class TSHasOne From THasOneOrMany
+
+	method obterOrFail()	
 EndClass
 
 
-Method New( ) Class TSFilial 
-	_Super:New()
-	::tabela 			:= 		"SM0"
-	::entidade			:=		"Filial"
-	::funcao				:= "Cadastro de Filial"		
-//	dbselectarea(::tabela)
-//	self:fillCampos()
-return (Self)
-
-
-
-Method iniCampos() class TSFilial
-	local cpoDef
-	// Nome externo, nome interno, tipo	
-	cpoDef := {{"empresa", "M0_CODIGO", "C"};
-				,{"filial", "M0_CODFIL", "C"};
-				,{"estadoEntrega", "M0_ESTENT", "C"}}
-
-	::addCpoDef(cpoDef)	
-
-	::setChave({"M0_CODIGO", "M0_CODFIL"})
-return
+method obterOrFail() class TSHasOneOrMany
+	local xRet
+	xRet := _Super:getOrFail()
+	if xRet[1]
+		xRet := xRet[2]:first()
+	endif	
+return xRet

@@ -9,11 +9,11 @@
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
-ฑฑบPrograma  ณ TSFornecedorบ Autor ณ gilles koffmann บ Data  ณ  17/08/15   บฑฑ
+ฑฑบPrograma  ณ TSBelongsToManyบ Autor ณ gilles koffmann บ Data  ณ  17/08/15   บฑฑ
 ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
-ฑฑบEmpresa   ณ Sigaware บE-Mailณ gilles@sigawarepb.com.br                 บฑฑ
+ฑฑบEmpresa   ณ Sigaware Pb บE-Mailณ gilles@sigawarepb.com.br                 บฑฑ
 ฑฑฬออออออออออุอออออออออออออออออออสออออออฯอออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบDescricao ณ Classe de Fornecedor          					    		    บฑฑ
+ฑฑบDescricao ณ Classe de Rela็ใo Belongs To Many   					    		    บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
 ฑฑบUso       ณ Framework copyright Sigaware Pb                            บฑฑ
@@ -23,48 +23,13 @@
 */
 
 
-/*/{Protheus.doc} TSFornecedor
-Classe representando um fornecedor (SA2).
-Herda de TSigaMDBas
+/*/{Protheus.doc} TSBelongsToMany
 @type class
 @author Gilles Koffmann - Sigaware Pb
-@since 04/03/2015
+@since 03/09/2014
 @version 1.0
-@see TSigaMDBas.html
 /*/
-Class TSFornecedor From TSigaMDBas
+Class TSBelongsToMany From TSigaMDRel
 
-	method New() Constructor
-		
-	method iniCampos()
-	method execAuto()
+	
 EndClass
-
-
-Method New( ) Class TSFornecedor 
-	_Super:New()
-	::tabela 	  := 		"SA2"	
-	::entidade			:=	"Fornecedor"
-	::funcao			:=	"Cadastro de Fornecedor"		
-	::execAuto := 			.T.	
-return (Self)
-
-
-Method iniCampos() class TSFornecedor
-	local cpoDef
-	// Nome externo, nome interno, tipo	
-	cpoDef := {{"filial", "A2_FILIAL", "C"};
-				,{"codigo", "A2_COD", "C"};
-				,{"loja", "A2_LOJA", "C"};
-				,{"estado", "A2_EST", "C"}}
-
-	::addCpoDef(cpoDef)	
-
-	::setChave({"A2_FILIAL", "A2_COD"})
-		
-return
-
-
-method execAuto(opcao) class TSFornecedor
-	MSExecAuto({|x,y| Mata020(x,y)},::aVetor,opcao)
-return

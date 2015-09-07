@@ -17,6 +17,8 @@
 #define ATUALIZAR		4
 #define DELETAR		5
 
+#define CHAVE_IND		1
+#define CHAVE_CPO		2
 /*
 ‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -63,7 +65,7 @@ Method iniCampos() class TELicGrupoTributario  <br>
 				,{"aliquota", "ZZN_ALIQ", "N"}} <br>
 	::addCpoDef(cpoDef)	 <br>
 		 <br>
-	::setChave({"ZZN_FILIAL", "ZZN_GRTRIB"}) <br>
+	::setChave({{1,{"ZZN_FILIAL", "ZZN_GRTRIB"}}}) <br>
 return  <br>
  <br>
 Exemplo de utilizaÁ„o da classe filha  <br>
@@ -93,7 +95,7 @@ Exemplo de utilizaÁ„o da classe filha  <br>
 Class TSigaMDBas 
 
 /*/{Protheus.doc} tabela
-Nome da tabela Protheus. Deve ser informado no contrutor da classe filha
+Nome da tabela Protheus. Deve ser informado no construtor da classe filha
 @type property
 @proptype character
 @example
@@ -102,7 +104,7 @@ Nome da tabela Protheus. Deve ser informado no contrutor da classe filha
 	data tabela
 	
 /*/{Protheus.doc} entidade
-Nome da entidade em Portugues. Deve ser informado no contrutor da classe filha
+Nome da entidade em Portugues. Deve ser informado no construtor da classe filha
 @type property
 @proptype character
 @example
@@ -111,7 +113,7 @@ Nome da entidade em Portugues. Deve ser informado no contrutor da classe filha
 	data entidade
 	
 /*/{Protheus.doc} funcao
-FunÁ„o da entidade. Deve ser informado no contrutor da classe filha
+FunÁ„o da entidade. Deve ser informado no construtor da classe filha
 @type property
 @proptype character
 @example
@@ -121,17 +123,16 @@ FunÁ„o da entidade. Deve ser informado no contrutor da classe filha
 	//data chave
 	//data codigo
 	// 1 Nome externo, 2 nome interno, 3 tipo, 4 valor, 5 mudado, 6 chave
-
-/*/{Protheus.doc} aVetor
-Array contendo os dados do ExecAuto
-@type property
-@proptype array
-/*/		
-	data aVetor
 	
 	data campos
 
+	// chave primaria
 	data chave
+
+	// todas as chaves com indexo
+	data chaves
+	
+	data relations
 	
 /*/{Protheus.doc} execAuto
 Se a entidade È atualizada atraves de ExecAuto ou acesso direto a base. Valor lÛgico.
@@ -142,13 +143,19 @@ Deve ser informado no contrutor da classe filha
 	data execAuto
 
 	method New() Constructor
-	method find()
-	method findAllBy()
+	method findBy()
+	method find()	 
+	method findByOrFail()		
+	method findOrFail()	
+	method findAllBy() 
+	method findAll()
+	method findAllByOrFail()
+	method findAllOrFail()			
 	method valor()	
 	method salvar()
 	method deletar()
 	method setar()		
-	method prepExecAuto()
+	method getEAVector()
 	method execAuto()
 	method resExecAuto()	
 //	Method procErroBatch()
@@ -168,13 +175,20 @@ Deve ser informado no contrutor da classe filha
 	method salvaRegistro()
 	method isInsert()
 	method deletaRegistro(valChave)	
-		
+
+	method hasOne()
+	method belongsTo() 
+	method hasMany()
+	method belongsToMany()	
+	method hasManyThrough()	
+	method filial()
 EndClass
 
 /*/{Protheus.doc} New
 Constructor
 @type method
-/*/Method New() Class TSigaMDBas
+/*/
+Method New() Class TSigaMDBas
 	::campos := {}
 	::iniCampos()
 	//::resetCampos()
@@ -185,11 +199,14 @@ return (Self)
 MÈtodo para inicializar a definiÁ„o dos campos e da chave primaria.
 Toda classe filha precisa definir.
 @type method
-@see #TSigaMDBas:addCpoDef
+@see #TSigaMDBas::addCpoDef
 /*/	
 method iniCampos()  class TSigaMDBas
 
 return
+
+method filial() class  TSigaMDBas
+return xFilial(::tabela)
 
 /*/{Protheus.doc} addCpoDef
 MÈtodo permitindo definir os campos. Deve ser chamado no mÈtodo iniCampos()
@@ -210,7 +227,7 @@ Method iniCampos() class TSProduto <br>
 				,{"grupoTributario", "B1_GRTRIB", "C"}} <br>
 	::addCpoDef(cpoDef)	 <br>
 		 <br>
-	::setChave({"B1_FILIAL", "B1_COD"}) <br>				
+	::setChave({{1,{"B1_FILIAL", "B1_COD"}}}) <br>				
 return
 /*/
 method addCpoDef(aCampoDef)  class TSigaMDBas
@@ -227,15 +244,16 @@ method addCpoDef(aCampoDef)  class TSigaMDBas
 return
 
 /*/{Protheus.doc} setChave
-MÈtodo permitindo definir a chave primaria. Deve ser chamado no mÈtodo iniCampos()
+MÈtodo permitindo definir as chaves. Deve ser chamado no mÈtodo iniCampos()
 @type method
-@param aChave, array, array com os campos compondo a chave primaria
+@param aChave, array, array com o numero do indice e os campos compondo a chave primaria
 @example
-	::setChave({"B1_FILIAL", "B1_COD"}) <br>
+	::setChave({{1,{"B1_FILIAL", "B1_COD"}}}) <br>
 /*/
 method setChave(aChave)  class TSigaMDBas
 	local nPos
-	::chave := aChave
+	::chave := aChave[1][2]
+	::chaves := aChave
 	for i := 0 to len(::chave)
 		nPos := ascan(::campos, {|x| x[CPOTEC] == ::chave[i]})
 		if nPos > 0
@@ -245,13 +263,14 @@ method setChave(aChave)  class TSigaMDBas
 return
 
 
-/*/{Protheus.doc} find
-Procura uma entidade pela chave primaria representada pelo indice numero 1. 
+/*/{Protheus.doc} findByOrfail
+Procura uma entidade pela indexo definido no parametro Index
 @type method
-@param pChave, character, chave de acesso a entidade
-@return array, {lRet, cMessage} lRet: .T. se encontrou .F. se n„o, cMessage : Mensagem de erro 
+@param index, numÈrico, Numero do indexo no Protheus
+@param pChave, character, valor da chave de busca
+@return array, {lRet, cMessage} lRet: .T. se encontrou .F. se n„o, cMessage : Mensagem de erro
 /*/
-Method find(pChave) class TSigaMDBas
+method findByOrFail(index, pChave)  class TSigaMDBas
 	local tabela := ::tabela
 	local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao} 
 	local axArea
@@ -259,22 +278,184 @@ Method find(pChave) class TSigaMDBas
 	if !Empty(pChave)
 		axArea := &(tabela)->(getarea())
 		dbselectarea(::tabela)
-		&(tabela)->(dbsetorder(1))
+		&(tabela)->(dbsetorder(index))
 		&(tabela)->(dbgotop())
 		
 		If &(tabela)->(DBSeek(xFilial(tabela)+pChave))
 			self:fillCampos() 
+			aRet[2] := Self
 		else
 			self:resetCampos()
-			aRet := {.F., ::entidade + " n„o enconstrado no " + ::funcao}
+			aRet := {.F., ::entidade + " " + pChave + " n„o enconstrado no " + ::funcao}
 		Endif
 		restarea(axArea)
 	else
 		self:resetCampos()
 		aRet := {.F., ::entidade + " resetado: chave vazia"}
 	endif
-	
 return aRet
+
+
+/*/{Protheus.doc} findOrFail
+Procura uma entidade pela chave primaria representada pelo indice numero 1. 
+@type method
+@param pChave, character, chave de acesso a entidade
+@return array, {lRet, cMessage} lRet: .T. se encontrou .F. se n„o, cMessage : Mensagem de erro 
+/*/
+Method findOrFail(pChave) class TSigaMDBas
+return ::findByOrFail(1,pChave)
+
+/*/{Protheus.doc} findBy
+Procura uma entidade pela indexo definido no parametro Index.
+@type method
+@param index, numÈrico, Numero do indexo no Protheus
+@param pChave, character, valor da chave de busca
+@return objeto, self ou nil se n„o encontrado
+/*/
+method findBy(index, pChave)  class TSigaMDBas
+//	local tabela := ::tabela
+//	local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao}
+	local aRet := nil 
+//	local axArea
+
+	aRet := findByOrFail(index, pChave)
+	if aRet[1]
+		aRet := aRet[2]
+	else 
+		aRet := nil 
+	endif
+
+return aRet
+
+/*/{Protheus.doc} find
+Procura uma entidade pela chave primaria representada pelo indice numero 1. 
+@type method
+@param pChave, character, chave de acesso a entidade
+@return array, {lRet, cMessage} lRet: .T. se encontrou .F. se n„o, cMessage : Mensagem de erro 
+/*/
+Method find(pChave) class TSigaMDBas
+return ::findBy(1,pChave)
+
+
+/*/{Protheus.doc} findAllByOrFail
+(long_description)
+@type method
+@param index, ${param_type}, (DescriÁ„o do par‚metro)
+@param pChave, ${param_type}, (DescriÁ„o do par‚metro)
+@example
+(examples)
+@see (links_or_references)
+/*/method findAllByOrFail(index, pChave)  class TSigaMDBas
+	local tabela := ::tabela
+	local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao}
+//	local aRet := nil 
+	local axArea
+	local oRes := TSigaMDCol():New()
+	local aValCurr := {}
+	local cNewObj
+	local oNewObj
+	local lCont := .T.
+	
+	if !Empty(pChave)
+		axArea := &(tabela)->(getarea())
+		dbselectarea(::tabela)
+		&(tabela)->(dbsetorder(index))
+		&(tabela)->(dbgotop())
+		
+		If &(tabela)->(DBSeek(xFilial(tabela)+pChave))
+			nPos := ascan(::chaves, {|x| x[CHAVE_IND] = index})
+			if nPos != 0 
+				for i := 1 to Len (::chaves[nPos][CHAVE_CPO])
+					aadd(aValCurr, &(tabela)->(&(Self:chaves[nPos][CHAVE_CPO][i])))										
+				Next
+			endif
+			while !&(tabela)->(EOF()) .And. lCont 
+				for j := 1 to Len(aValCurr)
+					if aValCurr[j] != &(tabela)->(&(Self:chaves[nPos][CHAVE_CPO][j]))
+						lCont := .F.
+						exit
+					endif
+				next
+				if !lCont
+					exit
+				endif
+				// criar nova entidade
+				cNewObj := GetClassName(self)+ "():New()"
+				oNewObj := &(cNewObj)
+				
+				oNewObj:fillCampos()
+				
+				oRes:add(oNewObj)	 
+//				aadd(aRes, oNewObj) 
+			// reter os valores				 
+				//self:fillCampos() 			
+				//aRet := Self
+				&(tabela)->(DbSkip())
+			endDo
+			aRet[2] := oRes
+		else
+			self:resetCampos()
+			aRet := {.F., ::entidade + " " + pChave + " n„o enconstrado no " + ::funcao}
+		Endif
+		restarea(axArea)
+	else
+		self:resetCampos()
+		aRet := {.F., ::entidade + " resetado: chave vazia"}
+	endif
+
+return aRet
+
+
+
+/*/{Protheus.doc} findAllOrFail
+(long_description)
+@type method
+@param index, ${param_type}, (DescriÁ„o do par‚metro)
+@param pChave, ${param_type}, (DescriÁ„o do par‚metro)
+@example
+(examples)
+@see (links_or_references)
+/*/
+method findAllOrFail(index, pChave)  class TSigaMDBas
+
+return ::findAllByOrFail(1,pChave)
+
+
+
+/*/{Protheus.doc} findAllBy
+(long_description)
+@type method
+@param index, ${param_type}, (DescriÁ„o do par‚metro)
+@param pChave, ${param_type}, (DescriÁ„o do par‚metro)
+@example
+(examples)
+@see (links_or_references)
+/*/method findAllBy(index, pChave)  class TSigaMDBas
+//	local tabela := ::tabela
+//	local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao}
+	local aRet := nil 
+//	local axArea
+
+	aRet := findAllByOrFail(index, pChave)
+	if aRet[1]
+		aRet := aRet[2]
+	else 
+		aRet := nil 
+	endif
+
+return aRet
+
+/*/{Protheus.doc} findAll
+(long_description)
+@type method
+@param pChave, ${param_type}, (DescriÁ„o do par‚metro)
+@example
+(examples)
+@see (links_or_references)
+/*/method findAll(pChave)  class TSigaMDBas		
+return ::findAllBy(1,pChave)
+
+
 
 /*/{Protheus.doc} isSet
 Permite saber se o modelo esta pre-enchido com uma entidade ou n„o
@@ -391,7 +572,7 @@ Method salvar() class TSigaMDBas
 			if !lIns
 				opcao := ATUALIZAR
 			endif								
-			::prepExecAuto()
+			//::prepExecAuto()
 			::execAuto(opcao)
 			aRet4 := ::resExecAuto()
 			if !aRet4[1]
@@ -442,6 +623,8 @@ method isInsert(lIns, valChave) class TSigaMDBas
 	local aRet := {.T.,""}
 	local nPos
 
+	lIns := .F.
+	valChave := ""
 	for i := 1 to len(::chave)
 		nPos := ascan(::campos, {|x| x[CPOTEC] == ::chave[i] })
 		if nPos != 0
@@ -461,20 +644,26 @@ return aRet
 /*/{Protheus.doc} deletar
 Deleta o modelo na base
 @type method
+@return array, {lRet, cMessage} lRet: .T. se conseguiu salvar .F. se n„o, cMessage : Mensagem de erro
 /*/
 method deletar() class TSigaMDBas
 	local tabela := ::tabela
 	local aRet := {.T., "deletado com sucesso"}
 	local aRet2
+	local aRet3
+	local aRet4
 	local lIns := .F.
 	local axArea := &(tabela)->(getarea())	
 	// determina inserÁ„o ou update
 	aRet2 := ::isInsert(@lIns, @valChave)
 	if aRet2[1]
 		if ::execAuto
-			::prepExecAuto()
+			//::prepExecAuto()
 			::execAuto(DELETAR)
-			::resExecAuto()
+			aRet4 := ::resExecAuto()
+			if !aRet4[1]
+				aRet[2] := aRet4[2]
+			endif
 		else
 			// Reclock
 			aRet3 := ::deletaRegistro(valChave)
@@ -499,7 +688,7 @@ method deletaRegistro(valChave) class  TSigaMDBas
 	&(tabela)->(dbgotop())
 				
 	if !(&(tabela)->(DBSeek(valChave)))
-		aRet := {.F., "Registro n„o encontrado na base para fazer atualizaÁ„o"}
+		aRet := {.F., ::entidade + " " + valChave + " n„o encontrado na base para fazer atualizaÁ„o"}
 	else
 		recLock(tabela, .F.)
 		&(tabela)->(DbDelete())			
@@ -514,7 +703,7 @@ DefiniÁ„o do ExecAuto. A definir na classe filha
 @param opcao, numÈrico, opÁao do ExecAuto 3: Inserir, 4: alterar, 5: Deletar
 @example
 	method execAuto(opcao) class TSCliente <br>
-		MSExecAuto({|x,y| Mata030(x,y)},::aVetor,opcao) <br>
+		MSExecAuto({|x,y| Mata030(x,y)},::getEAVector(),opcao) <br>
 	return
 /*/
 method execAuto(opcao) class TSigaMDBas
@@ -522,14 +711,19 @@ method execAuto(opcao) class TSigaMDBas
 return
 
 	
-method prepExecAuto() class TSigaMDBas
+/*/{Protheus.doc} getEAVector
+Retorna o vector de dados para chamar o ExecAuto
+@type method
+@return array, array contendo os dados no formato esperado pela ExecAuto
+/*/
+method getEAVector() class TSigaMDBas
+	local aVetor := {}
 	private lMsErroAuto := .F.
 	
-	::aVetor := {}
 	for i := 1 to len(::campos)
-		aadd(::aVetor , {::campos[i][CPOTEC],::campos[i][VALOR],nil})	
+		aadd(aVetor , {::campos[i][CPOTEC],::campos[i][VALOR],nil})	
 	next
-return
+return aVetor
 
 
 method resExecAuto()   class TSigaMDBas
@@ -548,37 +742,66 @@ method resExecAuto()   class TSigaMDBas
 return aiRet
 
 
+// RELATIONS
 
 
 
-/*Method procErroBatch() class TSigaMDBas
-	//TODO
-	if lMsErroAuto            
-		// delete file
-		FErase('c:\Totvs\logImport\importacaolog.log')
-		MostraErro('c:\Totvs\logImport\', 'importacaolog.log')
-		
-		if !self:identErro()
-			// Abrir arquivo
-			FWrite(nHLog, "Registro: " + str(nRegistro)  + ENTER)   				
-	
-	//		nHLogExec := FT_FUSE('c:\Download\importacaolog.log')
-			nHLogExec := FOpen('c:\Totvs\logImport\importacaolog.log')
-			lEnd := .F.
-			while !lEnd
-				cLinhaLog := FReadStr(nHLogExec, 100)					
-												
-				FWrite(nHLog, cLinhaLog  )														
-				if (Len(cLinhaLog) < 100)
-					lEnd := .T.						
-				EndIf
-			EndDo						
-			FClose(nHLogExec)
-			lImp := .T.
-		EndIf    
-		// Processar para botar no arquivo de log
-		// Numero de registro | Mensagem | Dado invalido
-	else
-		lImp := .T.  
-	Endif
-return*/
+
+/*/{Protheus.doc} hasOne
+RelaÁ„o One to One
+@type method
+@param nome, character, Nome em portugues da entidade
+@param entidade, character, Nome da Classe
+@param indexFk, character, Representa o indexo da Foreign Key
+@param camposPk, array, diferente de nil se diferente da Primary Key
+/*/
+method hasOne( entity, indexFk, fieldsPk) class TSigaMDBas	
+return TSHasOne:New(self, entidade, indexFk, fieldsPk)
+
+
+/*/{Protheus.doc} hasMany
+RelaÁ„o One to Many 
+@type method
+@param nome, character, Nome em portugues da entidade
+@param entidade, character, Nome da Classe
+@param indexFk, character, Representa o indexo da Foreign Key
+@param camposPk, array, diferente de nil se diferente da Primary Key
+/*/
+method hasMany( entity, indexFk, fieldsPk) class TSigaMDBas
+return TSHasMany:New(self, entity, indexFk, fieldsPk)
+
+/*/{Protheus.doc} belongsTo
+RelaÁ„o pertence a (1)
+@type method
+@param nome, character, Nome em portugues da entidade
+@param entidade, character, Nome da Classe
+@param indexFk, character, Representa o indexo da Foreign Key
+@param camposPk, array, diferente de nil se diferente da Primary Key
+/*/
+method belongsTo(entity, foreignKey, indexOtherKey) class TSigaMDBas
+return TSBelongsTo:New(self, entity, foreignKey, indexOtherKey)
+
+
+/*/{Protheus.doc} belongsToMany
+RelaÁ„o many to many
+@type method
+@param nome, character, Nome em portugues da entidade
+@param entidade, character, Nome da Classe
+@param indexFk, character, Representa o indexo da Foreign Key
+@param camposPk, array, diferente de nil se diferente da Primary Key
+/*/
+method belongsToMany( entidade, indexFk, camposPk) class TSigaMDBas
+//	aadd(::relation, {REL_BELONGSTOMANY, entidade, indexFk, camposPk})
+	// MANY TO MANY
+return
+
+/*/{Protheus.doc} hasManyThrough
+(long_description)
+@example
+(examples)
+@see (links_or_references)
+/*/
+method hasManyThrough() class TSigaMDBas
+
+return
+ 
