@@ -42,19 +42,19 @@ method exec() class TTestSigaMDBas
 
 	oGrpProd := TSGrupoProduto():New()	
 	// Grupo de Produto find
-	xReturn := oGrpProd.find('0200')
+	xReturn := oGrpProd:find('0200')
 	::dados := "Acessar grupo de produto 0200"
 	//Self:assert(xReturn, .T.)
 	Self:assert(Alltrim(xReturn:valor('descricao')), "BENS DE CONSUMO")
 	
 	// Grupo de produto setar
 	oGrpProd:setar("descricao", "BENS DE CONSUMO MODIF")
-	Self:assert(Alltrim(oGrpProd::valor('descricao')), "BENS DE CONSUMO MODIF")
+	Self:assert(Alltrim(oGrpProd:valor('descricao')), "BENS DE CONSUMO MODIF")
 	
 	// Grupo de produto salvar atualizacao
 	oGrpProd:salvar()
 	oGrpProd2 := TSGrupoProduto():New()
-	xReturn := oGrpProd2.find('0200') 
+	xReturn := oGrpProd2:find('0200') 
 	//Self:assert(xReturn[1], .T.)
 	Self:assert(Alltrim(xReturn:valor('descricao')), "BENS DE CONSUMO MODIF")
 	
@@ -68,14 +68,14 @@ method exec() class TTestSigaMDBas
 	oGrpProd3:setar("descricao", "TEST INSERCAO GRUPO")
 	oGrpProd3:salvar()
 	oGrpProd4 := TSGrupoProduto():New()
-	xReturn := oGrpProd4.find('0202') 
+	xReturn := oGrpProd4:find('0202') 
 	//Self:assert(xReturn[1], .T.)
 	Self:assert(Alltrim(xReturn:valor('codigo')), "0202")
 			
 	// Grupo de produto deletar
 	oGrpProd4:deletar()
 	oGrpProd5 := TSGrupoProduto():New()
-	xReturn := oGrpProd5.find('0202') 
+	xReturn := oGrpProd5:find('0202') 
 	Self:assert(xReturn, nil)
 	//Self:assert(Alltrim(xReturn[2]:valor('codigo')), "0202")	
 	
@@ -90,8 +90,8 @@ method exec() class TTestSigaMDBas
 		 
 	// navegar de produto para grupo de produto
 	oProd2 := TSProduto():New()
-	oProd2.find('IN.PR.0006')
+	oProd2:find('IN.PR.0006')
 	oGp := oProd2:grupoProduto():obter()
-	Self:assert(oGp:valor('descricao'), "BENS DE CONSUMO MODIF")
+	Self:assert(Alltrim(oGp:valor('descricao')), "BENS DE CONSUMO MODIF")
 	
 return

@@ -30,15 +30,21 @@
 @version 1.0
 
 /*/
-Class TSHasOne From THasOneOrMany
+Class TSHasOne From TSOneOMany
 
-	method obterOrFail()	
+	method obterOrFail()
+	method New() constructor	
 EndClass
 
+method New(parent, relatedType, foreignKey, indexOtherKey) class TSHasOne
+	_Super:New(parent, relatedType, foreignKey, indexOtherKey)
+	
+return
 
-method obterOrFail() class TSHasOneOrMany
+
+method obterOrFail() class TSHasOne
 	local xRet
-	xRet := _Super:getOrFail()
+	xRet := _Super:obterOrFail()
 	if xRet[1]
 		xRet := xRet[2]:first()
 	endif	

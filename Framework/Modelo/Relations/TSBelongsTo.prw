@@ -66,7 +66,7 @@ EndClass
 @see (links_or_references)
 /*/
 method New(parent, relatedType, foreignKey, indexOtherKey) class TSBelongsTo
-	_Self:New(parent, relatedType)
+	_Super:New(parent, relatedType)
 	
 	::foreignKey := foreignKey
 	::indexOtherKey := indexOtherKey
@@ -83,15 +83,18 @@ return
 /*/method obterOrFail() class TSBelongsTo
 	local xRet
 	local ind := ::indexOtherKey
-	
+	local pai
+	local fk
 	if ::indexOtherKey == nil
 		ind := 1
 	endif
 	   
-	xRet := ::getValKey(::foreignKey)
+	pai := Self:parent
+	fk :=  Self:foreignKey  
+	xRet := pai:getValKey(fk)
 
 	if xRet[1]
-		xRet := related:findByOrFail(ind, xRet[2])
+		xRet := ::related:findByOrFail(ind, xRet[2])
 	endif	
 return xRet
 

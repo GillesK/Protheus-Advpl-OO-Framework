@@ -46,6 +46,7 @@ a base
 @author Gilles Koffmann - Sigaware Pb
 @since 03/09/2014
 @version 1.0
+@todo metodo para incrementar um codigo sxe sxf
 @example
 Definição de uma classe filha  <br>
  <br>
@@ -132,7 +133,7 @@ Função da entidade. Deve ser informado no construtor da classe filha
 	// todas as chaves com indexo
 	data chaves
 	
-	data relations
+	//data relations
 	
 /*/{Protheus.doc} execAuto
 Se a entidade é atualizada atraves de ExecAuto ou acesso direto a base. Valor lógico.
@@ -182,6 +183,7 @@ Deve ser informado no contrutor da classe filha
 	method belongsToMany()	
 	method hasManyThrough()	
 	method filial()
+	method getValKey()
 EndClass
 
 /*/{Protheus.doc} New
@@ -192,6 +194,7 @@ Method New() Class TSigaMDBas
 	::campos := {}
 	::iniCampos()
 	//::resetCampos()
+	::execAuto := 	.F.	
 return (Self)
 
 
@@ -231,7 +234,7 @@ Method iniCampos() class TSProduto <br>
 return
 /*/
 method addCpoDef(aCampoDef)  class TSigaMDBas
-	for i := 0 to Len(aCampoDef)	
+	for i := 1 to Len(aCampoDef)	
 		// adicionar chave
 		aadd(aCampoDef[i], .F.)
 		// valor
@@ -254,7 +257,7 @@ method setChave(aChave)  class TSigaMDBas
 	local nPos
 	::chave := aChave[1][2]
 	::chaves := aChave
-	for i := 0 to len(::chave)
+	for i := 1 to len(::chave)
 		nPos := ascan(::campos, {|x| x[CPOTEC] == ::chave[i]})
 		if nPos > 0
 			::campos[nPos][CHAVE] := .T.
@@ -318,7 +321,7 @@ method findBy(index, pChave)  class TSigaMDBas
 	local aRet := nil 
 //	local axArea
 
-	aRet := findByOrFail(index, pChave)
+	aRet := ::findByOrFail(index, pChave)
 	if aRet[1]
 		aRet := aRet[2]
 	else 
@@ -350,7 +353,7 @@ return ::findBy(1,pChave)
 	local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao}
 //	local aRet := nil 
 	local axArea
-	local oRes := TSigaMDCol():New()
+	local oRes := TSColecao():New()
 	local aValCurr := {}
 	local cNewObj
 	local oNewObj
@@ -436,7 +439,7 @@ return ::findAllByOrFail(1,pChave)
 	local aRet := nil 
 //	local axArea
 
-	aRet := findAllByOrFail(index, pChave)
+	aRet := ::findAllByOrFail(index, pChave)
 	if aRet[1]
 		aRet := aRet[2]
 	else 
@@ -531,13 +534,13 @@ method setar(campo, valor) class  TSigaMDBas
 		
 	nPos := ascan(::campos, {|x| x[CPOPOR] == campo })
 	if nPos != 0
-		campos[nPos][VALOR] := valor
-		campos[nPos][MUDADO] := .T.
+		::campos[nPos][VALOR] := valor
+		::campos[nPos][MUDADO] := .T.
 	else
 		nPos := ascan(::campos, {|x| x[CPOTEC] == campo })
 		if 	nPos != 0
-			campos[nPos][VALOR] := valor
-			campos[nPos][MUDADO] := .T.
+			::campos[nPos][VALOR] := valor
+			::campos[nPos][MUDADO] := .T.
 		else 
 			xReturn := {.F., "campo não encontrado"}
 		endif
@@ -629,7 +632,7 @@ method isInsert(lIns, valChave) class TSigaMDBas
 		nPos := ascan(::campos, {|x| x[CPOTEC] == ::chave[i] })
 		if nPos != 0
 			// campo da chave foi mudado
-			if ::campos[nPos][MUDADO] := .T.
+			if ::campos[nPos][MUDADO] == .T.
 				lIns := .T.
 			endif
 			valChave := valChave + ::campos[nPos][VALOR]
@@ -640,6 +643,8 @@ method isInsert(lIns, valChave) class TSigaMDBas
 		endif
 	next
 return aRet
+
+
 
 /*/{Protheus.doc} deletar
 Deleta o modelo na base
@@ -653,7 +658,8 @@ method deletar() class TSigaMDBas
 	local aRet3
 	local aRet4
 	local lIns := .F.
-	local axArea := &(tabela)->(getarea())	
+	local axArea := &(tabela)->(getarea())
+	local valChave := ""
 	// determina inserção ou update
 	aRet2 := ::isInsert(@lIns, @valChave)
 	if aRet2[1]
@@ -768,7 +774,7 @@ Relação One to Many
 @param camposPk, array, diferente de nil se diferente da Primary Key
 /*/
 method hasMany( entity, indexFk, fieldsPk) class TSigaMDBas
-return TSHasMany:New(self, entity, indexFk, fieldsPk)
+return TSHasMany():New(self, entity, indexFk, fieldsPk)
 
 /*/{Protheus.doc} belongsTo
 Relação pertence a (1)
@@ -779,7 +785,7 @@ Relação pertence a (1)
 @param camposPk, array, diferente de nil se diferente da Primary Key
 /*/
 method belongsTo(entity, foreignKey, indexOtherKey) class TSigaMDBas
-return TSBelongsTo:New(self, entity, foreignKey, indexOtherKey)
+return TSBelongsTo():New(self, entity, foreignKey, indexOtherKey)
 
 
 /*/{Protheus.doc} belongsToMany
@@ -805,3 +811,27 @@ method hasManyThrough() class TSigaMDBas
 
 return
  
+
+ method getValKey(parentKey) class TSigaMDBas
+	local valChave := ""
+	local aRet := {.T., ""}
+	local cpoKey 
+	if parentKey == nil
+		cpoKey := ::chave
+	else
+		cpoKey := parentKey
+	endif
+	
+	for i := 1 to len(cpoKey)
+		nPos := ascan(::campos, {|x| x[CPOTEC] == cpoKey[i] })
+		//nPos := ascan(::campos, {|x| x[2] == cpoKey[i] })
+		if nPos != 0
+			valChave := valChave + ::campos[nPos][VALOR]
+		else
+			// TODO : erro			
+			aRet := {.F., "Campos de chave não encontrados"}
+			return aRet			
+		endif
+	next	
+	aRet[2] := valChave
+return aRet

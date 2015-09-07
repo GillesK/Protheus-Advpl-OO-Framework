@@ -2,7 +2,8 @@
 #INCLUDE "protheus.ch"
 #INCLUDE "TopConn.ch"
 #INCLUDE 'fileio.ch'       
-#include "msobject.ch"     
+#include "msobject.ch"   
+  
 
 
 /*
@@ -39,37 +40,17 @@ Class TSigaMDRel
 	Method New() constructor
 	method obter()
 	method obterOrFail()	 
-	method getvalKey()
+	//method getvalKey()
 EndClass
 
 method New(parent, relatedType) class TSigaMDRel 
 	::parent := parent
 	::relatedType := relatedType
-	cNameObj := entidade + "():New()"
+	cNameObj := ::relatedType + "():New()"
 	::related := &(cNameObj) 
 return
 
-method getValKey(parentKey) class TSigaMDRel
-	local valChave := ""
-	local aRet := {.T., ""}
-	local cpoKey 
-	if parentKey == nil
-		cpoKey := parent:chave
-	else
-		cpoKey := parentKey
-	endif
-	for i := 1 to len(cpoKey)
-		nPos := ascan(parent:campos, {|x| x[CPOTEC] == cpoKey[i] })
-		if nPos != 0
-			valChave := valChave + parent:campos[nPos][VALOR]
-		else
-			// TODO : erro			
-			aRet := {.F., "Campos de chave não encontrados"}
-			return aRet			
-		endif
-	next	
-	aRet[2] := valChave
-return aRet
+
 
 /*/{Protheus.doc} obter
 Obter os objetos da relação

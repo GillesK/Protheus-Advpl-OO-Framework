@@ -31,7 +31,7 @@ Classe definindo uma relação de tipo One To Many
 @version 1.0
 
 /*/
-Class TSHasOneOrMany From TSigaMDRel
+Class TSOneOMany From TSigaMDRel
 /**
      * The foreign key of the parent model.
      *
@@ -64,18 +64,20 @@ Method produto() class TEGrupoTributario <br>
 return TSHasMany():New(self, "TSProduto", {"B1_GRTRIB"}, nil) <br>
 	
 /*/
-method New(parent, relatedType, indexFk, localKey) class TSHasOneOrMany
-	_Self:New(parent, relatedType)
+method New(parent, relatedType, indexFk, localKey) class TSOneOMany
+	_Super:New(parent, relatedType)
 	
 	::indexFk := indexFk
 	::localKey := localKey	
 return
 
-method obterOrFail() class TSHasOneOrMany
+method obterOrFail() class TSOneOMany
 	local xRet
-	xRet := ::getValKey(::localKey)
+	local pai := Self:parent
+	local lk := Self:localKey
+	xRet := pai:getValKey(lk)
 	if xRet[1]
-		xRet := related:findAllByOrFail(::indexFk, xRet[2])
+		xRet := self:related:findAllByOrFail(::indexFk, xRet[2])
 	endif	
 return xRet
 

@@ -29,7 +29,13 @@
 @since 03/09/2014
 @version 1.0
 /*/
-Class TSHasMany From TSHasOneOrMany
+Class TSHasMany From TSOneOMany
 
-	
+	method New() constructor
 EndClass
+
+
+method New(parent, relatedType, foreignKey, indexOtherKey) class TSHasMany
+	_Super:New(parent, relatedType, foreignKey, indexOtherKey)
+	
+return

@@ -88,6 +88,12 @@ Method write(nome, dados, resultado, esperado, lRet) Class TSUTLog
 	local cTipo, res, esp 
 	FWrite(::nHandle, "Test: " + nome  + ENTER)
 	FWrite(::nHandle, "   input: " + dados  + ENTER)
+	if resultado == nil
+		resultado := "nil"
+	endif
+	if esperado == nil
+		esperado := "nil"
+	endif	
 	cTipo := valtype(resultado)
 	Do Case
 		case cTipo == 'C'
