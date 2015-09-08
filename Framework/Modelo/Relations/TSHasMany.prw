@@ -24,6 +24,7 @@
 
 
 /*/{Protheus.doc} TSHasMany
+Relação de tipo One To Many
 @type class
 @author Gilles Koffmann - Sigaware Pb
 @since 03/09/2014
@@ -38,4 +39,4 @@ EndClass
 method New(parent, relatedType, foreignKey, indexOtherKey) class TSHasMany
 	_Super:New(parent, relatedType, foreignKey, indexOtherKey)
 	
-return
+return  (Self)

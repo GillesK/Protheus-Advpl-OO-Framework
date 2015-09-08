@@ -24,11 +24,11 @@
 
 
 /*/{Protheus.doc} TSHasOne
+Relação de tipo One to One
 @type class
 @author Gilles Koffmann - Sigaware Pb
 @since 03/09/2014
 @version 1.0
-
 /*/
 Class TSHasOne From TSOneOMany
 
@@ -39,9 +39,13 @@ EndClass
 method New(parent, relatedType, foreignKey, indexOtherKey) class TSHasOne
 	_Super:New(parent, relatedType, foreignKey, indexOtherKey)
 	
-return
+return  (Self)
 
-
+/*/{Protheus.doc} obterOrFail
+Obter os objetos da relação
+@type method
+@return array, {lRet, obj} lRet: .T. se encontrou e obj = instancia de TSigaMDBas. lRet: .F. se não, obj : Mensagem de erro 
+/*/
 method obterOrFail() class TSHasOne
 	local xRet
 	xRet := _Super:obterOrFail()

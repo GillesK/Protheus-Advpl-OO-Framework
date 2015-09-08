@@ -13,7 +13,7 @@
 ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
 ฑฑบEmpresa   ณ Sigaware Pb บE-Mailณ gilles@sigawarepb.com.br                 บฑฑ
 ฑฑฬออออออออออุอออออออออออออออออออสออออออฯอออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบDescricao ณ Classe de Rela็ใo Belongs To Many   					    		    บฑฑ
+ฑฑบDescricao ณ Classe de Rela็ใo Many To Many   					    		    บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
 ฑฑบUso       ณ Framework copyright Sigaware Pb                            บฑฑ

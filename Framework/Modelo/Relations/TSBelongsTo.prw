@@ -55,15 +55,12 @@ EndClass
 
 
 /*/{Protheus.doc} New
-(long_description)
+Construtor
 @type method
-@param parent, ${param_type}, (Descrição do parâmetro)
-@param relatedType, ${param_type}, (Descrição do parâmetro)
-@param foreignKey, ${param_type}, (Descrição do parâmetro)
-@param indexOtherKey, ${param_type}, (Descrição do parâmetro)
-@example
-(examples)
-@see (links_or_references)
+@param parent, TSigaMDBas, instancia de quem esta definindo a relação
+@param relatedType, character, Tipo relacionado
+@param foreignKey, array, foreign key na tabela.
+@param indexOtherKey, numérico, número do indexo para procurar no modelo relacionado
 /*/
 method New(parent, relatedType, foreignKey, indexOtherKey) class TSBelongsTo
 	_Super:New(parent, relatedType)
@@ -71,16 +68,15 @@ method New(parent, relatedType, foreignKey, indexOtherKey) class TSBelongsTo
 	::foreignKey := foreignKey
 	::indexOtherKey := indexOtherKey
 	
-return
+return  (Self)
 
 
 /*/{Protheus.doc} obterOrFail
-(long_description)
+Obter os objetos da relação
 @type method
-@example
-(examples)
-@see (links_or_references)
-/*/method obterOrFail() class TSBelongsTo
+@return array, {lRet, obj} lRet: .T. se encontrou e obj = instancia de TSigaMDBas. lRet: .F. se não, obj : Mensagem de erro 
+/*/
+method obterOrFail() class TSBelongsTo
 	local xRet
 	local ind := ::indexOtherKey
 	local pai

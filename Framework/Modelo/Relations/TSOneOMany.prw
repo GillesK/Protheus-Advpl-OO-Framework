@@ -9,7 +9,7 @@
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
-ฑฑบPrograma  ณ TSHasOneOrManyบ Autor ณ gilles koffmann บ Data  ณ  17/08/15   บฑฑ
+ฑฑบPrograma  ณ TSOneOManyบ Autor ณ gilles koffmann บ Data  ณ  17/08/15   บฑฑ
 ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
 ฑฑบEmpresa   ณ Sigaware Pb บE-Mailณ gilles@sigawarepb.com.br                 บฑฑ
 ฑฑฬออออออออออุอออออออออออออออออออสออออออฯอออออออออออออออออออออออออออออออออนฑฑ
@@ -23,7 +23,7 @@
 */
 
 
-/*/{Protheus.doc} TSHasOneOrMany
+/*/{Protheus.doc} TSOneOMany
 Classe definindo uma rela็ใo de tipo One To Many
 @type class
 @author Gilles Koffmann - Sigaware Pb
@@ -61,16 +61,20 @@ Construtor
 	Um grupo tributario ้ asociado a varios produtos <br>
 	 <br>
 Method produto() class TEGrupoTributario <br>
-return TSHasMany():New(self, "TSProduto", {"B1_GRTRIB"}, nil) <br>
-	
+return TSHasMany():New(self, "TSProduto", {"B1_GRTRIB"}, nil) <br>	
 /*/
 method New(parent, relatedType, indexFk, localKey) class TSOneOMany
 	_Super:New(parent, relatedType)
 	
 	::indexFk := indexFk
 	::localKey := localKey	
-return
+return  (Self)
 
+/*/{Protheus.doc} obterOrFail
+Obter os objetos da rela็ใo
+@type method
+@return array, {lRet, obj} lRet: .T. se encontrou e obj = instancia de TSColecao. lRet: .F. se nใo, obj : Mensagem de erro 
+/*/
 method obterOrFail() class TSOneOMany
 	local xRet
 	local pai := Self:parent

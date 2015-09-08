@@ -48,7 +48,7 @@ method New(parent, relatedType) class TSigaMDRel
 	::relatedType := relatedType
 	cNameObj := ::relatedType + "():New()"
 	::related := &(cNameObj) 
-return
+return  (Self)
 
 
 
