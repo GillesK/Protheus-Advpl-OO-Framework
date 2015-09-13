@@ -39,8 +39,9 @@ Class TSIterator
 	method anterior()
 	method first()
 	method last()	
-	method Eoc()
-	method Boc()		
+	method eoc()
+	method boc()
+	method current()
 EndClass 
 
 
@@ -51,7 +52,7 @@ Construtor
 /*/
 method New(oCol) Class TSIterator
 	//::oCol := {}
-	::nCurr := 0
+	::nCurr := 1
 	::oCol := oCol
 return self
 
@@ -61,7 +62,7 @@ Retorna .T. se posicinado no final da coleção
 @type method
 @return lógico, 
 /*/
-method Eoc()  Class TSIterator
+method eoc()  Class TSIterator
 	local xRet := .F.
 	if ::nCurr == ::oCol:length() + 1
 		xRet := .T.
@@ -73,7 +74,7 @@ Retorna .T. se posicinado no inicio da coleção
 @type method
 @return lógico,
 /*/
-method Boc()  Class TSIterator
+method boc()  Class TSIterator
 	local xRet := .F.
 	if ::nCurr == 0
 		xRet := .T.
@@ -129,3 +130,6 @@ method last() Class TSIterator
 	::nCurr := ::length()
 return	::oCol:obter(::nCurr)
 
+
+method current() Class  TSIterator
+return ::oCol:obter(::nCurr)

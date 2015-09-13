@@ -190,6 +190,10 @@ Deve ser informado no contrutor da classe filha
 	method hasManyThrough()	
 	method filial()
 	method getValKey()
+	
+	method hydrateM()
+	method hydrateACols()
+	method all()		
 EndClass
 
 /*/{Protheus.doc} New
@@ -855,3 +859,79 @@ return
 	next	
 	aRet[2] := valChave
 return aRet
+
+
+/*/{Protheus.doc} hydrateM
+Preeche o objeto a partir da variavel de memoria M 
+@type method
+/*/
+method hydrateM() class  TSigaMDBas
+	local tipo
+	for i:= 1 to len(::campos)
+		tipo := Type(M->&(::campos[i][CPOTEC])) 
+		if tipo != "U" .And. tipo != "UE" .And. tipo != "UI"
+			::campos[i][VALOR] := M->&(::campos[i][CPOTEC])
+		endif  
+	next 
+return
+
+/*/{Protheus.doc} hydrateACols
+Preeche o objeto a partir do aHeader e aCols
+@type method
+@param paHeader, array, aHeader
+@param paCols, array, aCols
+@return TSColecao, os objetos do aCols
+/*/
+method hydrateACols(paHeader, paCols) class  TSigaMDBas
+	local nPos
+	local colObj
+	local oObj
+	local cCreate	
+	
+	colObj := TSColecao():New()
+	for j := 1 to len(paCols)
+		cCreate := GetClassName(Self) + "():New()"
+		oObj := &(cCreate)
+		for i := 1 to Len(paHeader)
+			nPos := ascan(oObj:campos, {|x| x[CPOTEC] == paHeader[i][2]})
+			if nPos != 0
+				oObj:campos[nPos][VALOR] := paCols[j][paHeader[i][2]] 	
+			endif		
+		next
+		colObj:add(oObj)
+	next
+	//Local xProd := aScan(aHeader,{|x| AllTrim(x[2])=="C6_PRODUTO" })
+	//Local _Prod := aCols[n,xProd]
+return colObj
+
+
+/*/{Protheus.doc} all
+Retorna todos os elementos da tabela
+@type method
+@return TSColecao, todos os registros da tabela
+/*/
+method all() class  TSigaMDBas
+	local tabela := ::tabela
+	local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao} 
+	local axArea
+	local colObj
+	local oObj
+	local cCreate
+	
+	colObj := TSColecao():New()
+
+	axArea := &(tabela)->(getarea())
+	dbSelectArea(::tabela)
+	&(tabela)->(dbSetOrder(1))
+	&(tabela)->(dbGoTop())
+	
+	while !&(tabela)->(EOF())
+		cCreate := GetClassName(Self) + "():New()"  
+		oObj := &(cCreate)
+		oObj:fillCampos()		
+		colObj:add(oObj)	
+		&(tabela)->(DbSkip())
+	endDo	
+	
+	restarea(axArea)
+return colObj

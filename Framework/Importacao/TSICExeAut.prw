@@ -10,11 +10,11 @@
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
-ฑฑบPrograma  ณ TSIMPCSVExecAuto   บ Autor ณ Gilles Koffmann   บ Data  ณ  17/08/15   บฑฑ
+ฑฑบPrograma  ณ TSICExeAut   บ Autor ณ Gilles Koffmann   บ Data  ณ  17/08/15   บฑฑ
 ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
 ฑฑบEmpresa   ณ Sigaware Pb บE-Mailณ gilles@sigawarepb.com.br              บฑฑ
 ฑฑฬออออออออออุอออออออออออออออออออสออออออฯอออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบDescricao ณ Classe de Importa็ใo de dados via arquivo csv   			  บฑฑ
+ฑฑบDescricao ณ Classe de Importa็ใo de dados arquivo csv via ExecAuto   			  บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
 ฑฑบUso       ณ Framework Copyright Sigaware Pb                             บฑฑ
@@ -129,12 +129,6 @@ return lIdent
 /*/{Protheus.doc} erroCampo
 (long_description)
 @type method
-@author Gilles
-@since 03/09/2015
-@version 1.0
-@example
-(examples)
-@see (links_or_references)
 /*/
 Method erroCampo() class TSICExeAut
 

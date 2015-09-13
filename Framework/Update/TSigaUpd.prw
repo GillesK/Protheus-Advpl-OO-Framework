@@ -5,10 +5,7 @@
 #include "msobject.ch"     
 
 
-    
-#DEFINE ENTER CHR(13)+CHR(10)
-
-/*/
+/*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
@@ -24,25 +21,95 @@
 ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
-/*/
+*/
 
+/*/{Protheus.doc} TSigaUpd
+Calsse de execução de compatibilizador Protheus (mudança de estrutura de dicionario e base)
+@author Gilles Koffmann - Sigaware Pb
+@since 13/09/2015
+@version 1.0
+@type class
+/*/
 Class TSigaUpd
 	
+	method update()
 	method ProcATU(sTabela, aRegsTab, aRegsCpo, aRegsInd, aRegsGatilhos) 
 	method MyOpenSM0Ex()  
 	Method GeraSX2(aRegs) 	
 	method GeraSX3(aRegs) 
 	Method GeraSIX(aRegs) 	
+	Method GeraSXB(aRegs)	
+	Method GeraSX7()
+	
+	Method sfVerInd(mvTabela,mvChave)
 	method sfSeqSIX(mvTabela)	
 	method sfSeqSX3(mvTabela)	
-	Method GeraSXB(aRegs)	
-	Method sfVerInd(mvTabela,mvChave)
-	Method GeraSX7()	 	
- 	
+		
+	Method DelSX7(aRegs)		 	
+	method sfSeqSX7(pCampo)
+	method reordSX7()
+	method reordSX3()
+	
+	method formatA(aRegs)
+	method New() constructor
 EndClass
 
 
+/*/{Protheus.doc} New
+Constructor
+@type method
+/*/
+method New() class TSigaUpd
+	//_Super:New()
+return self
 
+/*/{Protheus.doc} update
+Lança a execução do update de dicionario
+@type method
+@param aTab, array, Contendo os registros para criar tabelas SX2
+@param aCpo, array, Contendo os registros para criar campos SX3
+@param aCpoOrd, array, Contendo os registros para ordenar os campos, na forma {campo, campoAntes}
+@param aIdx, array, Contendo os registros para criar os indexos SIX
+@param aGatDel, array, Contendo os registros para deletar gatilhos. naforma {campo, campo dominio}
+@param aGat, array, Contendo os registros para criar os gatilhos SX7
+@param aGatOrd, array, Contendo os registros para ordenar os gatilhos
+/*/
+method update(aTab , aCpo , aCpoOrd , aIdx , aGatDel , aGat, aGatOrd)  class TSigaUpd
+	cArqEmp 					:= "SigaMat.Emp"
+	__cInterNet 	:= Nil
+	
+	PRIVATE cMessage
+	PRIVATE aArqUpd	 := {}
+	PRIVATE aREOPEN	 := {}
+	PRIVATE oMainWnd
+	Private nModulo 	:= 51 // modulo SIGAHSP
+	
+	Set Dele On
+	
+	lEmpenho				:= .F.
+	lAtuMnu					:= .F.
+	
+	Processa({|| ::ProcATU(aTab , aCpo , aCpoOrd , aIdx , aGatDel , aGat, aGatOrd)},"Processando []","Aguarde , processando preparação dos arquivos")	
+return 
+
+
+method formatA(aRegs)   class TSigaUpd
+	local aRet := {}, cur, aNew
+
+	ASORT(aRegs, , , { | x,y | x[1] < y[1] } )
+	
+	i := 1
+	while i <= Len(aRegs)
+		cur := aRegs[i][1]
+		aNew := {}						
+		while i <= Len(aRegs) .And. cur == aRegs[i][1]   
+			aadd(aNew, aRegs[i])
+			i += 1
+		enddo
+		aadd(aRet, aNew)
+	enddo				
+	
+return aRet
 
 
 /*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
@@ -56,7 +123,7 @@ EndClass
 ±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
-method ProcATU(sTabela, aRegsTab, aRegsCpo, aRegsInd, aRegsGatilhos)  class TSigaUpd
+method ProcATU(aRegsTab, aRegsCpo, aCpoOrd, aRegsInd, aGatDel, aRegsGatilhos, aGatOrd)  class TSigaUpd
 Local cTexto    	:= ""
 Local cFile     	:= ""
 Local cMask     	:= "Arquivos Texto (*.TXT) |*.txt|"
@@ -68,7 +135,7 @@ Local lOpen     	:= .F.
 
 ProcRegua(1)
 IncProc("Verificando integridade dos dicionários....")
-If (lOpen := IIF(Alias() <> "SM0", MyOpenSm0Ex(), .T. ))
+If (lOpen := IIF(Alias() <> "SM0", ::MyOpenSm0Ex(), .T. ))
 
 	dbSelectArea("SM0")
 	dbGotop()
@@ -99,7 +166,7 @@ If (lOpen := IIF(Alias() <> "SM0", MyOpenSm0Ex(), .T. ))
 			if aRegsTab != nil
 				if Len(aRegsTab) >0
 					IncProc("Analisando Dicionario de Arquivos...")
-					cTexto += GeraSX2(aRegsTab)
+					cTexto += ::GeraSX2(aRegsTab)
 				endif
 			endif
 			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -108,27 +175,61 @@ If (lOpen := IIF(Alias() <> "SM0", MyOpenSm0Ex(), .T. ))
 			if aRegsCpo != nil
 				if Len(aRegsCpo) >0			
 					IncProc("Analisando Dicionario de Dados...")
-					cTexto += GeraSX3(aRegsCpo, sTabela)
+					// Reorganiza array
+					// sort
+					aRegsCpo2 := ::formatA(aRegsCpo)					
+
+					for i := 1 to len(aRegsCpo2)
+						cTexto += ::GeraSX3(aRegsCpo2[i])
+					next
 				endif
 			endif					
-			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-			//³Atualiza os gatilhos.          ³
-			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-			if aRegsGatilhos != nil
-				if Len(aRegsGatilhos) >0			
-					IncProc("Analisando Gatilhos...")
-					cTexto += GeraSX7(aRegsGatilhos)
+			
+			// reord cpo
+			if aCpoOrd != nil
+				if Len(aCpoOrd) > 0
+					for i := 1 to Len(aCpoOrd) 
+						cTexto += ::reordSx3(aCpoOrd[i][1], aCpoOrd[i][2])
+					next		
 				endif
-			endif						
+			endif			
+			
+			
 			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 			//³Atualiza os indices.³
 			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 			if aRegsInd != nil
 				if Len(aRegsInd) >0			
 					IncProc("Analisando arquivos de índices. "+"Empresa : "+SM0->M0_CODIGO+" Filial : "+SM0->M0_CODFIL+"-"+SM0->M0_NOME)
-					cTexto += GeraSIX(aRegsInd,sTabela)
+					
+					aRegsInd2 :=  ::formatA(aRegsInd)
+
+					for i := 1 to len(aRegsInd2)
+						cTexto += ::GeraSIX(aRegsInd2)
+					next
 				endif
 			endif
+			
+			// dele gatilhos
+			if aGatDel != nil
+				if Len(aGatDel) >0
+					cTexto += ::DelSX7(aGatDel)
+				endif
+			endif
+							
+			//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+			//³Atualiza os gatilhos.          ³
+			//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			if aRegsGatilhos != nil
+				if Len(aRegsGatilhos) >0			
+					IncProc("Analisando Gatilhos...")
+					aRegsGat2 :=  ::formatA(aRegsGatilhos)
+					for i := 1 to len(aRegsGat2)
+						cTexto += ::GeraSX7(aRegsGat[i])
+					next															
+				endif
+			endif						
+
 			End Transaction
 	
 			__SetX31Mode(.F.)
@@ -148,7 +249,7 @@ If (lOpen := IIF(Alias() <> "SM0", MyOpenSm0Ex(), .T. ))
 			Next nX		
 
 			RpcClearEnv()
-			If !( lOpen := MyOpenSm0Ex() )
+			If !( lOpen := ::MyOpenSm0Ex() )
 				Exit
 		 EndIf
 		Next nI
@@ -228,7 +329,7 @@ Method GeraSX2(aRegs)  class TSigaUpd
 Local aArea 			:= GetArea()
 Local i      		:= 0
 Local j      		:= 0
-Local aRegs  		:= {}
+//Local aRegs  		:= {}
 Local cTexto 		:= ''
 Local lInclui		:= .F.
 
@@ -277,7 +378,7 @@ Return('SX2 : ' + cTexto  + CHR(13) + CHR(10))
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 /*/
-method GeraSX3(aRegs, sTabela)  class TSigaUpd
+method GeraSX3(aRegs)  class TSigaUpd
 Local aArea 			:= GetArea()
 Local i      		:= 0
 Local j      		:= 0
@@ -286,38 +387,13 @@ Local cTexto 		:= ''
 Local lInclui		:= .F.
 local ciSeq := ""
 
-ciSeq:=sfSeqSX3(sTabela)
+ciSeq:= ::sfSeqSX3(aRegs[1][1])
 If !Empty(ciSeq)
 	for k:= 1 to len(aRegs)
 		ciSeq	:=	Soma1(ciSeq,2,.T.)
 		aRegs[k][2] := ciSeq
 	Next
 Endif
-/*aRegs  := {}
-AADD(aRegs,{"ZZZ","01","ZZZ_FILIAL","C",02,00,"Filial      ","Sucursal    ","Branch      ","Filial do Sistema        ","Sucursal                 ","Branch of the System     ","@!                                           ","                                                                                                                                ","€€€€€€€€€€€€€€€","                                                                                                                                ","      ",01,"şÀ"," "," ","U","N"," "," "," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","033"," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","02","ZZZ_PRIATI","C",**,00,"Princ. Ativo","Princ. Ativo","Princ. Ativo","Principio Ativo          ","Principio Ativo          ","Principio Ativo          ","                                             ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","03","ZZZ_CNPJ  ","C",14,00,"Cnpj        ","Cnpj        ","Cnpj        ","Cnpj                     ","Cnpj                     ","Cnpj                     ","                                             ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","04","ZZZ_LABORA","C",**,00,"Laboratorio ","Laboratorio ","Laboratorio ","Laboratorio              ","Laboratorio              ","Laboratorio              ","                                             ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","05","ZZZ_CGGREM","C",15,00,"Cod. Ggrem  ","Cod. Ggrem  ","Cod. Ggrem  ","Codigo Ggrem             ","Codigo Ggrem             ","Codigo Ggrem             ","                                             ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","06","ZZZ_EAN   ","C",14,00,"Ean         ","Ean         ","Ean         ","Ean                      ","Ean                      ","Ean                      ","                                             ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","07","ZZZ_PRODUT","C",**,00,"Produto     ","Produto     ","Produto     ","Produto                  ","Produto                  ","Produto                  ","                                             ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","08","ZZZ_APRESE","C",**,00,"Apresentacao","Apresentacao","Apresentacao","Apresentacao             ","Apresentacao             ","Apresentacao             ","                                             ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","09","ZZZ_CLATER","C",**,00,"Clas. Terape","Clas. Terape","Clas. Terape","Classe Terapeutica       ","Classe Terapeutica       ","Classe Terapeutica       ","                                             ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","10","ZZZ_PF0   ","N",12,02,"PF0         ","PF0         ","PF0         ","Preco Fabrica 0%         ","Preco Fabrica 0%         ","Preco Fabrica 0%         ","@E 999,999,999.99                            ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","11","ZZZ_PF12  ","N",12,02,"PF12        ","PF12        ","PF12        ","Preco fabrica 12%        ","Preco fabrica 12%        ","Preco fabrica 12%        ","@E 999,999,999.99                            ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","12","ZZZ_PF17  ","N",12,02,"PF17        ","PF17        ","PF17        ","Preco fabrica 17%        ","Preco fabrica 17%        ","Preco fabrica 17%        ","@E 999,999,999.99                            ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","13","ZZZ_PF18  ","N",12,02,"PF18        ","PF18        ","PF18        ","Preco fabrica 18%        ","Preco fabrica 18%        ","Preco fabrica 18%        ","@E 999,999,999.99                            ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","14","ZZZ_PF19  ","N",12,02,"PF19        ","PF19        ","PF19        ","Preco fabrica 19%        ","Preco fabrica 19%        ","Preco fabrica 19%        ","@E 999,999,999.99                            ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","15","ZZZ_PF17MA","N",12,02,"PF17MA      ","PF17MA      ","PF17MA      ","Preco fabrica 17% Manaus ","Preco fabrica 17% Manaus ","Preco fabrica 17% Manaus ","@E 999,999,999.99                            ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","16","ZZZ_PMC0  ","N",12,02,"PMC0        ","PMC0        ","PMC0        ","Preco max. consumidor 0% ","Preco max. consumidor 0% ","Preco max. consumidor 0% ","@E 999,999,999.99                            ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","17","ZZZ_PMC12 ","N",12,02,"PMC12       ","PMC12       ","PMC12       ","Preco max. consumidor 12%","Preco max. consumidor 12%","Preco max. consumidor 12%","@E 999,999,999.99                            ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","18","ZZZ_PMC17 ","N",12,02,"PMC17       ","PMC17       ","PMC17       ","Preco max. consumidor 17%","Preco max. consumidor 17%","Preco max. consumidor 17%","@E 999,999,999.99                            ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","19","ZZZ_PMC18 ","N",12,02,"PMC18       ","PMC18       ","PMC18       ","Preco max. consumidor 18%","Preco max. consumidor 18%","Preco max. consumidor 18%","@E 999,999,999.99                            ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","20","ZZZ_PMC19 ","N",12,02,"PMC19       ","PMC19       ","PMC19       ","Preco max. consumidor 19%","Preco max. consumidor 19%","Preco max. consumidor 19%","@E 999,999,999.99                            ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","21","ZZZ_PMC17M","N",12,02,"PMC17M      ","PMC17M      ","PMC17M      ","Preco max. consum. 17% Ma","Preco max. consum. 17% Ma","Preco max. consum. 17% Ma","@E 999,999,999.99                            ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","22","ZZZ_RESHOS","C",01,00,"Rest. Hospit","Rest. Hospit","Rest. Hospit","Restricao Hospitalar     ","Restricao Hospitalar     ","Restricao Hospitalar     ","                                             ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","23","ZZZ_CAP   ","C",01,00,"Cap         ","Cap         ","Cap         ","Cap                      ","Cap                      ","Cap                      ","                                             ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})
-AADD(aRegs,{"ZZZ","24","ZZZ_CFAZ87","C",01,00,"Confaz 87   ","Confaz 87   ","Confaz 87   ","Confaz 87                ","Confaz 87                ","Confaz 87                ","                                             ","                                                                                                                                ","€€€€€€€€€€€€€€ ","                                                                                                                                ","      ",00,"şÀ"," "," ","U","N","A","R"," ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                                                                                                                                ","                    ","                                                            ","                                                                                ","   "," "," ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "," "," "," ","               ","   ","N","N","N"})*/
 
 dbSelectArea("SX3")
 dbSetOrder(1)
@@ -353,6 +429,69 @@ Next i
 RestArea(aArea)
 Return('SX3 : ' + cTexto  + CHR(13) + CHR(10))
 
+// reordenar campo
+// campo vai depois de outro campo
+// duas etapas insere o campo e realoca
+
+method reordSx3(pCampo, pCpoAntes) class TSigaUpd
+	local cOrdCpoAnt, cArquivo, cOrdCpo, curOrd, curArq, cpoTrat
+	local cTexto := ""
+	Local aArea 			:= GetArea()
+		 
+	dbSelectArea("SX3")
+	SX3->(dbSetOrder(2))  // X3_CAMPO
+	SX3->(DbGoTop())
+	
+	// procura ordem do campo antes
+	if SX3->(DbSeek(pCpoAntes))
+		cOrdCpoAnt := SX3->X3_ORDEM
+		curOrd :=  SX3->X3_ORDEM
+		cArquivo := SX3->X3_ARQUIVO
+		SX3->(DbGoTop())
+		
+		// procura o campo que devemos re ordenar e atualizar a ordem
+		if SX3->(DbSeek(pCampo))
+			if SX3->X3_ORDEM != Soma1(curOrd) 
+				RecLock("SX3", .F.)
+				curOrd := Soma1(curOrd)
+				SX3->X3_ORDEM = curOrd
+				SX3->(MsUnlock())
+				
+				// re 0rdenar o resto
+				SX3->(dbSetOrder(1))  // X3_ARQUIVO+X3_ORDEM
+				SX3->(DbGoTop())	
+				cpoTrat := pCampo
+				if SX3->(DbSeek(cArquivo+curOrd))
+					curArq := SX3->X3_ARQUIVO  
+					while !SX3->(Eof()) .And. curArq == SX3->X3_ARQUIVO
+						if SX3->X3_CAMPO != cpoTrat
+							RecLock("SX3", .F.)
+							curOrd := Soma1(curOrd)
+							SX3->X3_ORDEM = curOrd
+							cpoTrat := SX3->X3_CAMPO 
+							SX3->(MsUnlock())
+							// temos que fechar e re-abrir pois mexemos com a Ordem que faz parte do indexo
+							SX3->(DbCloseArea())
+							dbSelectArea("SX3")
+							SX3->(dbSetOrder(1))
+							SX3->(DbSeek(cArquivo+curOrd))								
+						endif
+						SX3->(DbSkip())  
+					enddo 
+				endif
+			endif
+		else
+			cTexto += "Campo não encontrado"
+		endif		
+	else 
+		cTexto += "Campo antes não encontrado"	
+	endif
+	
+	RestArea(aArea)
+				
+return ('SX3 reord: ' + cTexto  + CHR(13) + CHR(10))
+
+
 
 /*/
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
@@ -376,10 +515,10 @@ Local cTexto 		:= ''
 Local lInclui		:= .F.
 local ciSeq := ""
 
-ciSeq  :=sfSeqSIX(sTabela)
+ciSeq  := ::sfSeqSIX(sTabela)
 If !Empty(ciSeq)
 	for k:= 1 to len(aRegs)
-		ciSeqAtu	:=	sfVerInd(sTabela,aRegs[k][3])
+		ciSeqAtu	:=	::sfVerInd(sTabela,aRegs[k][3])
 		ciSeq	:=	IIF(Empty(ciSeqAtu),Soma1(ciSeq,1,.T.),ciSeqAtu)
 		aRegs[k][2] := ciSeq
 		//AADD(aRegs,{"SD3",ciSeq,"D3_FILIAL+D3_XNROC+D3_XITEM+D3_XSEQ				
@@ -443,7 +582,7 @@ Method GeraSXB(aRegs) class TSigaUpd
 Local aArea 			:= GetArea()
 Local i      		:= 0
 Local j      		:= 0
-Local aRegs  		:= {}
+//Local aRegs  		:= {}
 Local cTexto 		:= ''
 Local lInclui		:= .F.
 
@@ -514,6 +653,43 @@ method sfSeqSX3(mvTabela) class TSigaUpd
 	RestArea(aiAreaSX3)
 Return (ciRet)
 
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ sfSeqSX7  ³ Autor ³ MICROSIGA             ³ Data ³   /  /   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡ao ³ Captura a Ultima Sequencia da Ordem da Tabela para Gravas os Gatilhos    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³ Generico                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+method sfSeqSX7(pCampo) class TSigaUpd 
+	Local ciRet			:=	""
+//	Local aiArea 			:= GetArea()
+	Local aiAreaSX7		:= SX7->(GetArea())
+	//Local ciAlias			:=	Padr(mvTabela,Len(SX3->X3_ARQUIVO),"")
+	local curCampo
+				
+	DBSeletArea("SX7")
+	SX7->(DBSetOrder(1))
+	SX7->(DBGoTop())
+	If SX7->(DBSeek(pCampo))
+		curCampo := SX7->X7_CAMPO
+		Do While SX7->(!EoF()) .And. SX7->X7_CAMPO == curCampo
+			ciRet	:=	SX7->X7_SEQUENC
+			SX7->(DBSkip())
+		EndDo
+	EndIf
+	
+//	RestArea(aiArea)
+	RestArea(aiAreaSX7)
+Return (ciRet)
+
+
 /*/
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -568,6 +744,14 @@ Local j      		:= 0
 Local cTexto 		:= ''
 Local lInclui		:= .F.
 
+ciSeq:= ::sfSeqSX7(aRegs[1][1])
+If !Empty(ciSeq)
+	for k:= 1 to len(aRegs)
+		ciSeq	:=	Soma1(ciSeq)
+		aRegs[k][2] := ciSeq
+	Next
+Endif
+
 //aRegs  := {}
 //AADD(aRegs,{"Z03_PROD  ","001","LEFT(SB1->B1_DESC,50)                                                                               ","Z03_DESPRO","P","S","SB1",01,"xFilial('SB1')+M->Z03_PROD                                                                          ","                                        ","U"})
 
@@ -576,30 +760,140 @@ dbSetOrder(1)
 
 For i := 1 To Len(aRegs)
 
- dbSetOrder(1)
- lInclui := !DbSeek(aRegs[i, 1] + aRegs[i, 2])
+	dbSetOrder(1)
+ 	lInclui := !DbSeek(aRegs[i, 1] + aRegs[i, 2])
 
- cTexto += IIf( aRegs[i,1] $ cTexto, "", aRegs[i,1] + "\")
+ 	cTexto += IIf( aRegs[i,1] $ cTexto, "", aRegs[i,1] + "\")
 
- RecLock("SX7", lInclui)
-  For j := 1 to FCount()
-   If j <= Len(aRegs[i])
-   	If allTrim(Field(j)) == "X2_ARQUIVO"
-   		aRegs[i,j] := SubStr(aRegs[i,j], 1, 3) + SM0->M0_CODIGO + "0"
-   	EndIf
-    If !lInclui .AND. AllTrim(Field(j)) == "X3_ORDEM"
-     Loop
-    Else
-     FieldPut(j,aRegs[i,j])
-    EndIf
-   Endif
-  Next
- MsUnlock()
+	RecLock("SX7", lInclui)
+  	For j := 1 to FCount()
+   		If j <= Len(aRegs[i])
+   			If allTrim(Field(j)) == "X2_ARQUIVO"
+   				aRegs[i,j] := SubStr(aRegs[i,j], 1, 3) + SM0->M0_CODIGO + "0"
+   			EndIf
+    		If !lInclui .AND. AllTrim(Field(j)) == "X7_SEQUENC"
+     			Loop
+    		Else
+     		FieldPut(j,aRegs[i,j])
+    		EndIf
+   		Endif
+  	Next
+ 	MsUnlock()
 Next i
 
 
 RestArea(aArea)
 Return('SX7 : ' + cTexto  + CHR(13) + CHR(10))
+
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡ao    ³ DelSX7  ³ Autor ³ MICROSIGA             ³ Data ³   /  /   ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡ao ³ Funcao generica para deletar SX7			                  ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³ Generico                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+Method DelSX7(aRegs) class TSigaUpd
+Local aArea 			:= GetArea()
+Local k      		:= 0
+//Local j      		:= 0
+//Local aRegs  		:= {}
+Local cTexto 		:= ''
+//Local lInclui		:= .F.
+local curCampo
+local cOrdCur
+local aCpoTrat := {}
+local nPos
+
+// Indentificação de um gatilho
+// X7_CAMPO, X7_CDOMIN
+// aRegs tem a forma {{X7_CAMPO, X7_CDOMIN}}
+
+//aRegs  := {}
+//AADD(aRegs,{"Z03_PROD  ","001","LEFT(SB1->B1_DESC,50)                                                                               ","Z03_DESPRO","P","S","SB1",01,"xFilial('SB1')+M->Z03_PROD                                                                          ","                                        ","U"})
+
+// delete dos registros
+
+	dbSelectArea("SX7")
+	SX7->(dbSetOrder(1))
+
+	for k := 1 to len(aRegs)
+		cTexto += IIf( aRegs[k,1] $ cTexto, "", aRegs[k,1] + "\")
+		SX7->(DbGoTop())	
+		if SX7->(DbSeek(aRegs[k][1]))
+			curCampo := SX7->X7_CAMPO
+			while !SX7->(EOF()) .And. SX7->X7_CAMPO == curCampo
+				if Alltrim(SX7->X7_CDOMIN) == aRegs[k][2]
+					RecLock("SX7", .F.)
+					SX7->(DbDelete())
+					SX7->(MsUnlock())
+					exit
+				endif  
+				SX7->(DbSkip())
+			enddo  			
+		endif				
+	next
+
+	RestArea(aArea)
+
+	for k := 1 to len(aRegs)
+		cTexto += IIf( aRegs[k,1] $ cTexto, "", aRegs[k,1] + "\")
+		SX7->(DbGoTop())	
+		nPos := ascan(aCpoTrat, {|x| x == aRegs[k][1]})
+		if nPos == 0
+			aadd(aCpoTrat, aRegs[k][1])
+			::reordSX7(aRegs[k])							
+		endif
+	next	
+		
+Return('SX7 : ' + cTexto  + CHR(13) + CHR(10))
+
+
+method reordSX7(aRegs)  class TSigaUpd
+Local aArea 			:= GetArea()
+Local k      		:= 0
+//Local j      		:= 0
+//Local aRegs  		:= {}
+Local cTexto 		:= ''
+//Local lInclui		:= .F.
+local curCampo
+local cOrdCur
+
+// re-ordenação
+//	cOrdCur := '001'
+	//aCpoTrat := {}
+	dbSelectArea("SX7")
+	SX7->(dbSetOrder(1))
+	SX7->(DbGoTop())
+	
+	if SX7->(DbSeek(aRegs[1]))
+		curCampo := SX7->X7_CAMPO
+		cOrdCur := '001'
+		while !SX7->(EOF()) .And. SX7->X7_CAMPO == curCampo
+//					cOrdem := SX7->X7_SEQUENC
+			if SX7->X7_SEQUENC != cOrdCur
+				RecLock("SX7", .F.)
+				SX7->X7_SEQUENC := cOrdCur   
+				SX7->(MsUnlock())
+				// temos que fechar e re-abrir pois mexemos com a Ordem que faz parte do indexo
+				SX7->(DbCloseArea())
+				dbSelectArea("SX7")
+				SX7->(dbSetOrder(1))
+				SX7->(DbSeek(aRegs[1]+cOrdCur))
+			endif
+			cOrdCur := Soma1(cOrdCur)  
+			SX7->(DbSkip())
+		enddo  			
+	endif				
+
+	RestArea(aArea)
+return
 
 /*/
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ

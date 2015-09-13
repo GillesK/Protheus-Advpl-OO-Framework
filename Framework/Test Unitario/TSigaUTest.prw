@@ -140,3 +140,62 @@ Método de execução do teste. Abstrato. Deve ser definir na classe filha
 method exec() class  TSigaUTest
 
 return
+
+
+method simulAHeader(tabela, aFields, aNoCampos)
+	local  curTab, nPos
+	private aHeader := {}
+
+	// Define os campos de acordo com o array
+	DbSelectArea("SX3")
+
+	if aNoCampos != nil
+		aFields := {}
+		SX3->(DbSetOrder(1))
+		SX3->(DbGoTop())
+		If SX3->(DbSeek(tabela))
+			curTab := SX3->X3_ARQUIVO
+			while !SX3->(Eof()) .And. curTab == SX3->X3_ARQUIVO
+				nPos := ascan(aNoCampos, {|x| x == SX3->X3_CAMPO})
+				if nPos == 0 
+					Aadd(aFields, SX3->X3_CAMPO)
+				endif				
+				SX3->(DbSkip())
+			enddo 
+		endif
+	endif
+		
+	SX3->(DbSetOrder(2))
+	SX3->(DbGoTop())		
+	// Faz a contagem de campos no array
+	For nX := 1 to Len(aFields)
+		// posiciona sobre o campo
+		If SX3->(DbSeek(aFields[nX]))	
+			// adiciona as informações do campo para o getdados	  	
+			Aadd(aHeader, {AllTrim(X3Titulo()),SX3->X3_CAMPO,SX3->X3_PICTURE,SX3->X3_TAMANHO,SX3->X3_DECIMAL,SX3->X3_VALID,;
+				SX3->X3_USADO,SX3->X3_TIPO,SX3->X3_F3,SX3->X3_CONTEXT,SX3->X3_CBOX,SX3->X3_RELACAO})
+		Endif		  		  	
+	Next nX
+
+	
+	// Faz a contagem de campos no array
+/*	For nX := 1 to Len(aFields)
+		// Cria a variavel referente ao campo
+		If DbSeek(aFields[nX])
+			Aadd(aFieldFill, CriaVar(SX3->X3_CAMPO))
+		Endif
+				
+	Next nX*/
+		
+return
+
+method simuACols(aValores) class TSigaUTest
+//FillGetDados ( < nOpc>, < cAlias>, [ nOrder], [ cSeekKey], [ bSeekWhile], [ uSeekFor], [ aNoFields], [ aYesFields], [ lOnlyYes], [ cQuery], [ bMontCols], [ lEmpty], [ aHeaderAux], [ aColsAux], [ bAfterCols], [ bBeforeCols], [ bAfterHeader], [ cAliasQry], [ bCriaVar], [ lUserFields], [ aYesUsado] ) --> lRet
+	private aCols := {}
+	
+	for i := 1 to Len(aValores)
+	// adiciona linha a linha das tabelas
+		Aadd(aCols, aValores[i])
+		/*.f. -> Campo do delete do array GETDADOS*/
+	next																			
+Return
