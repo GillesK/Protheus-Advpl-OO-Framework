@@ -19,7 +19,7 @@ Classe de log dos testes
   	data logFile  	
 	
 	Method New() Constructor
-	Method writeLog()         
+//	Method writeLog()         
 	Method write()
 //	Method convert() 
 //	Method isExclu()
@@ -51,28 +51,6 @@ Constructor
 return  Self
 
 
-Method writeLog(sOrigin, nRegistro) Class TSUTLog          
-	local nHLogExec, lEnd, cLinhaLog
-	FErase(::logDir + 'templog.log')
-	MostraErro(::logDir, 'templog.log')  		
-					// Abrir arquivo
-	FWrite(::nHandle, "Registro: " + str(nRegistro)  + ENTER)   				
-	
-//				nHLogExec := FT_FUSE('c:\Download\importacaolog.log')
-	nHLogExec := FOpen(::logDir + 'templog.log')
-	lEnd := .F.
-	while !lEnd
-		cLinhaLog := FReadStr(nHLogExec, 100)					
-						
-		FWrite(::nHandle, cLinhaLog  )														
-		if (Len(cLinhaLog) < 100)
-			lEnd := .T.						
-		EndIf
-	EndDo						
-	FClose(nHLogExec)    
-					// Processar para botar no arquivo de log
-					// Numero de registro | Mensagem | Dado invalido  
-return         
 
 /*/{Protheus.doc} write
 Escreve na log. Uso interno
@@ -122,3 +100,27 @@ Method write(nome, dados, resultado, esperado, lRet) Class TSUTLog
 	FWrite(::nHandle, "   " + lRet  + ENTER)
 	FWrite(::nHandle, ENTER)			
 return
+
+
+/*Method writeLog(sOrigin, nRegistro) Class TSUTLog          
+	local nHLogExec, lEnd, cLinhaLog
+	FErase(::logDir + 'templog.log')
+	MostraErro(::logDir, 'templog.log')  		
+					// Abrir arquivo
+	FWrite(::nHandle, "Registro: " + str(nRegistro)  + ENTER)   				
+	
+//				nHLogExec := FT_FUSE('c:\Download\importacaolog.log')
+	nHLogExec := FOpen(::logDir + 'templog.log')
+	lEnd := .F.
+	while !lEnd
+		cLinhaLog := FReadStr(nHLogExec, 100)					
+						
+		FWrite(::nHandle, cLinhaLog  )														
+		if (Len(cLinhaLog) < 100)
+			lEnd := .T.						
+		EndIf
+	EndDo						
+	FClose(nHLogExec)    
+					// Processar para botar no arquivo de log
+					// Numero de registro | Mensagem | Dado invalido  
+return*/         
