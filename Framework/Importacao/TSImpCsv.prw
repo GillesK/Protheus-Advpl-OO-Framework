@@ -502,7 +502,7 @@ Method prepFiles() class TSImpCsv
 		Alert("Erro ao criar o arquivo " + logDir + logFile + " Erro: " + Str(Ferror()))
 		return .F.
 	Else   
-		FWrite(nHLog, dtoc(Date()) + " " + time() + " " + ::sArquivo + " " + ::sOption + " " + ENTER)   
+		FWrite(nHLog, dtoc(Date()) + " " + time() + " " + ::sArquivo +  " " + ENTER)   
 	EndIf                                       
 
 return .T.

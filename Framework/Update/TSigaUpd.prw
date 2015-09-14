@@ -205,7 +205,7 @@ If (lOpen := IIF(Alias() <> "SM0", ::MyOpenSm0Ex(), .T. ))
 					aRegsInd2 :=  ::formatA(aRegsInd)
 
 					for i := 1 to len(aRegsInd2)
-						cTexto += ::GeraSIX(aRegsInd2)
+						cTexto += ::GeraSIX(aRegsInd2[i])
 					next
 				endif
 			endif
@@ -225,7 +225,7 @@ If (lOpen := IIF(Alias() <> "SM0", ::MyOpenSm0Ex(), .T. ))
 					IncProc("Analisando Gatilhos...")
 					aRegsGat2 :=  ::formatA(aRegsGatilhos)
 					for i := 1 to len(aRegsGat2)
-						cTexto += ::GeraSX7(aRegsGat[i])
+						cTexto += ::GeraSX7(aRegsGat2[i])
 					next															
 				endif
 			endif						
@@ -506,7 +506,7 @@ return ('SX3 reord: ' + cTexto  + CHR(13) + CHR(10))
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 /*/
-Method GeraSIX(aRegs, sTabela)  class TSigaUpd
+Method GeraSIX(aRegs)  class TSigaUpd
 Local aArea 			:= GetArea()
 Local i      		:= 0
 Local j      		:= 0
@@ -515,10 +515,10 @@ Local cTexto 		:= ''
 Local lInclui		:= .F.
 local ciSeq := ""
 
-ciSeq  := ::sfSeqSIX(sTabela)
+ciSeq  := ::sfSeqSIX(aRegs[1][1])
 If !Empty(ciSeq)
 	for k:= 1 to len(aRegs)
-		ciSeqAtu	:=	::sfVerInd(sTabela,aRegs[k][3])
+		ciSeqAtu	:=	::sfVerInd(aRegs[1][1],aRegs[k][3])
 		ciSeq	:=	IIF(Empty(ciSeqAtu),Soma1(ciSeq,1,.T.),ciSeqAtu)
 		aRegs[k][2] := ciSeq
 		//AADD(aRegs,{"SD3",ciSeq,"D3_FILIAL+D3_XNROC+D3_XITEM+D3_XSEQ				
@@ -639,7 +639,7 @@ method sfSeqSX3(mvTabela) class TSigaUpd
 	Local aiAreaSX3		:= SX3->(GetARea())
 	Local ciAlias			:=	Padr(mvTabela,Len(SX3->X3_ARQUIVO),"")
 	
-	DBSeletArea("SX3")
+	DBSelectArea("SX3")
 	SX3->(DBSetOrder(1))//X3_ARQUIVO+X3_ORDEM
 	SX3->(DBGoTop())
 	If SX3->(DBSeek(ciAlias))
@@ -674,7 +674,7 @@ method sfSeqSX7(pCampo) class TSigaUpd
 	//Local ciAlias			:=	Padr(mvTabela,Len(SX3->X3_ARQUIVO),"")
 	local curCampo
 				
-	DBSeletArea("SX7")
+	DBSelectArea("SX7")
 	SX7->(DBSetOrder(1))
 	SX7->(DBGoTop())
 	If SX7->(DBSeek(pCampo))
@@ -709,7 +709,7 @@ method sfSeqSIX(mvTabela) class TSigaUpd
 	Local aiAreaSIX		:= SIX->(GetARea())
 	Local ciAlias			:=	Padr(mvTabela,Len(SIX->INDICE),"")
 	
-	DBSeletArea("SIX")
+	DBSelectArea("SIX")
 	SIX->(DBSetOrder(1))//INDICE+ORDEM
 	SIX->(DBGoTop())
 	If SIX->(DBSeek(ciAlias))
@@ -915,7 +915,7 @@ Method sfVerInd(mvTabela,mvChave) class TSigaUpd
 	Local ciAlias			:=	Padr(AllTrim(mvTabela),Len(SIX->INDICE)," ")
 	Local ciChave			:=	Padr(AllTrim(mvChave),Len(SIX->CHAVE)," ")
 	
-	DBSeletArea("SIX")
+	DBSelectArea("SIX")
 	SIX->(DBSetOrder(1))//INDICE+ORDEM
 	SIX->(DBGoTop())
 	If SIX->(DBSeek(ciAlias))
