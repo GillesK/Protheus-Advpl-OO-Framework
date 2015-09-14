@@ -31,7 +31,8 @@ EndClass
 Constructor
 @type method
 @param logDir, character, pasta (caminho absoluto) onde sera escrito o arquivo de log dos testes
-/*/Method New(logDir) Class TSUTLog
+/*/
+Method New(logDir) Class TSUTLog
 
 //	::logFile := logFile	  
 //	local cUserId := __cUserId	
