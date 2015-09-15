@@ -251,6 +251,7 @@ Method iniCampos() class TSProduto <br>
 return
 /*/
 method addCpoDef(aCampoDef)  class TSigaMDBas
+	local i
 	for i := 1 to Len(aCampoDef)	
 		// adicionar chave
 		aadd(aCampoDef[i], .F.)
@@ -272,6 +273,7 @@ Método permitindo definir as chaves. Deve ser chamado no método iniCampos()
 /*/
 method setChave(aChave)  class TSigaMDBas
 	local nPos
+	local i
 	::chave := aChave[1][2]
 	::chaves := aChave
 	for i := 1 to len(::chave)
@@ -395,6 +397,7 @@ method findAllByOrFail(index, pChave)  class TSigaMDBas
 	local cNewObj
 	local oNewObj
 	local lCont := .T.
+	local i, j
 	
 	if !Empty(pChave)
 		axArea := &(tabela)->(getarea())
@@ -632,6 +635,7 @@ return aRet
 method salvaRegistro(lIns, valChave)  class TSigaMDBas
 	local aRet := {.T., ""}
 	local tabela := ::tabela
+	local i
 	
 	dbselectarea(tabela)	
 	&(tabela)->(dbsetorder(1))
@@ -656,6 +660,7 @@ return aRet
 method isInsert(lIns, valChave) class TSigaMDBas
 	local aRet := {.T.,""}
 	local nPos
+	local i
 
 	lIns := .F.
 	valChave := ""
@@ -754,6 +759,7 @@ Retorna o vector de dados para chamar o ExecAuto
 @return array, array contendo os dados no formato esperado pela ExecAuto
 /*/
 method getEAVector() class TSigaMDBas
+	local i
 	local aVetor := {}
 	private lMsErroAuto := .F.
 	
@@ -767,6 +773,8 @@ method resExecAuto()   class TSigaMDBas
 	local aiRet := {.T., ""}
 	local ciText0
 	local aiErro
+	local niX
+	
 	If lMsErroAuto	
 		ciTexto		:=	" Erro Rotina Automática "+ Chr(13)+Chr(10)	
 		aiErro 		:= GetAutoGRLog()
@@ -846,7 +854,9 @@ return
 method getValKey(parentKey) class TSigaMDBas
 	local valChave := ""
 	local aRet := {.T., ""}
-	local cpoKey 
+	local cpoKey
+	local i
+	 
 	if parentKey == nil
 		cpoKey := ::chave
 	else
@@ -874,6 +884,8 @@ Preeche o objeto a partir da variavel de memoria M
 /*/
 method hydrateM() class  TSigaMDBas
 	local tipo
+	local i
+	
 	for i:= 1 to len(::campos)
 		tipo := Type(M->(&(self:campos[i][CPOTEC]))) 
 		//if tipo != "U" .And. tipo != "UE" .And. tipo != "UI"
@@ -894,6 +906,7 @@ method hydrateACols(paHeader, paCols) class  TSigaMDBas
 	local colObj
 	local oObj
 	local cCreate	
+	local j, i
 	
 	colObj := TSColecao():New()
 	for j := 1 to len(paCols)
@@ -1003,7 +1016,7 @@ Retorna um aHeader
 @return array, aHeader
 /*/
 method simulAHeader( aFlds, aNoCampos)    class  TSigaMDBas
-	local  curTab, nPos
+	local  curTab, nPos, nX
 	local aHeaderInt := {}
 	local axArea := SX3->(getarea())
 
@@ -1064,6 +1077,7 @@ Simula um aCols
 method simulACols(aValores)   class  TSigaMDBas
 //FillGetDados ( < nOpc>, < cAlias>, [ nOrder], [ cSeekKey], [ bSeekWhile], [ uSeekFor], [ aNoFields], [ aYesFields], [ lOnlyYes], [ cQuery], [ bMontCols], [ lEmpty], [ aHeaderAux], [ aColsAux], [ bAfterCols], [ bBeforeCols], [ bAfterHeader], [ cAliasQry], [ bCriaVar], [ lUserFields], [ aYesUsado] ) --> lRet
 	local aColsInt := {}
+	local i
 	
 	for i := 1 to Len(aValores)
 	// adiciona linha a linha das tabelas
