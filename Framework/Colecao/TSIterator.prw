@@ -64,7 +64,8 @@ Retorna .T. se posicinado no final da coleção
 /*/
 method eoc()  Class TSIterator
 	local xRet := .F.
-	if ::nCurr == ::oCol:length() + 1
+	local nLim := ::oCol:length() + 1
+	if ::nCurr == nLim
 		xRet := .T.
 	endif
 return xRet
@@ -100,7 +101,7 @@ Se posiciona no elemento seguinte da coleção
 @return mix, objeto da coleção ou nil se ja esta no final
 /*/
 method seguinte() Class TSIterator
-	if ::nCurr > ::length()
+	if ::nCurr > ::oCol:length()
 		return nil
 	endif
 	::nCurr += 1
@@ -112,7 +113,7 @@ Se posiciona e retorna o primeiro da coleção
 @return mix, retorna o primeiro da coleção ou nil se coleção vazia
 /*/
 method first() Class TSIterator
-	if ::length() == 0
+	if ::oCol:length() == 0
 		return nil
 	endif
 	::nCurr := 1
@@ -124,12 +125,15 @@ Se posiciona e retorna o ultimo da coleção
 @return mix, retorna o ultimo da coleção ou nil se coleção vazia
 /*/
 method last() Class TSIterator
-	if ::length() == 0
+	if ::oCol:length() == 0
 		return nil
 	endif
-	::nCurr := ::length()
+	::nCurr := ::oCol:length()
 return	::oCol:obter(::nCurr)
 
 
 method current() Class  TSIterator
+	if ::oCol:length() == 0
+		return nil
+	endif
 return ::oCol:obter(::nCurr)

@@ -94,4 +94,5 @@ method exec() class TTestSigaMDBas
 	oGp := oProd2:grupoProduto():obter()
 	Self:assert(Alltrim(oGp:valor('descricao')), "BENS DE CONSUMO MODIF")
 	
+	
 return

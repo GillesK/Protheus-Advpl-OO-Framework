@@ -65,8 +65,12 @@ Escreve na log. Uso interno
 /*/
 Method write(nome, dados, resultado, esperado, lRet) Class TSUTLog
 	local cTipo, res, esp 
-	FWrite(::nHandle, "Test: " + nome  + ENTER)
-	FWrite(::nHandle, "   input: " + dados  + ENTER)
+	if nome != nil
+		FWrite(::nHandle, "Test: " + nome  + ENTER)
+	endif
+	if dados != nil
+		FWrite(::nHandle, "   input: " + dados  + ENTER)
+	endif
 	if resultado == nil
 		resultado := "nil"
 	endif

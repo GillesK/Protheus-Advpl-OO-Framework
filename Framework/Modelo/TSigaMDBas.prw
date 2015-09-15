@@ -193,7 +193,14 @@ Deve ser informado no contrutor da classe filha
 	
 	method hydrateM()
 	method hydrateACols()
-	method all()		
+	method all()
+	method simulAHeader()
+	method simulACols()
+	method retCpoTec()
+	
+//	method RegToMemory()	
+	method getVar()
+	method setVar()
 EndClass
 
 /*/{Protheus.doc} New
@@ -836,7 +843,7 @@ method hasManyThrough() class TSigaMDBas
 return
  
 
- method getValKey(parentKey) class TSigaMDBas
+method getValKey(parentKey) class TSigaMDBas
 	local valChave := ""
 	local aRet := {.T., ""}
 	local cpoKey 
@@ -868,10 +875,10 @@ Preeche o objeto a partir da variavel de memoria M
 method hydrateM() class  TSigaMDBas
 	local tipo
 	for i:= 1 to len(::campos)
-		tipo := Type(M->&(::campos[i][CPOTEC])) 
-		if tipo != "U" .And. tipo != "UE" .And. tipo != "UI"
-			::campos[i][VALOR] := M->&(::campos[i][CPOTEC])
-		endif  
+		tipo := Type(M->(&(self:campos[i][CPOTEC]))) 
+		//if tipo != "U" .And. tipo != "UE" .And. tipo != "UI"
+			::campos[i][VALOR] := M->(&(self:campos[i][CPOTEC]))
+		//endif  
 	next 
 return
 
@@ -893,9 +900,9 @@ method hydrateACols(paHeader, paCols) class  TSigaMDBas
 		cCreate := GetClassName(Self) + "():New()"
 		oObj := &(cCreate)
 		for i := 1 to Len(paHeader)
-			nPos := ascan(oObj:campos, {|x| x[CPOTEC] == paHeader[i][2]})
+			nPos := ascan(oObj:campos, {|x| x[CPOTEC] == alltrim(paHeader[i][2])})
 			if nPos != 0
-				oObj:campos[nPos][VALOR] := paCols[j][paHeader[i][2]] 	
+				oObj:campos[nPos][VALOR] := paCols[j][i] 	
 			endif		
 		next
 		colObj:add(oObj)
@@ -935,3 +942,132 @@ method all() class  TSigaMDBas
 	
 	restarea(axArea)
 return colObj
+
+/*method RegToMemory()  class  TSigaMDBas
+//	local var 
+//	local nPos
+//	local xReturn := nil
+//	local cpoVar := ""
+// NAO FUNCIONA: AS VARIAVEIS DE MEMORIA SAO REINICIALIZADAS AO SAIR DO METODO		
+//	cpoVar := ::retCpoTec(campo)
+		
+	RegToMemory(::tabela, .F., .F., .F.)	
+return*/ 
+
+
+method getVar(campo)  class  TSigaMDBas
+//	local var 
+//	local nPos
+//	local xReturn := nil
+	local cpoVar := ""
+		
+	cpoVar := ::retCpoTec(campo)
+		
+return M->(&(cpoVar))
+
+
+method setVar(campo, valor)  class  TSigaMDBas
+//	local var 
+//	local nPos
+//	local xReturn := nil
+	local cpoVar := ""
+		
+	cpoVar := ::retCpoTec(campo)
+	
+	M->(&(cpoVar)) := valor 
+//	var := CriaVar(cpoVar)	
+return 
+
+
+method retCpoTec(campo)  class  TSigaMDBas
+	local nPos
+	local cpoVar := ""
+	
+	nPos := ascan(::campos, {|x| x[CPOPOR] == campo })
+	if nPos != 0
+		cpoVar :=  ::campos[nPos][CPOTEC]
+	else
+		nPos := ascan(::campos, {|x| x[CPOTEC] == campo })
+		if 	nPos != 0
+			cpoVar :=  ::campos[nPos][CPOTEC]
+		endif
+	endif
+return cpoVar
+
+/*/{Protheus.doc} simulAHeader
+Retorna um aHeader
+@type method
+@param tabela, character, Tabela
+@param aFields, array, Lista do campos a incluir no aHeader, se nil -> todos
+@param aNoCampos, array, Lista dos campos a ser excluidos do aHeader
+@return array, aHeader
+/*/
+method simulAHeader( aFlds, aNoCampos)    class  TSigaMDBas
+	local  curTab, nPos
+	local aHeaderInt := {}
+	local axArea := SX3->(getarea())
+
+	// Define os campos de acordo com o array
+	DbSelectArea("SX3")
+	
+	if ((aFlds == nil .And. aNoCampos == nil) .Or. (aNoCampos != nil)) 
+		aFlds := {}
+		SX3->(DbSetOrder(1))
+		SX3->(DbGoTop())
+		If SX3->(DbSeek(::tabela))
+			curTab := SX3->X3_ARQUIVO
+			while !SX3->(Eof()) .And. curTab == SX3->X3_ARQUIVO
+				nPos := 0
+				if aNoCampos != nil
+					nPos := ascan(aNoCampos, {|x| ::retCpoTec(x) == SX3->X3_CAMPO})
+				endif
+				if nPos == 0 
+					Aadd(aFlds, SX3->X3_CAMPO)
+				endif				
+				SX3->(DbSkip())
+			enddo 
+		endif
+	endif
+		
+	SX3->(DbSetOrder(2))
+	SX3->(DbGoTop())		
+	// Faz a contagem de campos no array
+	For nX := 1 to Len(aFlds)
+		// posiciona sobre o campo
+		cpoTec := ::retCpoTec(aFlds[nX])
+		If SX3->(DbSeek(cpoTec))	
+			// adiciona as informações do campo para o getdados	  	
+			Aadd(aHeaderInt, {AllTrim(X3Titulo()),SX3->X3_CAMPO,SX3->X3_PICTURE,SX3->X3_TAMANHO,SX3->X3_DECIMAL,SX3->X3_VALID,;
+				SX3->X3_USADO,SX3->X3_TIPO,SX3->X3_F3,SX3->X3_CONTEXT,SX3->X3_CBOX,SX3->X3_RELACAO})
+		Endif		  		  	
+	Next nX
+
+	restarea(axArea)
+	// Faz a contagem de campos no array
+/*	For nX := 1 to Len(aFields)
+		// Cria a variavel referente ao campo
+		If DbSeek(aFields[nX])
+			Aadd(aFieldFill, CriaVar(SX3->X3_CAMPO))
+		Endif
+				
+	Next nX*/
+		
+return aHeaderInt
+
+
+/*/{Protheus.doc} simuACols
+Simula um aCols
+@type method
+@param aValores, array, Valores a ser colocados no aCols, 1 linha por linha de aCols
+@return array, aCols
+/*/
+method simulACols(aValores)   class  TSigaMDBas
+//FillGetDados ( < nOpc>, < cAlias>, [ nOrder], [ cSeekKey], [ bSeekWhile], [ uSeekFor], [ aNoFields], [ aYesFields], [ lOnlyYes], [ cQuery], [ bMontCols], [ lEmpty], [ aHeaderAux], [ aColsAux], [ bAfterCols], [ bBeforeCols], [ bAfterHeader], [ cAliasQry], [ bCriaVar], [ lUserFields], [ aYesUsado] ) --> lRet
+	local aColsInt := {}
+	
+	for i := 1 to Len(aValores)
+	// adiciona linha a linha das tabelas
+		Aadd(aColsInt, aValores[i])
+		/*.f. -> Campo do delete do array GETDADOS*/
+	next																			
+Return aColsInt

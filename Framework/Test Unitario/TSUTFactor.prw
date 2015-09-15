@@ -66,6 +66,7 @@ Class TSUTFactor
 	data logDir
 	
 	data oLog
+	data tables
 	
 	//data codigo
 	
@@ -88,10 +89,11 @@ senha=xxxxxxx
 @param sEnvFile, character, caminha absoluto para o arquivo de definição de ambiente.
 @param sLogDir, character, Pasta onde vai ser escrito o arquivo de log
 /*/
-Method New(sEnvFile, sLogDir) Class TSUTFactor
+Method New(sEnvFile, sLogDir, cTables) Class TSUTFactor
 	::envFile := sEnvFile
 	::logDir := sLogDir
 	::oLog := TSUTLog():New(sLogDir)
+	::tables := cTables
 	// Read env File
 	self:readEnvFile(::envFile)	
 	self:prepEnv()
@@ -99,7 +101,7 @@ return (Self)
 
 
 Method prepEnv() class TSUTFactor
-	PREPARE ENVIRONMENT EMPRESA (self:empresa) FILIAL (self:filial) USER (self:usuario)  PASSWORD (self:senha) 
+	PREPARE ENVIRONMENT EMPRESA (self:empresa) FILIAL (self:filial) USER (self:usuario)  PASSWORD (self:senha) TABLES (self:tables)  
 	//PREPARE ENVIRONMENT EMPRESA (::oEnv:_EMPRESA:TEXT) FILIAL (::oEnv:_FILIAL:TEXT) USER (::oEnv:_USUARIO:TEXT)  PASSWORD (::oEnv:_SENHA:TEXT) TABLES (::oEnv:_TABLES:TEXT) MODULO (::oEnv:_MODULO:TEXT)	               	                                       
 	//PREPARE ENVIRONMENT EMPRESA (self:empresa) FILIAL (self:filial) USER (self:usuario)  PASSWORD (self:senha) TABLEA 'SA1' MODULO 'SIGAFAT' 
 return
