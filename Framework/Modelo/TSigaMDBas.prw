@@ -148,16 +148,22 @@ Deve ser informado no contrutor da classe filha
 	data execAuto
 
 	method New() Constructor
-	method findBy()
-	method find()	 
+	
 	method findByOrFail()
 	method findBOFFilial()		
 	method findOrFail()
-	method findOFFilial()		
+	method findOFFilial()
+	method findAllByOrFail()
+	method findAllOrFail()	
+				
 	method findAllBy() 
 	method findAll()
-	method findAllByOrFail()
-	method findAllOrFail()			
+	method findBy()
+	method find()
+
+	method findFilial()
+	method findByFilial()		 
+			
 	method valor()	
 	method salvar()
 	method deletar()
@@ -193,6 +199,8 @@ Deve ser informado no contrutor da classe filha
 	
 	method hydrateM()
 	method hydrateACols()
+	method hydratePos()
+		
 	method all()
 	method simulAHeader()
 	method simulACols()
@@ -338,6 +346,7 @@ method findByOrFail(index, pChave)  class TSigaMDBas
 return ::findBOFFilial(index, xFilial(::tabela), pChave) 
 
 
+
 /*/{Protheus.doc} findOrFail
 Procura uma entidade pela chave primaria representada pelo indice numero 1. 
 @type method
@@ -348,6 +357,22 @@ Method findOrFail(pChave) class TSigaMDBas
 return ::findByOrFail(1,pChave)
 
 
+method findByFilial(index, filial, pChave)  class TSigaMDBas
+//	local tabela := ::tabela
+//	local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao}
+	local aRet := nil 
+//	local axArea
+
+	aRet := ::findBOFFilial(index, filial, pChave)
+	if aRet[1]
+		aRet := aRet[2]
+	else 
+		aRet := nil 
+	endif
+
+return aRet
+
+
 /*/{Protheus.doc} findBy
 Procura uma entidade pela indexo definido no parametro Index.
 @type method
@@ -356,19 +381,7 @@ Procura uma entidade pela indexo definido no parametro Index.
 @return objeto, self ou nil se não encontrado
 /*/
 method findBy(index, pChave)  class TSigaMDBas
-//	local tabela := ::tabela
-//	local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao}
-	local aRet := nil 
-//	local axArea
-
-	aRet := ::findByOrFail(index, pChave)
-	if aRet[1]
-		aRet := aRet[2]
-	else 
-		aRet := nil 
-	endif
-
-return aRet
+return ::findByFilial(index, xFilial(::tabela), pChave)
 
 /*/{Protheus.doc} find
 Procura uma entidade pela chave primaria representada pelo indice numero 1. 
@@ -379,6 +392,9 @@ Procura uma entidade pela chave primaria representada pelo indice numero 1.
 Method find(pChave) class TSigaMDBas
 return ::findBy(1,pChave)
 
+
+Method findFilial(filial, pChave)  class TSigaMDBas
+return ::findByFilial(1, filial, pChave)
 
 /*/{Protheus.doc} findAllByOrFail
 Encontra todas as instancias representado pelo index e chave
@@ -887,9 +903,23 @@ method hydrateM() class  TSigaMDBas
 	local i
 	
 	for i:= 1 to len(::campos)
-		tipo := Type(M->(&(self:campos[i][CPOTEC]))) 
+		//tipo := Type(M->(&(self:campos[i][CPOTEC]))) 
 		//if tipo != "U" .And. tipo != "UE" .And. tipo != "UI"
 			::campos[i][VALOR] := M->(&(self:campos[i][CPOTEC]))
+		//endif  
+	next 
+return
+
+
+method hydratePos() class  TSigaMDBas
+	local tipo
+	local i
+	local sTabela := ::tabela
+	
+	for i:= 1 to len(::campos)
+//		tipo := Type(M->(&(self:campos[i][CPOTEC]))) 
+		//if tipo != "U" .And. tipo != "UE" .And. tipo != "UI"
+			::campos[i][VALOR] := &(sTabela)->(&(self:campos[i][CPOTEC]))
 		//endif  
 	next 
 return
