@@ -24,7 +24,9 @@
 
 
 /*/{Protheus.doc} TSHasMany
-Relação de tipo One To Many
+Relação de tipo One To Many.
+
+Herda de TSOneOMany
 @type class
 @author Gilles Koffmann - Sigaware Pb
 @since 03/09/2014

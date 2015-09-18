@@ -24,6 +24,8 @@
 
 
 /*/{Protheus.doc} TSBelongsTo
+Classe de relação "Pertence a".
+Herda de TSigaMDRel
 @type class
 @author Gilles Koffmann - Sigaware Pb
 @since 03/09/2014

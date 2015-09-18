@@ -24,7 +24,9 @@
 
 
 /*/{Protheus.doc} TSHasOne
-Relação de tipo One to One
+Relação de tipo One to One.
+
+Herda de TSOneOMany
 @type class
 @author Gilles Koffmann - Sigaware Pb
 @since 03/09/2014

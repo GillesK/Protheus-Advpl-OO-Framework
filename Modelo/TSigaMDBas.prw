@@ -858,6 +858,7 @@ return
 
 /*/{Protheus.doc} hasManyThrough
 (long_description)
+@type method
 @example
 (examples)
 @see (links_or_references)
@@ -911,7 +912,10 @@ method hydrateM() class  TSigaMDBas
 return
 
 
-method hydratePos() class  TSigaMDBas
+/*/{Protheus.doc} hydratePos
+Hydrata o modelo com o registro posicionado
+@type method
+/*/method hydratePos() class  TSigaMDBas
 	local tipo
 	local i
 	local sTabela := ::tabela
@@ -998,6 +1002,13 @@ return colObj
 return*/ 
 
 
+
+/*/{Protheus.doc} getVar
+retorna o valor do campo de memoria M->
+@type method
+@param campo, character, Nome do campo
+
+/*/
 method getVar(campo)  class  TSigaMDBas
 //	local var 
 //	local nPos
@@ -1009,7 +1020,12 @@ method getVar(campo)  class  TSigaMDBas
 return M->(&(cpoVar))
 
 
-method setVar(campo, valor)  class  TSigaMDBas
+/*/{Protheus.doc} setVar
+Atualiza a variavel de memoria M->
+@type method
+@param campo, character, Nome do campo
+@param valor, mix, Valor do campo
+/*/method setVar(campo, valor)  class  TSigaMDBas
 //	local var 
 //	local nPos
 //	local xReturn := nil
@@ -1022,7 +1038,12 @@ method setVar(campo, valor)  class  TSigaMDBas
 return 
 
 
-method retCpoTec(campo)  class  TSigaMDBas
+/*/{Protheus.doc} retCpoTec
+retorna o nome tecnico do campo
+@type method
+@param campo, character, Nome do campo
+@return character, nome técnico do campo
+/*/method retCpoTec(campo)  class  TSigaMDBas
 	local nPos
 	local cpoVar := ""
 	

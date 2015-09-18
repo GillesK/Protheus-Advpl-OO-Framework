@@ -9,13 +9,15 @@
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
-±±ºPrograma  ³ TSigaUpd   º Autor ³ Gilles Koffmann   º Data  ³  17/08/15   º±±
+±±ºPrograma  ³ TSigaUpd   º Autor ³ Gilles Koffmann   º Data  ³  17/08/15  º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
 ±±ºEmpresa   ³ Sigaware Pb ºE-Mail³ gilles@sigawarepb.com.br              º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºDescricao ³ Classe de compatibilizacao Protheus (criação/update no dicionario)		  º±±
-±±º          ³  Criado a partir da rotina Totvs HSPGERAT() (executado em formulas) e complementos  º±±
-±±º          ³  de handerson Duarte                                        º±±
+±±ºDescricao ³ Classe de compatibilizacao Protheus (criação/update 	     º±±
+±±º          ³  no dicionario)                                             º±±
+±±º          ³  Criado a partir da rotina Totvs HSPGERAT() (executado em   º±±
+±±º          ³  formulas) e complementos de Handerson Duarte              º±±
+±±º          ³                                          					º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
 ±±ºUso       ³ Framework Copyright Sigaware Pb                             º±±
 ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
@@ -24,11 +26,13 @@
 */
 
 /*/{Protheus.doc} TSigaUpd
-Calsse de execução de compatibilizador Protheus (mudança de estrutura de dicionario e base)
+Classe de execução de compatibilizador Protheus (mudança de estrutura de dicionario e base)
+para todas as empresas
+@type class
+@todo implantar a re-ordenação dos gatilhos
 @author Gilles Koffmann - Sigaware Pb
 @since 13/09/2015
 @version 1.0
-@type class
 /*/
 Class TSigaUpd
 	
@@ -68,9 +72,9 @@ Lança a execução do update de dicionario
 @type method
 @param aTab, array, Contendo os registros para criar tabelas SX2
 @param aCpo, array, Contendo os registros para criar campos SX3
-@param aCpoOrd, array, Contendo os registros para ordenar os campos, na forma {campo, campoAntes}
+@param aCpoOrd, array, Contendo os registros para ordenar os campos, na forma {campo, campo Antes}
 @param aIdx, array, Contendo os registros para criar os indexos SIX
-@param aGatDel, array, Contendo os registros para deletar gatilhos. naforma {campo, campo dominio}
+@param aGatDel, array, Contendo os registros para deletar gatilhos. na forma {campo, campo dominio}. É aconselhado colocar os deletes de gatilhos em um compatibilizador a parte
 @param aGat, array, Contendo os registros para criar os gatilhos SX7
 @param aGatOrd, array, Contendo os registros para ordenar os gatilhos
 /*/
@@ -89,12 +93,18 @@ method update(aTab , aCpo , aCpoOrd , aIdx , aGatDel , aGat, aGatOrd)  class TSi
 	lEmpenho				:= .F.
 	lAtuMnu					:= .F.
 	
-	Processa({|| ::ProcATU(aTab , aCpo , aCpoOrd , aIdx , aGatDel , aGat, aGatOrd)},"Processando []","Aguarde , processando preparação dos arquivos")	
+	Processa({|| ::ProcATU(aTab , aCpo , aCpoOrd , aIdx , aGatDel , aGat, aGatOrd)},"Processando compatibilizador","Aguarde , processando preparação dos arquivos")	
 return 
 
 
-method formatA(aRegs)   class TSigaUpd
+/*/{Protheus.doc} formatA
+Agrupa o array de entrada por entidade, SX3-> por tabela, SX7 -> por campo, SIX -> por tabela
+@type method
+@param aRegs, array, array a re-ordenar
+/*/
+method formatA(aRegs)  class TSigaUpd
 	local aRet := {}, cur, aNew
+	local i
 
 	ASORT(aRegs, , , { | x,y | x[1] < y[1] } )
 	
@@ -112,17 +122,18 @@ method formatA(aRegs)   class TSigaUpd
 return aRet
 
 
-/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
-±±³Fun‡…o    ³ProcATU   ³ Autor ³                       ³ Data ³  /  /    ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Descri‡…o ³ Funcao de processamento da gravacao dos arquivos           ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-±±³ Uso      ³ Baseado na funcao criada por Eduardo Riera em 01/02/2002   ³±±
-±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+/*/{Protheus.doc} ProcATU
+Execução do update 
+@type method
+@param aTab, array, Contendo os registros para criar tabelas SX2
+@param aCpo, array, Contendo os registros para criar campos SX3
+@param aCpoOrd, array, Contendo os registros para ordenar os campos, na forma {campo, campo Antes}
+@param aIdx, array, Contendo os registros para criar os indexos SIX
+@param aGatDel, array, Contendo os registros para deletar gatilhos. na forma {campo, campo dominio}. É aconselhado colocar os deletes de gatilhos em um compatibilizador a parte
+@param aGat, array, Contendo os registros para criar os gatilhos SX7
+@param aGatOrd, array, Contendo os registros para ordenar os gatilhos
+/*/
 method ProcATU(aRegsTab, aRegsCpo, aCpoOrd, aRegsInd, aGatDel, aRegsGatilhos, aGatOrd)  class TSigaUpd
 Local cTexto    	:= ""
 Local cFile     	:= ""
@@ -132,6 +143,7 @@ Local nI        	:= 0
 Local nX        	:= 0
 Local aRecnoSM0 	:= {}
 Local lOpen     	:= .F.
+local i
 
 ProcRegua(1)
 IncProc("Verificando integridade dos dicionários....")
@@ -277,162 +289,153 @@ EndIf
 Return(Nil)
 
 
-/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
-±±³Fun‡…o    ³MyOpenSM0Ex³ Autor ³Sergio Silveira       ³ Data ³07/01/2003³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Descri‡…o ³ Efetua a abertura do SM0 exclusivo                         ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-±±³ Uso      ³ Atualizacao FIS                                            ³±±
-±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+
+/*/{Protheus.doc} MyOpenSM0Ex
+Abertura do arquivo de empresas
+@type method
+
+/*/
 method MyOpenSM0Ex()  class TSigaUpd
 
-Local lOpen := .F.
-Local nLoop := 0
-
-For nLoop := 1 To 20
-	dbUseArea( .T.,, "SIGAMAT.EMP", "SM0", .F., .F. )
-	If !Empty( Select( "SM0" ) )
-		lOpen := .T.
-		dbSetIndex("SIGAMAT.IND")
-		Exit	
+	Local lOpen := .F.
+	Local nLoop := 0
+	
+	For nLoop := 1 To 20
+		dbUseArea( .T.,, "SIGAMAT.EMP", "SM0", .F., .F. )
+		If !Empty( Select( "SM0" ) )
+			lOpen := .T.
+			dbSetIndex("SIGAMAT.IND")
+			Exit	
+		EndIf
+		Sleep( 500 )
+	Next nLoop
+	
+	If !lOpen
+		Aviso( "Atencao !", "Nao foi possivel a abertura da tabela de empresas de forma exclusiva !", { "Ok" }, 2 )
 	EndIf
-	Sleep( 500 )
-Next nLoop
-
-If !lOpen
-	Aviso( "Atencao !", "Nao foi possivel a abertura da tabela de empresas de forma exclusiva !", { "Ok" }, 2 )
-EndIf
 
 Return( lOpen )
 
 
 
 
-/*/
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
-±±³Fun‡ao    ³ GeraSX2  ³ Autor ³ MICROSIGA             ³ Data ³   /  /   ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Descri‡ao ³ Funcao generica para copia de dicionarios                  ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Uso       ³ Generico                                                   ³±±
-±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/{Protheus.doc} GeraSX2
+Geração ou atualização dos registros de SX2
+@type method
+@param aRegs, array, registro de descrição de tabelas
 /*/
 Method GeraSX2(aRegs)  class TSigaUpd
-Local aArea 			:= GetArea()
-Local i      		:= 0
-Local j      		:= 0
-//Local aRegs  		:= {}
-Local cTexto 		:= ''
-Local lInclui		:= .F.
-
-//aRegs  := {}
-//AADD(aRegs,{"ZZZ","                                        ","ZZZ070  ","PRECOS FABRICA ANVISA         ","PRECOS FABRICA ANVISA         ","PRECOS FABRICA ANVISA         ","                                        ","C","E","E",00," ","                                                                                                                                                                                                                                                          "," ",00,"                                                                                                                                                                                                                                                              ","                              ","                              "})
-
-dbSelectArea("SX2")
-dbSetOrder(1)
-
-For i := 1 To Len(aRegs)
-
- dbSetOrder(1)
- lInclui := !DbSeek(aRegs[i, 1])
-
- cTexto += IIf( aRegs[i,1] $ cTexto, "", aRegs[i,1] + "\")
-
- RecLock("SX2", lInclui)
-  For j := 1 to FCount()
-   If j <= Len(aRegs[i])
-   	If allTrim(Field(j)) == "X2_ARQUIVO"
-   		aRegs[i,j] := SubStr(aRegs[i,j], 1, 3) + SM0->M0_CODIGO + "0"
-   	EndIf
-    If !lInclui .AND. AllTrim(Field(j)) == "X3_ORDEM"
-     Loop
-    Else
-     FieldPut(j,aRegs[i,j])
-    EndIf
-   Endif
-  Next
- MsUnlock()
-Next i
-
-
-RestArea(aArea)
+	Local aArea 			:= GetArea()
+	Local i      		:= 0
+	Local j      		:= 0
+	//Local aRegs  		:= {}
+	Local cTexto 		:= ''
+	Local lInclui		:= .F.
+	
+	//aRegs  := {}
+	//AADD(aRegs,{"ZZZ","                                        ","ZZZ070  ","PRECOS FABRICA ANVISA         ","PRECOS FABRICA ANVISA         ","PRECOS FABRICA ANVISA         ","                                        ","C","E","E",00," ","                                                                                                                                                                                                                                                          "," ",00,"                                                                                                                                                                                                                                                              ","                              ","                              "})
+	
+	dbSelectArea("SX2")
+	dbSetOrder(1)
+	
+	For i := 1 To Len(aRegs)
+	
+		dbSetOrder(1)
+	 	lInclui := !DbSeek(aRegs[i, 1])
+	
+	 	cTexto += IIf( aRegs[i,1] $ cTexto, "", aRegs[i,1] + "\")
+	
+		RecLock("SX2", lInclui)
+	  	For j := 1 to FCount()
+	   		If j <= Len(aRegs[i])
+	   			If allTrim(Field(j)) == "X2_ARQUIVO"
+	   				aRegs[i,j] := SubStr(aRegs[i,j], 1, 3) + SM0->M0_CODIGO + "0"
+	   			EndIf
+	    		/*If !lInclui .AND. AllTrim(Field(j)) == "X3_ORDEM"
+	     			Loop
+	    		Else*/
+	     		FieldPut(j,aRegs[i,j])
+	    		//EndIf
+	   		Endif
+	  	Next
+	 	MsUnlock()
+	 	
+	Next i
+	
+	RestArea(aArea)
 Return('SX2 : ' + cTexto  + CHR(13) + CHR(10))
-/*/
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
-±±³Fun‡ao    ³ GeraSX3  ³ Autor ³ MICROSIGA             ³ Data ³   /  /   ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Descri‡ao ³ Funcao generica para copia de dicionarios                  ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Uso       ³ Generico                                                   ³±±
-±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+
+
+
+/*/{Protheus.doc} GeraSX3
+Geração ou atualização dos registros de SX2
+@type method
+@param aRegs, array, registro de descrição de campos
+
 /*/
 method GeraSX3(aRegs)  class TSigaUpd
-Local aArea 			:= GetArea()
-Local i      		:= 0
-Local j      		:= 0
-//Local aRegs  		:= {}
-Local cTexto 		:= ''
-Local lInclui		:= .F.
-local ciSeq := ""
-
-ciSeq:= ::sfSeqSX3(aRegs[1][1])
-If !Empty(ciSeq)
-	for k:= 1 to len(aRegs)
-		ciSeq	:=	Soma1(ciSeq,2,.T.)
-		aRegs[k][2] := ciSeq
-	Next
-Endif
-
-dbSelectArea("SX3")
-dbSetOrder(1)
-
-For i := 1 To Len(aRegs)
-
- If(Ascan(aArqUpd, aRegs[i,1]) == 0)
- 	aAdd(aArqUpd, aRegs[i,1])
- EndIf
-
- dbSetOrder(2)
- lInclui := !DbSeek(aRegs[i, 3])
-
- cTexto += IIf( aRegs[i,1] $ cTexto, "", aRegs[i,1] + "\")
-
- RecLock("SX3", lInclui)
-  For j := 1 to FCount()
-   If j <= Len(aRegs[i])
-   	If allTrim(Field(j)) == "X2_ARQUIVO"
-   		aRegs[i,j] := SubStr(aRegs[i,j], 1, 3) + SM0->M0_CODIGO + "0"
-   	EndIf
-    If !lInclui .AND. AllTrim(Field(j)) == "X3_ORDEM"
-     Loop
-    Else
-     FieldPut(j,aRegs[i,j])
-    EndIf
-   Endif
-  Next
- MsUnlock()
-Next i
-
-
-RestArea(aArea)
+	Local aArea 			:= GetArea()
+	Local i      		:= 0
+	Local j      		:= 0
+	//Local aRegs  		:= {}
+	Local cTexto 		:= ''
+	Local lInclui		:= .F.
+	local ciSeq := ""
+	
+	ciSeq:= ::sfSeqSX3(aRegs[1][1])
+	If !Empty(ciSeq)
+		for k:= 1 to len(aRegs)
+			ciSeq	:=	Soma1(ciSeq,2,.T.)
+			aRegs[k][2] := ciSeq
+		Next
+	Endif
+	
+	dbSelectArea("SX3")
+	dbSetOrder(1)
+	
+	For i := 1 To Len(aRegs)
+	
+		If(Ascan(aArqUpd, aRegs[i,1]) == 0)
+	 		aAdd(aArqUpd, aRegs[i,1])
+	 	EndIf
+	
+	 	dbSetOrder(2)
+	 	lInclui := !DbSeek(aRegs[i, 3])
+	
+	 	cTexto += IIf( aRegs[i,1] $ cTexto, "", aRegs[i,1] + "\")
+	
+	 	RecLock("SX3", lInclui)
+	  	For j := 1 to FCount()
+	   		If j <= Len(aRegs[i])
+	   			/*If allTrim(Field(j)) == "X2_ARQUIVO"
+	   				aRegs[i,j] := SubStr(aRegs[i,j], 1, 3) + SM0->M0_CODIGO + "0"
+	   			EndIf*/
+	    		If !lInclui .AND. AllTrim(Field(j)) == "X3_ORDEM"
+	     			Loop
+	    		Else
+	     			FieldPut(j,aRegs[i,j])
+	    		EndIf
+	   		Endif
+	  	Next
+	 	MsUnlock()
+	Next i
+	
+	
+	RestArea(aArea)
 Return('SX3 : ' + cTexto  + CHR(13) + CHR(10))
 
 // reordenar campo
 // campo vai depois de outro campo
 // duas etapas insere o campo e realoca
 
+
+
+/*/{Protheus.doc} reordSx3
+reordenar os campos
+@type method
+@param pCampo, ${param_type}, Campo a mover
+@param pCpoAntes, ${param_type}, campo apos o qual o pCampo sera instalado
+/*/
 method reordSx3(pCampo, pCpoAntes) class TSigaUpd
 	local cOrdCpoAnt, cArquivo, cOrdCpo, curOrd, curArq, cpoTrat
 	local cTexto := ""
@@ -493,147 +496,127 @@ return ('SX3 reord: ' + cTexto  + CHR(13) + CHR(10))
 
 
 
-/*/
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
-±±³Fun‡ao    ³ GeraSIX  ³ Autor ³ MICROSIGA             ³ Data ³   /  /   ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Descri‡ao ³ Funcao generica para copia de dicionarios                  ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Uso       ³ Generico                                                   ³±±
-±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
-/*/
-Method GeraSIX(aRegs)  class TSigaUpd
-Local aArea 			:= GetArea()
-Local i      		:= 0
-Local j      		:= 0
-//Local aRegs  		:= {}
-Local cTexto 		:= ''
-Local lInclui		:= .F.
-local ciSeq := ""
-
-ciSeq  := ::sfSeqSIX(aRegs[1][1])
-If !Empty(ciSeq)
-	for k:= 1 to len(aRegs)
-		ciSeqAtu	:=	::sfVerInd(aRegs[1][1],aRegs[k][3])
-		ciSeq	:=	IIF(Empty(ciSeqAtu),Soma1(ciSeq,1,.T.),ciSeqAtu)
-		aRegs[k][2] := ciSeq
-		//AADD(aRegs,{"SD3",ciSeq,"D3_FILIAL+D3_XNROC+D3_XITEM+D3_XSEQ				
-	next	
-EndIf
-
-
-//aRegs  := {}
-//AADD(aRegs,{"ZZZ","1","ZZZ_FILIAL+ZZZ_EAN                                                                                                                                              ","Filial+Ean                                                            ","Filial+Ean                                                            ","Filial+Ean                                                            ","U","                                                                                                                                                                ","          ","S"})
-
-dbSelectArea("SIX")
-dbSetOrder(1)
-
-For i := 1 To Len(aRegs)
-
- If(Ascan(aArqUpd, aRegs[i,1]) == 0)
- 	aAdd(aArqUpd, aRegs[i,1])
- EndIf
-
- dbSetOrder(1)
- lInclui := !DbSeek(aRegs[i, 1] + aRegs[i, 2])
- If !lInclui
-  TcInternal(60,RetSqlName(aRegs[i, 1]) + "|" + RetSqlName(aRegs[i, 1]) + aRegs[i, 2])
- Endif
-
- cTexto += IIf( aRegs[i,1] $ cTexto, "", aRegs[i,1] + "\")
-
- RecLock("SIX", lInclui)
-  For j := 1 to FCount()
-   If j <= Len(aRegs[i])
-   	If allTrim(Field(j)) == "X2_ARQUIVO"
-   		aRegs[i,j] := SubStr(aRegs[i,j], 1, 3) + SM0->M0_CODIGO + "0"
-   	EndIf
-    If !lInclui .AND. AllTrim(Field(j)) == "X3_ORDEM"
-     Loop
-    Else
-     FieldPut(j,aRegs[i,j])
-    EndIf
-   Endif
-  Next
- MsUnlock()
-Next i
-
-
-RestArea(aArea)
+/*/{Protheus.doc} GeraSIX
+Geração ou atualização dos registros de SIX
+@type method
+@param aRegs, array, registro de indices
+/*/Method GeraSIX(aRegs)  class TSigaUpd
+	Local aArea 			:= GetArea()
+	Local i      		:= 0
+	Local j      		:= 0
+	local k
+	//Local aRegs  		:= {}
+	Local cTexto 		:= ''
+	Local lInclui		:= .F.
+	local ciSeq := ""
+	
+	ciSeq  := ::sfSeqSIX(aRegs[1][1])
+	If !Empty(ciSeq)
+		for k:= 1 to len(aRegs)
+			ciSeqAtu	:=	::sfVerInd(aRegs[1][1],aRegs[k][3])
+			ciSeq	:=	IIF(Empty(ciSeqAtu),Soma1(ciSeq,1,.T.),ciSeqAtu)
+			aRegs[k][2] := ciSeq
+			//AADD(aRegs,{"SD3",ciSeq,"D3_FILIAL+D3_XNROC+D3_XITEM+D3_XSEQ				
+		next	
+	EndIf
+	
+	
+	//aRegs  := {}
+	//AADD(aRegs,{"ZZZ","1","ZZZ_FILIAL+ZZZ_EAN                                                                                                                                              ","Filial+Ean                                                            ","Filial+Ean                                                            ","Filial+Ean                                                            ","U","                                                                                                                                                                ","          ","S"})
+	
+	dbSelectArea("SIX")
+	dbSetOrder(1)
+	
+	For i := 1 To Len(aRegs)
+	
+		If(Ascan(aArqUpd, aRegs[i,1]) == 0)
+	 		aAdd(aArqUpd, aRegs[i,1])
+	 	EndIf
+	
+	 	dbSetOrder(1)
+	 	lInclui := !DbSeek(aRegs[i, 1] + aRegs[i, 2])
+	 	If !lInclui
+	  		TcInternal(60,RetSqlName(aRegs[i, 1]) + "|" + RetSqlName(aRegs[i, 1]) + aRegs[i, 2])
+	 	Endif
+	
+	 	cTexto += IIf( aRegs[i,1] $ cTexto, "", aRegs[i,1] + "\")
+	
+	 	RecLock("SIX", lInclui)
+	  	For j := 1 to FCount()
+	   		If j <= Len(aRegs[i])
+	//   	If allTrim(Field(j)) == "X2_ARQUIVO"
+	//   		aRegs[i,j] := SubStr(aRegs[i,j], 1, 3) + SM0->M0_CODIGO + "0"
+	//   	EndIf
+	//    If !lInclui .AND. AllTrim(Field(j)) == "X3_ORDEM"
+	//     Loop
+	//    Else
+	     		FieldPut(j,aRegs[i,j])
+	//    EndIf
+		   Endif
+	  	Next
+	 	MsUnlock()
+	Next i
+	
+	
+	RestArea(aArea)
 Return('SIX : ' + cTexto  + CHR(13) + CHR(10))
-/*/
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
-±±³Fun‡ao    ³ GeraSXB  ³ Autor ³ MICROSIGA             ³ Data ³   /  /   ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Descri‡ao ³ Funcao generica para copia de dicionarios                  ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Uso       ³ Generico                                                   ³±±
-±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
-/*/
-Method GeraSXB(aRegs) class TSigaUpd
-Local aArea 			:= GetArea()
-Local i      		:= 0
-Local j      		:= 0
-//Local aRegs  		:= {}
-Local cTexto 		:= ''
-Local lInclui		:= .F.
-
-//aRegs  := {}
-//AADD(aRegs,{"      "," ","  ","  ","Nome                ","Nombre              ","Name                ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "})
-
-dbSelectArea("SXB")
-dbSetOrder(1)
-
-For i := 1 To Len(aRegs)
-
- dbSetOrder(1)
- lInclui := !DbSeek(aRegs[i, 1] + aRegs[i, 2] + aRegs[i, 3] + aRegs[i, 4])
-
- cTexto += IIf( aRegs[i,1] $ cTexto, "", aRegs[i,1] + "\")
-
- RecLock("SXB", lInclui)
-  For j := 1 to FCount()
-   If j <= Len(aRegs[i])
-   	If allTrim(Field(j)) == "X2_ARQUIVO"
-   		aRegs[i,j] := SubStr(aRegs[i,j], 1, 3) + SM0->M0_CODIGO + "0"
-   	EndIf
-    If !lInclui .AND. AllTrim(Field(j)) == "X3_ORDEM"
-     Loop
-    Else
-     FieldPut(j,aRegs[i,j])
-    EndIf
-   Endif
-  Next
- MsUnlock()
-Next i
 
 
-RestArea(aArea)
+
+
+/*/{Protheus.doc} GeraSXB
+Geração de SXB
+@type method
+@todo Não testado - Testar
+@param aRegs, array, Registro de SXB
+/*/Method GeraSXB(aRegs) class TSigaUpd
+	Local aArea 			:= GetArea()
+	Local i      		:= 0
+	Local j      		:= 0
+	//Local aRegs  		:= {}
+	Local cTexto 		:= ''
+	Local lInclui		:= .F.
+	
+	//aRegs  := {}
+	//AADD(aRegs,{"      "," ","  ","  ","Nome                ","Nombre              ","Name                ","                                                                                                                                                                                                                                                          ","                                                                                                                                                                                                                                                          "})
+	
+	dbSelectArea("SXB")
+	dbSetOrder(1)
+	
+	For i := 1 To Len(aRegs)
+	
+	 	dbSetOrder(1)
+	 	lInclui := !DbSeek(aRegs[i, 1] + aRegs[i, 2] + aRegs[i, 3] + aRegs[i, 4])
+	
+	 	cTexto += IIf( aRegs[i,1] $ cTexto, "", aRegs[i,1] + "\")
+	
+	 	RecLock("SXB", lInclui)
+	  	For j := 1 to FCount()
+	   		If j <= Len(aRegs[i])
+	//   	If allTrim(Field(j)) == "X2_ARQUIVO"
+	//   		aRegs[i,j] := SubStr(aRegs[i,j], 1, 3) + SM0->M0_CODIGO + "0"
+	//   	EndIf
+	//    If !lInclui .AND. AllTrim(Field(j)) == "X3_ORDEM"
+	//     Loop
+	//    Else
+	     		FieldPut(j,aRegs[i,j])
+	//    EndIf
+	   		Endif
+	  	Next
+	 	MsUnlock()
+	Next i
+	
+	
+	RestArea(aArea)
 Return('SXB : ' + cTexto  + CHR(13) + CHR(10))
 
 
-/*/
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
-±±³Fun‡ao    ³ sfSeqSX3  ³ Autor ³ MICROSIGA             ³ Data ³   /  /   ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Descri‡ao ³ Captura a Ultima Sequencia da Ordem da Tabela para Gravas o Campo    ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Uso       ³ Generico                                                   ³±±
-±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
-/*/
-method sfSeqSX3(mvTabela) class TSigaUpd 
+
+/*/{Protheus.doc} sfSeqSX3
+Encontra a ultima sequencia da tabela
+@type method
+@param mvTabela, character, tabela
+/*/method sfSeqSX3(mvTabela) class TSigaUpd 
 	Local ciRet			:=	""
 	Local aiArea 			:= GetArea()
 	Local aiAreaSX3		:= SX3->(GetARea())
@@ -654,20 +637,11 @@ method sfSeqSX3(mvTabela) class TSigaUpd
 Return (ciRet)
 
 
-/*/
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
-±±³Fun‡ao    ³ sfSeqSX7  ³ Autor ³ MICROSIGA             ³ Data ³   /  /   ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Descri‡ao ³ Captura a Ultima Sequencia da Ordem da Tabela para Gravas os Gatilhos    ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Uso       ³ Generico                                                   ³±±
-±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
-/*/
-method sfSeqSX7(pCampo) class TSigaUpd 
+/*/{Protheus.doc} sfSeqSX7
+Encontra a ultima sequencia do gatilho
+@type method
+@param pCampo, ${param_type}, campo do gatilho
+/*/method sfSeqSX7(pCampo) class TSigaUpd 
 	Local ciRet			:=	""
 //	Local aiArea 			:= GetArea()
 	Local aiAreaSX7		:= SX7->(GetArea())
@@ -690,20 +664,11 @@ method sfSeqSX7(pCampo) class TSigaUpd
 Return (ciRet)
 
 
-/*/
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
-±±³Fun‡ao    ³ sfSeqSIX  ³ Autor ³ MICROSIGA             ³ Data ³   /  /   ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Descri‡ao ³ Captura a Ultima Sequencia da Ordem da Tabela para Gravas o Índice    ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Uso       ³ Generico                                                   ³±±
-±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
-/*/
-method sfSeqSIX(mvTabela) class TSigaUpd
+/*/{Protheus.doc} sfSeqSIX
+Encontra a ultima sequencia do indexo
+@type method
+@param mvTabela, character, tabela
+/*/method sfSeqSIX(mvTabela) class TSigaUpd
 	Local ciRet			:=	""
 	Local aiArea 			:= GetArea()
 	Local aiAreaSIX		:= SIX->(GetARea())
@@ -723,93 +688,82 @@ method sfSeqSIX(mvTabela) class TSigaUpd
 	RestArea(aiAreaSIX)
 Return (ciRet)
 
-/*/
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
-±±³Fun‡ao    ³ GeraSX7  ³ Autor ³ MICROSIGA             ³ Data ³   /  /   ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Descri‡ao ³ Funcao generica para copia de dicionarios                  ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Uso       ³ Generico                                                   ³±±
-±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+
+
+
+/*/{Protheus.doc} GeraSX7
+Gera ou atualiza gatilhos
+@type method
+@param aRegs, array, contendo a definição dos gatilhos
 /*/
 Method GeraSX7(aRegs) class TSigaUpd
-Local aArea 			:= GetArea()
-Local i      		:= 0
-Local j      		:= 0
-//Local aRegs  		:= {}
-Local cTexto 		:= ''
-Local lInclui		:= .F.
-
-ciSeq:= ::sfSeqSX7(aRegs[1][1])
-If !Empty(ciSeq)
-	for k:= 1 to len(aRegs)
-		ciSeq	:=	Soma1(ciSeq)
-		aRegs[k][2] := ciSeq
-	Next
-Endif
-
-//aRegs  := {}
-//AADD(aRegs,{"Z03_PROD  ","001","LEFT(SB1->B1_DESC,50)                                                                               ","Z03_DESPRO","P","S","SB1",01,"xFilial('SB1')+M->Z03_PROD                                                                          ","                                        ","U"})
-
-dbSelectArea("SX7")
-dbSetOrder(1)
-
-For i := 1 To Len(aRegs)
-
+	Local aArea 			:= GetArea()
+	Local i      		:= 0
+	Local j      		:= 0
+	local k
+	//Local aRegs  		:= {}
+	Local cTexto 		:= ''
+	Local lInclui		:= .F.
+	
+	ciSeq:= ::sfSeqSX7(aRegs[1][1])
+	If !Empty(ciSeq)
+		for k:= 1 to len(aRegs)
+			ciSeq	:=	Soma1(ciSeq)
+			aRegs[k][2] := ciSeq
+		Next
+	Endif
+	
+	//aRegs  := {}
+	//AADD(aRegs,{"Z03_PROD  ","001","LEFT(SB1->B1_DESC,50)                                                                               ","Z03_DESPRO","P","S","SB1",01,"xFilial('SB1')+M->Z03_PROD                                                                          ","                                        ","U"})
+	
+	dbSelectArea("SX7")
 	dbSetOrder(1)
- 	lInclui := !DbSeek(aRegs[i, 1] + aRegs[i, 2])
-
- 	cTexto += IIf( aRegs[i,1] $ cTexto, "", aRegs[i,1] + "\")
-
-	RecLock("SX7", lInclui)
-  	For j := 1 to FCount()
-   		If j <= Len(aRegs[i])
-   			If allTrim(Field(j)) == "X2_ARQUIVO"
-   				aRegs[i,j] := SubStr(aRegs[i,j], 1, 3) + SM0->M0_CODIGO + "0"
-   			EndIf
-    		If !lInclui .AND. AllTrim(Field(j)) == "X7_SEQUENC"
-     			Loop
-    		Else
-     		FieldPut(j,aRegs[i,j])
-    		EndIf
-   		Endif
-  	Next
- 	MsUnlock()
-Next i
-
-
-RestArea(aArea)
+	
+	For i := 1 To Len(aRegs)
+	
+		dbSetOrder(1)
+	 	lInclui := !DbSeek(aRegs[i, 1] + aRegs[i, 2])
+	
+	 	cTexto += IIf( aRegs[i,1] $ cTexto, "", aRegs[i,1] + "\")
+	
+		RecLock("SX7", lInclui)
+	  	For j := 1 to FCount()
+	   		If j <= Len(aRegs[i])
+	   			//If allTrim(Field(j)) == "X2_ARQUIVO"
+	   				//aRegs[i,j] := SubStr(aRegs[i,j], 1, 3) + SM0->M0_CODIGO + "0"
+	   			//EndIf
+	    		If !lInclui .AND. AllTrim(Field(j)) == "X7_SEQUENC"
+	     			Loop
+	    		Else
+	     			FieldPut(j,aRegs[i,j])
+	    		EndIf
+	   		Endif
+	  	Next
+	 	MsUnlock()
+	Next i
+	
+	RestArea(aArea)
 Return('SX7 : ' + cTexto  + CHR(13) + CHR(10))
 
 
-/*/
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
-±±³Fun‡ao    ³ DelSX7  ³ Autor ³ MICROSIGA             ³ Data ³   /  /   ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Descri‡ao ³ Funcao generica para deletar SX7			                  ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Uso       ³ Generico                                                   ³±±
-±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+
+
+/*/{Protheus.doc} DelSX7
+Deleta certos gatilhos
+@type method
+@param aRegs, array, na forma {campo, campo dominio}
 /*/
 Method DelSX7(aRegs) class TSigaUpd
-Local aArea 			:= GetArea()
-Local k      		:= 0
-//Local j      		:= 0
-//Local aRegs  		:= {}
-Local cTexto 		:= ''
-//Local lInclui		:= .F.
-local curCampo
-local cOrdCur
-local aCpoTrat := {}
-local nPos
+	Local aArea 			:= GetArea()
+	Local k      		:= 0
+	//Local j      		:= 0
+	//Local aRegs  		:= {}
+	Local cTexto 		:= ''
+	//Local lInclui		:= .F.
+	local curCampo
+	local cOrdCur
+	local aCpoTrat := {}
+	local nPos
 
 // Indentificação de um gatilho
 // X7_CAMPO, X7_CDOMIN
@@ -855,15 +809,22 @@ local nPos
 Return('SX7 : ' + cTexto  + CHR(13) + CHR(10))
 
 
+
+
+/*/{Protheus.doc} reordSX7
+Reordenar os gatilhos. Tira os buracos da sequencia
+@type method
+@param aRegs, array, (Descrição do parâmetro)
+/*/
 method reordSX7(aRegs)  class TSigaUpd
-Local aArea 			:= GetArea()
-Local k      		:= 0
-//Local j      		:= 0
-//Local aRegs  		:= {}
-Local cTexto 		:= ''
-//Local lInclui		:= .F.
-local curCampo
-local cOrdCur
+	Local aArea 			:= GetArea()
+	Local k      		:= 0
+	//Local j      		:= 0
+	//Local aRegs  		:= {}
+	Local cTexto 		:= ''
+	//Local lInclui		:= .F.
+	local curCampo
+	local cOrdCur
 
 // re-ordenação
 //	cOrdCur := '001'
@@ -895,18 +856,15 @@ local cOrdCur
 	RestArea(aArea)
 return
 
-/*/
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
-±±³Fun‡ao    ³ sfVerInd  ³ Autor ³ MICROSIGA             ³ Data ³   /  /   ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Descri‡ao ³ Verifica se a Chave do Índice já existe ou não    ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Uso       ³ Generico                                                   ³±±
-±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+
+
+
+/*/{Protheus.doc} sfVerInd
+Verifica se o Indice mudou
+@type method
+@param mvTabela, character, tabela
+@param mvChave, character, a chave do indice sendo procurado
+@return character, valor da chave quando encontrada, vazio se não
 /*/
 Method sfVerInd(mvTabela,mvChave) class TSigaUpd
 	Local ciRet			:=	""

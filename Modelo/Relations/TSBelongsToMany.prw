@@ -24,7 +24,11 @@
 
 
 /*/{Protheus.doc} TSBelongsToMany
+Classe de relação Many to Many.
+
+Herda de TSigaMDRel
 @type class
+@todo implantar
 @author Gilles Koffmann - Sigaware Pb
 @since 03/09/2014
 @version 1.0

@@ -32,6 +32,7 @@ São facultativos os métodos tratEspec(), prepTits() e as propiedades ::nLinCol e
 
 Herda de TSImpCsv
 @type class
+@todo classe incompleta não testada
 @author Gilles Koffmann - Sigaware Pb
 @since 12/10/2013
 @version 1.2
