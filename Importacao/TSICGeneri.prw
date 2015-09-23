@@ -46,6 +46,11 @@ Class TSICGeneri From TSImpCsv
 EndClass
 
 
+/*/{Protheus.doc} New
+Constructor
+@param pTable, character, Tabela a ser importada
+@param sArquivo, character, Caminho absoluto para o arquivo csv
+/*/
 method New(pTable, sArquivo) class TSICGeneri
 	_Super:New(sArquivo)
 	::sTable := pTable

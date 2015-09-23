@@ -293,7 +293,6 @@ Return(Nil)
 /*/{Protheus.doc} MyOpenSM0Ex
 Abertura do arquivo de empresas
 @type method
-
 /*/
 method MyOpenSM0Ex()  class TSigaUpd
 

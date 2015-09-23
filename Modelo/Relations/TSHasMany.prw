@@ -38,7 +38,7 @@ Class TSHasMany From TSOneOMany
 EndClass
 
 
-method New(parent, relatedType, foreignKey, indexOtherKey) class TSHasMany
-	_Super:New(parent, relatedType, foreignKey, indexOtherKey)
+method New(parent, relatedType, foreignKey, numCpoFk, indexOtherKey) class TSHasMany
+	_Super:New(parent, relatedType, foreignKey, numCpoFk, indexOtherKey)
 	
 return  (Self)

@@ -40,6 +40,8 @@ Class TSColecao
 	method reset()
 	method obter()		
 	method getIterator()
+	method find()
+	method sort()	
 EndClass 
 
 
@@ -90,3 +92,22 @@ Retorna o tamanho da coleção
 /*/
 method length() Class TSColecao	
 return len(::aCol)
+
+/*/{Protheus.doc} find
+Encontrar um elemento na coleção
+@type method
+@param bCode, blóco de codigo, Mesma forma que para ascan
+/*/
+method find(bCode)  Class TSColecao	
+return ascan(::aCol, bCode)
+
+
+/*/{Protheus.doc} sort
+Sort
+@type method
+@param nNum1, numérico, (Descrição do parâmetro)
+@param nNum2, numérico, (Descrição do parâmetro)
+@param bCode, booleano, (Descrição do parâmetro)
+/*/
+method sort(nNum1, nNum2, bCode) Class TSColecao
+return asort(::aCol, nNum1, nNum2, bCode)
