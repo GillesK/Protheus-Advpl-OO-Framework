@@ -85,7 +85,7 @@ method exec() class TTestSigaMDBas
 	
 	// Produto -> Findall by grupo de produto
 	oProd := TSProduto():New()
-	oColProd := oProd:findAllBy(4, '0200')
+	oColProd := oProd:findAll( '0200', 4)
 	Self:assert(oColProd:length(), 38)
 		 
 	// navegar de produto para grupo de produto

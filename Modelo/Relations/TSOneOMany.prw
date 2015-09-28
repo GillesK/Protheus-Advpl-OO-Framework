@@ -67,12 +67,12 @@ Construtor
 Method produto() class TEGrupoTributario <br>
 return TSHasMany():New(self, "TSProduto", {"B1_GRTRIB"}, nil) <br>	
 /*/
-method New(parent, relatedType, indexFk, numCpoFk, localKey) class TSOneOMany
+method New(parent, relatedType, indexFk, localKey) class TSOneOMany
 	_Super:New(parent, relatedType)
 	
 	::indexFk := indexFk
 	::localKey := localKey	
-	::numCpoFk := numCpoFk
+	::numCpoFk := len(localKey) + 1
 return  (Self)
 
 /*/{Protheus.doc} obterOrFail
@@ -86,7 +86,7 @@ method obterOrFail() class TSOneOMany
 	local lk := Self:localKey
 	xRet := pai:getValKey(lk)
 	if xRet[1]
-		xRet := self:related:findAllBOFCpo(::indexFk, ::numCpoFk, xRet[2])
+		xRet := self:related:findAllOrFail(  xRet[2], ::indexFk, ::numCpoFk)
 	endif	
 return xRet
 

@@ -149,22 +149,24 @@ Deve ser informado no contrutor da classe filha
 
 	method New() Constructor
 	
-	method findByOrFail()
-	method findBOFFilial()		
+///	method findByOrFail()
 	method findOrFail()
-	method findOFFilial()
-	
-	method findAllBOFCpo(index, numCpo, pChave)	
-	method findAllByOrFail()
-	method findAllOrFail()	
-				
-	method findAllBy() 
-	method findAll()
-	method findBy()
 	method find()
+			
+//	method findBOFFilial()			
+//	method findOFFilial()
+	
+//	method findAllBOFCpo(index, numCpo, pChave)	
+///	method findAllByOrFail()
+	method findAllOrFail()	
+	method findAll()
+					
+///	method findAllBy() 
+///	method findBy()
 
-	method findFilial()
-	method findByFilial()		 
+
+//	method findFilial()
+//	method findByFilial()		 
 			
 	method valor()	
 	method salvar()
@@ -294,20 +296,27 @@ method setChave(aChave)  class TSigaMDBas
 	next 
 return
 
-/*/{Protheus.doc} findBOFFilial
-Procura uma entidade pela indexo definido no parametro Index e a filial
+
+/*/{Protheus.doc} findOrfail
+Procura uma entidade pela indexo definido no parametro Index
 @type method
+@param pChave, character, valor da chave de busca
 @param index, numérico, Numero do indexo no Protheus
 @param filial, character, Filial
-@param pChave, character, valor da chave de busca
 @return array, {lRet, oObj} lRet: .T. se encontrou com oObj = self, .F. se não, oObj : Mensagem de erro
 /*/
-method findBOFFilial(index, filial, pChave)  class TSigaMDBas
+method findOrFail(pChave, index, filial)  class TSigaMDBas
 	local tabela := ::tabela
 	local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao} 
 	local axArea
 	
 	if !Empty(pChave)
+		if filial == nil
+			filial := xFilial(::tabela)
+		endif
+		if index == nil
+			index := 1
+		endif
 		axArea := &(tabela)->(getarea())
 		dbselectarea(::tabela)
 		&(tabela)->(dbsetorder(index))
@@ -325,27 +334,8 @@ method findBOFFilial(index, filial, pChave)  class TSigaMDBas
 		self:resetCampos()
 		aRet := {.F., ::entidade + " resetado: chave vazia"}
 	endif	
-return aRet
 
-/*/{Protheus.doc} findOFFilial
-Procura uma entidade pela chave primaria representada pelo indice numero 1 e filial 
-@type method
-@param filial, character, Filial
-@param pChave, character, chave de acesso a entidade
-@return array, {lRet, oObj} lRet: .T. se encontrou com oObj = self, .F. se não, oObj : Mensagem de erro 
-/*/
-Method findOFFilial(filial, pChave) class TSigaMDBas
-return ::findBOFFilial(1,filial, pChave)
-
-/*/{Protheus.doc} findByOrfail
-Procura uma entidade pela indexo definido no parametro Index
-@type method
-@param index, numérico, Numero do indexo no Protheus
-@param pChave, character, valor da chave de busca
-@return array, {lRet, oObj} lRet: .T. se encontrou com oObj = self, .F. se não, oObj : Mensagem de erro
-/*/
-method findByOrFail(index, pChave)  class TSigaMDBas
-return ::findBOFFilial(index, xFilial(::tabela), pChave) 
+return aRet 
 
 
 
@@ -353,26 +343,29 @@ return ::findBOFFilial(index, xFilial(::tabela), pChave)
 Procura uma entidade pela chave primaria representada pelo indice numero 1. 
 @type method
 @param pChave, character, chave de acesso a entidade
+@param filial, character, Filial
 @return array, {lRet, oObj} lRet: .T. se encontrou com oObj = self, .F. se não, oObj : Mensagem de erro 
 /*/
-Method findOrFail(pChave) class TSigaMDBas
-return ::findByOrFail(1,pChave)
+//Method findOrFail(pChave, filial) class TSigaMDBas
+//return ::findByOrFail(1,pChave, filial)
 
 
-/*/{Protheus.doc} findByFilial
-(long_description)
+
+/*/{Protheus.doc} find
+Procura uma entidade pela indexo definido no parametro Index.
 @type method
+@param pChave, character, valor da chave de busca
 @param index, numérico, Numero do indexo no Protheus
-@param filial,  character, Filial
-@param pChave,  character, chave de acesso a entidade
+@param filial, character, Filial
+@return objeto, self ou nil se não encontrado
 /*/
-method findByFilial(index, filial, pChave)  class TSigaMDBas
+method find(pChave,index, filial)  class TSigaMDBas
 //	local tabela := ::tabela
 //	local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao}
 	local aRet := nil 
 //	local axArea
 
-	aRet := ::findBOFFilial(index, filial, pChave)
+	aRet := ::findOrFail(pChave, index, filial)
 	if aRet[1]
 		aRet := aRet[2]
 	else 
@@ -380,17 +373,7 @@ method findByFilial(index, filial, pChave)  class TSigaMDBas
 	endif
 
 return aRet
-
-
-/*/{Protheus.doc} findBy
-Procura uma entidade pela indexo definido no parametro Index.
-@type method
-@param index, numérico, Numero do indexo no Protheus
-@param pChave, character, valor da chave de busca
-@return objeto, self ou nil se não encontrado
-/*/
-method findBy(index, pChave)  class TSigaMDBas
-return ::findByFilial(index, xFilial(::tabela), pChave)
+//::findByFilial(index, xFilial(::tabela), pChave)
 
 /*/{Protheus.doc} find
 Procura uma entidade pela chave primaria representada pelo indice numero 1. 
@@ -398,44 +381,21 @@ Procura uma entidade pela chave primaria representada pelo indice numero 1.
 @param pChave, character, chave de acesso a entidade
 @return objeto, self ou nil se não encontrado 
 /*/
-Method find(pChave) class TSigaMDBas
-return ::findBy(1,pChave)
+//Method find(pChave, filial) class TSigaMDBas
+//return ::findBy(1,pChave, filial)
 
 
-/*/{Protheus.doc} findFilial
-(long_description)
-@type method
-@param filial, character, filial
-@param pChave, character, chave de acesso a entidade
-/*/
-Method findFilial(filial, pChave)  class TSigaMDBas
-return ::findByFilial(1, filial, pChave)
 
 /*/{Protheus.doc} findAllByOrFail
 Encontra todas as instancias representado pelo index e chave
 @type method
-@param index, ${param_type}, (Descrição do parâmetro)
-@param pChave, ${param_type}, (Descrição do parâmetro)
+@param index, numérico, Numero do indexo a usar
+@param pChave, character, chave de acesso no indexo
+@param numCpo, numérico, Quantos campos devem ser usados dentro do indexo
 @return array, {lRet, oObj} lRet: .T. se encontrou com oObj = coleção (TSColecao) de self, .F. se não, oObj : Mensagem de erro
 /*/
-method findAllByOrFail(index, pChave)  class TSigaMDBas	
-	local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao}
-	local nPos
-	
-	nPos := ascan(::chaves, {|x| x[CHAVE_IND] = index})
-	if nPos != 0 
-		aRet := findAllBOFCpo(index, Len (::chaves[nPos][CHAVE_CPO]), pChave)
-	else
-		aRet := {.F., "Chave não encontrada"}
-	endif
-return aRet
-
-
-
-
-
-
-method findAllBOFCpo(index, numCpo, pChave)  class TSigaMDBas
+//method findAllBOFCpo(index,  pChave, numCpo)  class TSigaMDBas
+method findAllOrFail( pChave, index, numCpo, filial)  class TSigaMDBas
 	local tabela := ::tabela
 	local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao}
 //	local aRet := nil 
@@ -449,12 +409,27 @@ method findAllBOFCpo(index, numCpo, pChave)  class TSigaMDBas
 	local nPos
 	
 	if !Empty(pChave)
+		if index == nil
+			index := 1
+		endif
+		if filial == nil
+			filial := xFilial(tabela)
+		endif
 		axArea := &(tabela)->(getarea())
 		dbselectarea(::tabela)
 		&(tabela)->(dbsetorder(index))
 		&(tabela)->(dbgotop())
 		
-		If &(tabela)->(DBSeek(xFilial(tabela)+pChave))
+		if 	numCpo == nil
+			nPos := ascan(::chaves, {|x| x[CHAVE_IND] = index})
+			if nPos != 0 
+				numCpo := Len (::chaves[nPos][CHAVE_CPO])
+			else
+				aRet := {.F., "Chave não encontrada"}
+			endif
+		endif
+
+		If &(tabela)->(DBSeek(filial+pChave))
 			nPos := ascan(::chaves, {|x| x[CHAVE_IND] = index})
 			if nPos != 0 
 				for i := 1 to numCpo
@@ -474,14 +449,14 @@ method findAllBOFCpo(index, numCpo, pChave)  class TSigaMDBas
 				// criar nova entidade
 				cNewObj := GetClassName(self)+ "():New()"
 				oNewObj := &(cNewObj)
-				
+					
 				oNewObj:fillCampos()
-				
+					
 				oRes:add(oNewObj)	 
-//				aadd(aRes, oNewObj) 
-			// reter os valores				 
-				//self:fillCampos() 			
-				//aRet := Self
+	//				aadd(aRes, oNewObj) 
+				// reter os valores				 
+					//self:fillCampos() 			
+					//aRet := Self
 				&(tabela)->(DbSkip())
 			endDo
 			aRet[2] := oRes
@@ -489,7 +464,8 @@ method findAllBOFCpo(index, numCpo, pChave)  class TSigaMDBas
 			self:resetCampos()
 			aRet := {.F., ::entidade + " " + pChave + " não enconstrado no " + ::funcao}
 		Endif
-		restarea(axArea)
+		restarea(axArea)							
+			//aRet := findAllBOFCpo(index, Len (::chaves[nPos][CHAVE_CPO]), pChave)
 	else
 		self:resetCampos()
 		aRet := {.F., ::entidade + " resetado: chave vazia"}
@@ -501,29 +477,31 @@ return aRet
 /*/{Protheus.doc} findAllOrFail
 Encontra todas as instancias representado pela chave e index 1
 @type method
-@param index, ${param_type}, (Descrição do parâmetro)
-@param pChave, ${param_type}, (Descrição do parâmetro)
+@param index, numérico, Numero do indexo a usar
+@param pChave, character, chave de acesso no indexo
+@param numCpo, numérico, Quantos campos devem ser usados dentro do indexo
 @return array, {lRet, oObj} lRet: .T. se encontrou com oObj = coleção (TSColecao) de self, .F. se não, oObj : Mensagem de erro
 /*/
-method findAllOrFail(index, pChave)  class TSigaMDBas
-return ::findAllByOrFail(1,pChave)
+//method findAllOrFail(index, pChave, numCpo)  class TSigaMDBas
+//return ::findAllByOrFail(1,pChave, numCpo)
 
 
 
-/*/{Protheus.doc} findAllBy
+/*/{Protheus.doc} findAll
 Encontra todas as instancias representado pelo index e chave
 @type method
-@param index, ${param_type}, (Descrição do parâmetro)
-@param pChave, ${param_type}, (Descrição do parâmetro)
+@param index, numérico, Numero do indexo a usar
+@param pChave, character, chave de acesso no indexo
+@param numCpo, numérico, Quantos campos devem ser usados dentro do indexo
 @return objeto, coleção (TSColecao) de self ou nil se não encontrado
 /*/
-method findAllBy(index, pChave)  class TSigaMDBas
+method findAll( pChave, index, numCpo, filial)  class TSigaMDBas
 //	local tabela := ::tabela
 //	local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao}
 	local aRet := nil 
 //	local axArea
 
-	aRet := ::findAllByOrFail(index, pChave)
+	aRet := ::findAllOrFail( pChave,index, numCpo, filial)
 	if aRet[1]
 		aRet := aRet[2]
 	else 
@@ -535,10 +513,12 @@ return aRet
 /*/{Protheus.doc} findAll
 Encontra todas as instancias representado pela chave e index 1
 @type method
-@param pChave, ${param_type}, (Descrição do parâmetro)
+@param pChave, character, chave de acesso no indexo
+@param numCpo, numérico, Quantos campos devem ser usados dentro do indexo
 @return objeto, coleção (TSColecao) de self ou nil se não encontrado
-/*/method findAll(pChave)  class TSigaMDBas		
-return ::findAllBy(1,pChave)
+/*/
+//method findAll(pChave, numCpo)  class TSigaMDBas		
+//return ::findAllBy(1,pChave, numCpo)
 
 
 
@@ -860,8 +840,8 @@ Relação One to Many
 @param localKey, array, chave na tabela fonte
 @return TSigaMDRel, instancia da relação
 /*/
-method hasMany( relatedType, indexFk, numCpoFk, localKey) class TSigaMDBas
-return TSHasMany():New(self, relatedType, indexFk, numCpoFk, localKey)
+method hasMany( relatedType, indexFk,  localKey) class TSigaMDBas
+return TSHasMany():New(self, relatedType, indexFk,  localKey)
 
 /*/{Protheus.doc} belongsTo
 Relação pertence a (1)

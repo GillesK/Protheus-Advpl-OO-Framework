@@ -92,7 +92,7 @@ method obterOrFail() class TSBelongsTo
 	xRet := pai:getValKey(fk)
 
 	if xRet[1]
-		xRet := ::related:findByOrFail(ind, xRet[2])
+		xRet := ::related:findOrFail( xRet[2], ind)
 	endif	
 return xRet
 
