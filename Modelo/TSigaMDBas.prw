@@ -339,17 +339,6 @@ return aRet
 
 
 
-/*/{Protheus.doc} findOrFail
-Procura uma entidade pela chave primaria representada pelo indice numero 1. 
-@type method
-@param pChave, character, chave de acesso a entidade
-@param filial, character, Filial
-@return array, {lRet, oObj} lRet: .T. se encontrou com oObj = self, .F. se não, oObj : Mensagem de erro 
-/*/
-//Method findOrFail(pChave, filial) class TSigaMDBas
-//return ::findByOrFail(1,pChave, filial)
-
-
 
 /*/{Protheus.doc} find
 Procura uma entidade pela indexo definido no parametro Index.
@@ -373,16 +362,6 @@ method find(pChave,index, filial)  class TSigaMDBas
 	endif
 
 return aRet
-//::findByFilial(index, xFilial(::tabela), pChave)
-
-/*/{Protheus.doc} find
-Procura uma entidade pela chave primaria representada pelo indice numero 1. 
-@type method
-@param pChave, character, chave de acesso a entidade
-@return objeto, self ou nil se não encontrado 
-/*/
-//Method find(pChave, filial) class TSigaMDBas
-//return ::findBy(1,pChave, filial)
 
 
 
@@ -474,17 +453,6 @@ method findAllOrFail( pChave, index, numCpo, filial)  class TSigaMDBas
 return aRet
 
 
-/*/{Protheus.doc} findAllOrFail
-Encontra todas as instancias representado pela chave e index 1
-@type method
-@param index, numérico, Numero do indexo a usar
-@param pChave, character, chave de acesso no indexo
-@param numCpo, numérico, Quantos campos devem ser usados dentro do indexo
-@return array, {lRet, oObj} lRet: .T. se encontrou com oObj = coleção (TSColecao) de self, .F. se não, oObj : Mensagem de erro
-/*/
-//method findAllOrFail(index, pChave, numCpo)  class TSigaMDBas
-//return ::findAllByOrFail(1,pChave, numCpo)
-
 
 
 /*/{Protheus.doc} findAll
@@ -509,16 +477,6 @@ method findAll( pChave, index, numCpo, filial)  class TSigaMDBas
 	endif
 
 return aRet
-
-/*/{Protheus.doc} findAll
-Encontra todas as instancias representado pela chave e index 1
-@type method
-@param pChave, character, chave de acesso no indexo
-@param numCpo, numérico, Quantos campos devem ser usados dentro do indexo
-@return objeto, coleção (TSColecao) de self ou nil se não encontrado
-/*/
-//method findAll(pChave, numCpo)  class TSigaMDBas		
-//return ::findAllBy(1,pChave, numCpo)
 
 
 
