@@ -782,7 +782,7 @@ Method DelSX7(aRegs) class TSigaUpd
 		if SX7->(DbSeek(aRegs[k][1]))
 			curCampo := SX7->X7_CAMPO
 			while !SX7->(EOF()) .And. SX7->X7_CAMPO == curCampo
-				if Alltrim(SX7->X7_CDOMIN) == aRegs[k][2]
+				if Alltrim(SX7->X7_CDOMIN) == allTrim(aRegs[k][2])
 					RecLock("SX7", .F.)
 					SX7->(DbDelete())
 					SX7->(MsUnlock())

@@ -8,10 +8,15 @@
 #define CPOPOR	1 
 #define CPOTEC 	2
 #define TIPO	 	3
-#define CHAVE		4
+#define TAMANHO	4
+#define DECIMAL	5
+//#define AUTOINC	4
+//#define FILIAL	5
+//#define CHAVE		4
 		
-#define VALOR		5
-#define MUDADO	6
+#define VALOR		6
+#define MUDADO	7
+#define ORDEM		8
 
 #define INSERIR		3
 #define ATUALIZAR		4
@@ -19,6 +24,11 @@
 
 #define CHAVE_IND		1
 #define CHAVE_CPO		2
+#define CHAVE_ALIAS	3
+
+#define CHAVE_FIND_MODEL			1
+#define BETWEEN_FIND_MODEL		2
+
 /*
 ‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -136,8 +146,15 @@ FunÁ„o da entidade. Deve ser informado no construtor da classe filha
 
 	// todas as chaves com indexo
 	data chaves
+	data eaChave
+	
+	data campoInc
+	data campoFilial
+	data pkIndex
+	data temFilial
 	
 	//data relations
+	data findModel
 	
 /*/{Protheus.doc} execAuto
 Se a entidade È atualizada atraves de ExecAuto ou acesso direto a base. Valor lÛgico.
@@ -145,49 +162,51 @@ Deve ser informado no contrutor da classe filha
 @type  property
 @proptype lÛgico
 /*/	 		
-	data execAuto
+	data isExecAuto
+	data filhos
 
 	method New() Constructor
 	
-///	method findByOrFail()
 	method findOrFail()
 	method find()
-			
-//	method findBOFFilial()			
-//	method findOFFilial()
 	
-//	method findAllBOFCpo(index, numCpo, pChave)	
-///	method findAllByOrFail()
 	method findAllOrFail()	
 	method findAll()
-					
-///	method findAllBy() 
-///	method findBy()
-
-
-//	method findFilial()
-//	method findByFilial()		 
-			
+								
 	method valor()	
 	method salvar()
+	method getFilialCpo()	
+	method geraFilial() 
+	method getAutoIncCpo()
+	method geraNum() 
+	method confirmNum(lIns) 
+	method rollbackNum(lIns)
+	
+	method setFilhos()
 	method deletar()
 	method setar()		
 	method getEAVector()
+	method setEAChave(eaChave)	
+	method ordCampos()
 	method execAuto()
 	method resExecAuto()	
 //	Method procErroBatch()
 	method fillCampos()
 	method resetCampos()				
-	
+		
 	method isSet()
 	
-	method defDBCampos()
-	method defDBIndices()
-	method defDBGatilhos()
+//	method defDBCampos()
+//	method defDBIndices()
+//	method defDBGatilhos()
 	
 	method iniCampos()
 	method addCpoDef()
 	method setChave()
+	method getChave()	
+	method addCpoInc(pCpoInc) 
+	method setCpoFilial(pCpoFilial) 
+	method setPkIndex(pPkIndex)
 	
 	method salvaRegistro()
 	method isInsert()
@@ -204,15 +223,20 @@ Deve ser informado no contrutor da classe filha
 	method hydrateM()
 	method hydrateACols()
 	method hydratePos()
+	method extractACols(paHeader, colecao)	
 		
 	method all()
 	method simulAHeader()
 	method simulACols()
 	method retCpoTec()
+//	method getCampo(cpoName)	
+	method getCampo()
 	
 //	method RegToMemory()	
 	method getVar()
 	method setVar()
+	
+	method setOrderInternal()	
 EndClass
 
 /*/{Protheus.doc} New
@@ -221,11 +245,20 @@ Constructor
 /*/
 Method New() Class TSigaMDBas
 	::campos := {}
+	::eaChave := nil
+	::chave := nil
+	::pkIndex := nil
+	::temFilial := .T.	
 	::iniCampos()
 	//::resetCampos()
-	::execAuto := 	.F.	
+	::isExecAuto := 	.F.
+	::findModel := CHAVE_FIND_MODEL
+	
 return (Self)
 
+method setFilhos(filhos) class TSigaMDBas
+	::filhos := filhos
+return
 
 /*/{Protheus.doc} iniCampos
 MÈtodo para inicializar a definiÁ„o dos campos e da chave primaria.
@@ -237,8 +270,16 @@ method iniCampos()  class TSigaMDBas
 
 return
 
+/*/{Protheus.doc} filial
+xFilial
+@type method
+/*/
 method filial() class  TSigaMDBas
-return xFilial(::tabela)
+	local ret := ""
+	if ::temFilial
+		ret := xFilial(::tabela)
+	endif
+return ret
 
 /*/{Protheus.doc} addCpoDef
 MÈtodo permitindo definir os campos. Deve ser chamado no mÈtodo iniCampos()
@@ -264,16 +305,93 @@ return
 /*/
 method addCpoDef(aCampoDef)  class TSigaMDBas
 	local i
+	local cOrdem := "01"
 	for i := 1 to Len(aCampoDef)	
-		// adicionar chave
-		aadd(aCampoDef[i], .F.)
+		// adicionar autoInc
+/*		if Len(aCampoDef[i]) == 3
+			aadd(aCampoDef[i], .F.)
+		endif
+		if Len(aCampoDef[i]) == 4
+			aadd(aCampoDef[i], .F.)
+		endif*/		
+		// Adicionar Chave
+		//aadd(aCampoDef[i], .F.)
 		// valor
+		// adicionar tamanho e decimal
+		if Len(aCampoDef[i]) == 3
+			aadd(aCampoDef[i], 0)
+		endif		
+		if Len(aCampoDef[i]) == 4
+			aadd(aCampoDef[i], 0)
+		endif				
 		aadd(aCampoDef[i], nil)
 		//mudado
 		aadd(aCampoDef[i], .F.)
+		//ordem
+		aadd(aCampoDef[i], cOrdem)
 		
 		aadd(::campos, aCampoDef[i])
+		cOrdem := Soma1(cOrdem)
 	next
+	
+	if ::temFilial
+		::campoFilial := ::campos[1][CPOTEC]
+	endif 
+
+return
+
+
+/*/{Protheus.doc} getCampo
+Retorna o campo
+@type method
+@param cpoName, character, Nome do campo em portugues ou nome tecnico
+@return array, definiÁ„o do campo
+/*/
+method getCampo(cpoName)  class TSigaMDBas
+	local nPos
+	local xReturn := nil
+		
+	nPos := ascan(::campos, {|x| x[CPOPOR] == cpoName })
+	if nPos != 0
+		xReturn :=  ::campos[nPos]
+	else
+		nPos := ascan(::campos, {|x| x[CPOTEC] == cpoName })
+		if 	nPos != 0
+			xReturn :=  ::campos[nPos]
+		endif
+	endif	
+return xReturn
+
+
+/*/{Protheus.doc} addCpoInc
+Determina o campo com numeraÁ„o automatica
+@type method
+@param pCpoInc, character, nome do campo tÈcnico com auto incremento
+/*/method addCpoInc(pCpoInc)  class TSigaMDBas
+	::campoInc := pCpoInc	
+return
+
+/*/{Protheus.doc} setCpoFilial
+Determina o campo que representa a filial. Por default È o primeiro campo definido
+@type method
+@param pCpoFilial, character, Campo que representa a filial (nome tÈcnico)
+/*/
+method setCpoFilial(pCpoFilial) class TSigaMDBas
+	::campoFilial := pCpoFilial
+return
+
+/*/{Protheus.doc} setPkIndex
+Determina a chave primaria, por default È o primerio indexo definido
+@type method
+@param pPkIndex, cheracter, Numero do indexo que representa a chave primaria
+/*/
+method setPkIndex(pPkIndex)  class TSigaMDBas
+	local nPos
+	::pkIndex := pPkIndex
+	nPos := ascan(::chaves, {|x| x[CHAVE_IND] == ::pkIndex})
+	if nPos != 0
+		::chave := ::chaves[nPos][CHAVE_CPO]
+	endif
 return
 
 /*/{Protheus.doc} setChave
@@ -283,18 +401,60 @@ MÈtodo permitindo definir as chaves. Deve ser chamado no mÈtodo iniCampos()
 @example
 	::setChave({{1,{"B1_FILIAL", "B1_COD"}}}) <br>
 /*/
-method setChave(aChave)  class TSigaMDBas
+method setChave(aChaves)  class TSigaMDBas
 	local nPos
 	local i
-	::chave := aChave[1][2]
-	::chaves := aChave
-	for i := 1 to len(::chave)
+	if ::chave == nil
+		::chave := aChaves[1][CHAVE_CPO]
+	endif
+	::chaves := aChaves
+	
+	if ::pkIndex == nil
+		::pkIndex := aChaves[1][CHAVE_IND]
+	endif
+	
+	if ::eaChave == nil
+		::eaChave := 	aChaves[1][CHAVE_CPO]
+	endif
+/*	for i := 1 to len(::chave)
 		nPos := ascan(::campos, {|x| x[CPOTEC] == ::chave[i]})
 		if nPos > 0
 			::campos[nPos][CHAVE] := .T.
 		endif
-	next 
+	next*/ 
 return
+
+
+
+/*/{Protheus.doc} getChave
+Retorna o array contendo os campos da chave
+@type method
+@param index, character, Numero ou nome do indexo.
+@return array, campos do indexo
+/*/
+method getChave(index) class  TSigaMDBas
+	local nPos
+	local aRet := nil
+	// chave : CHAVE_ALIAS
+	if valType(index) == "N"
+		index := str(index)
+	endif	
+	nPos := ascan(::chaves, {|x| x[CHAVE_IND] = index})
+	if nPos != 0 
+		aRet := ::chaves[nPos][CHAVE_CPO]
+	else
+		nPos := ascan(::chaves, {|x| x[CHAVE_ALIAS] = index})
+		if nPos != 0 
+			aRet := ::chaves[nPos][CHAVE_CPO]
+		endif		
+	endif 
+return aRet
+
+
+/*method getChavePos(index, nPos)
+	local aChave
+	aChave := ::getChave(index)
+return aChave[nPos]*/
 
 
 /*/{Protheus.doc} findOrfail
@@ -309,26 +469,66 @@ method findOrFail(pChave, index, filial)  class TSigaMDBas
 	local tabela := ::tabela
 	local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao} 
 	local axArea
+	local aCpo
+	local lFound := .F.
+	local nPosIni, nPosFim, nPosFil
+	local cChavTyp, cpoIni
 	
 	if !Empty(pChave)
 		if filial == nil
-			filial := xFilial(::tabela)
+			filial := ::filial()
 		endif
 		if index == nil
-			index := 1
+			index := "1"
 		endif
 		axArea := &(tabela)->(getarea())
 		dbselectarea(::tabela)
-		&(tabela)->(dbsetorder(index))
+		::setOrderInternal(index)
+		//&(tabela)->(dbsetorder(index))
 		&(tabela)->(dbgotop())
 		
-		If &(tabela)->(DBSeek(filial+pChave))
-			self:fillCampos() 
-			aRet[2] := Self
-		else
-			self:resetCampos()
-			aRet := {.F., ::entidade + " " + pChave + " n„o enconstrado no " + ::funcao}
-		Endif
+		Do Case
+			Case ::findModel == CHAVE_FIND_MODEL
+				If &(tabela)->(DBSeek(filial+pChave))
+					self:fillCampos() 
+					aRet[2] := Self
+				else
+					self:resetCampos()
+					aRet := {.F., ::entidade + " " + pChave + " n„o enconstrado no " + ::funcao}
+				Endif
+			Case ::findModel == BETWEEN_FIND_MODEL
+				// get campos ini e fim
+				aCpo := ::getChave(index)
+				//nPosFil := ascan(::campos, {|x| x[CPOTEC] == aChave[1] })
+				// TODO testar se tem filial
+				cpoIni := ::getCampo(aCpo[2])
+				cChavTyp := pChave
+				if cpoIni[TIPO] == "D"
+					cChavTyp := stod(pChave)
+				endif					
+				//nPosFim := ascan(::campos, {|x| x[CPOTEC] == aChave[3] })
+				If &(tabela)->(DBSeek(filial))
+					while !&(tabela)->(Eof()) .And. &(tabela)->(&(aCpo[1])) == filial
+						if cChavTyp >= &(tabela)->(&(aCpo[2])) 
+							if cChavTyp <= &(tabela)->(&(aCpo[3])) 
+								lFound := .T.
+								self:fillCampos()
+								aRet[2] := Self 
+								exit
+							endif
+						endif
+						&(tabela)->(dbskip())
+					enddo		
+					if !lFound
+						self:resetCampos()
+						aRet := {.F., ::entidade + " " + pChave + " n„o enconstrado no " + ::funcao}
+					endif
+				else
+					self:resetCampos()
+					aRet := {.F., ::entidade + " " + pChave + " n„o enconstrado no " + ::funcao}					
+				endif	
+		EndCase
+		
 		restarea(axArea)
 	else
 		self:resetCampos()
@@ -365,15 +565,16 @@ return aRet
 
 
 
-/*/{Protheus.doc} findAllByOrFail
+/*/{Protheus.doc} findAllOrFail
 Encontra todas as instancias representado pelo index e chave
 @type method
-@param index, numÈrico, Numero do indexo a usar
 @param pChave, character, chave de acesso no indexo
+@param index, numÈrico, Numero do indexo a usar
 @param numCpo, numÈrico, Quantos campos devem ser usados dentro do indexo
+@param filial, character, Filial
 @return array, {lRet, oObj} lRet: .T. se encontrou com oObj = coleÁ„o (TSColecao) de self, .F. se n„o, oObj : Mensagem de erro
 /*/
-//method findAllBOFCpo(index,  pChave, numCpo)  class TSigaMDBas
+
 method findAllOrFail( pChave, index, numCpo, filial)  class TSigaMDBas
 	local tabela := ::tabela
 	local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao}
@@ -386,38 +587,46 @@ method findAllOrFail( pChave, index, numCpo, filial)  class TSigaMDBas
 	local lCont := .T.
 	local i, j
 	local nPos
+	local aCpo
 	
 	if !Empty(pChave)
 		if index == nil
-			index := 1
+			index := "1"
 		endif
 		if filial == nil
-			filial := xFilial(tabela)
+			filial := ::filial()
 		endif
 		axArea := &(tabela)->(getarea())
 		dbselectarea(::tabela)
-		&(tabela)->(dbsetorder(index))
+		::setOrderInternal(index)
+		//&(tabela)->(dbsetorder(index))
 		&(tabela)->(dbgotop())
 		
+		aCpo := ::getChave(index)
 		if 	numCpo == nil
-			nPos := ascan(::chaves, {|x| x[CHAVE_IND] = index})
+			if aCpo == nil
+				aRet := {.F., "Chave n„o encontrada"}
+			else
+				numCpo := Len(aCpo) 
+			endif
+/*			nPos := ascan(::chaves, {|x| x[CHAVE_IND] = index})
 			if nPos != 0 
 				numCpo := Len (::chaves[nPos][CHAVE_CPO])
 			else
-				aRet := {.F., "Chave n„o encontrada"}
-			endif
+
+			endif*/
 		endif
 
 		If &(tabela)->(DBSeek(filial+pChave))
-			nPos := ascan(::chaves, {|x| x[CHAVE_IND] = index})
-			if nPos != 0 
+			//nPos := ascan(::chaves, {|x| x[CHAVE_IND] = index})
+			if aCpo != nil 
 				for i := 1 to numCpo
-					aadd(aValCurr, &(tabela)->(&(Self:chaves[nPos][CHAVE_CPO][i])))										
+					aadd(aValCurr, &(tabela)->(&(aCpo[i])))										
 				Next
 			endif
 			while !&(tabela)->(EOF()) .And. lCont 
 				for j := 1 to Len(aValCurr)
-					if aValCurr[j] != &(tabela)->(&(Self:chaves[nPos][CHAVE_CPO][j]))
+					if aValCurr[j] != &(tabela)->(&(aCpo[j]))
 						lCont := .F.
 						exit
 					endif
@@ -458,9 +667,10 @@ return aRet
 /*/{Protheus.doc} findAll
 Encontra todas as instancias representado pelo index e chave
 @type method
-@param index, numÈrico, Numero do indexo a usar
 @param pChave, character, chave de acesso no indexo
+@param index, numÈrico, Numero do indexo a usar
 @param numCpo, numÈrico, Quantos campos devem ser usados dentro do indexo
+@param filial, character, Filial
 @return objeto, coleÁ„o (TSColecao) de self ou nil se n„o encontrado
 /*/
 method findAll( pChave, index, numCpo, filial)  class TSigaMDBas
@@ -487,10 +697,14 @@ Permite saber se o modelo esta pre-enchido com uma entidade ou n„o
 /*/
 method isSet() Class TSigaMDBas
 	local xReturn := .F.
-	nPos := ascan(::campos, {|x| x[CHAVE] == .T. })
-	if nPos != 0 .And. ::campos[nPos][VALOR] != nil  
-		xReturn := .T.
-	endif
+	local i, cpo
+	for i := 1 to Len(::chave) 
+		cpo := ::getCampo(::chave[i])
+		if cpo[VALOR] != nil  
+			xReturn := .T.
+			exit
+		endif
+	next
 return xReturn
 
 /*/{Protheus.doc} resetCampos
@@ -508,11 +722,24 @@ return
 
 method fillCampos() class TSigaMDBas
 	local tabela := ::tabela
-	local i
+	local i 
+   	Local bError         := { |e| oError := e , Break(e) }
+   	Local bErrorBlock
 
+	bErrorBlock    := ErrorBlock( bError )
 	for i := 1 to len(::campos)
-		::campos[i][VALOR] := (&(tabela))->(&(Self:campos[i][CPOTEC])) 
-	next	
+		begin sequence
+			::campos[i][VALOR] := (&(tabela))->(&(Self:campos[i][CPOTEC]))
+		Recover
+			ConOut( ProcName() + " " + Str(ProcLine()) + " " + oError:Description )
+		end sequence
+	next
+	Errorblock(bErrorBlock)
+	
+//		if ValType(&(tabela+"->"+Self:campos[i][2])) <> "U" //ValType(&(tabela+"->"+Self:campos[i][2]))
+//		else
+//			MsgAlert("cpo not found")
+//		endif		
 return 
 
 
@@ -525,18 +752,15 @@ Obter o valor do campo
 	::oFornecedor:valor('estado')
 /*/
 method valor(campo) class TSigaMDBas
-	local nPos
+	local nPos, cpo
 	local xReturn := nil
 		
-	nPos := ascan(::campos, {|x| x[CPOPOR] == campo })
-	if nPos != 0
-		xReturn :=  ::campos[nPos][VALOR]
-	else
-		nPos := ascan(::campos, {|x| x[CPOTEC] == campo })
-		if 	nPos != 0
-			xReturn :=  ::campos[nPos][VALOR]
-		endif
-	endif
+	cpo := ::getCampo(campo)
+//	nPos := ascan(::campos, {|x| x[CPOPOR] == campo })
+//	if cpo != nil
+		xReturn :=  cpo[VALOR]
+//	endif
+
 return xReturn
 
 /*/{Protheus.doc} setar
@@ -549,23 +773,18 @@ Permite setar o valor de um campo
 	::oFornecedor:setar('estado', 'PB')
 /*/
 method setar(campo, valor) class  TSigaMDBas
-	local nPos
-	local xReturn := {.T., "Campo encontrado e setado"}
+	local nPos, cpo
+//	local xReturn := {.T., "Campo encontrado e setado"}
 		
-	nPos := ascan(::campos, {|x| x[CPOPOR] == campo })
-	if nPos != 0
-		::campos[nPos][VALOR] := valor
-		::campos[nPos][MUDADO] := .T.
-	else
-		nPos := ascan(::campos, {|x| x[CPOTEC] == campo })
-		if 	nPos != 0
-			::campos[nPos][VALOR] := valor
-			::campos[nPos][MUDADO] := .T.
-		else 
-			xReturn := {.F., "campo n„o encontrado"}
-		endif
-	endif		
-return xReturn
+	cpo := ::getCampo(campo)
+	//nPos := ascan(::campos, {|x| x[CPOPOR] == campo })
+//	if cpo != nil
+		cpo[VALOR] := valor
+		cpo[MUDADO] := .T.
+//	else
+//		xReturn := {.F., "campo n„o encontrado"}
+//	endif		
+return /*xReturn*/
 
 /*/{Protheus.doc} salvar
 Salvar as modificaÁıes do modelo na base. Gerencia a inserÁ„o como a modificaÁ„o
@@ -584,44 +803,98 @@ Method salvar() class TSigaMDBas
 	local lIns := .F.
 	local valChave := ""
 	local opcao := INSERIR
-	
+	local lMsErroEA
 	// TODO chamada do log
 	
+	lMsHelpAuto 		:= .T.
+	lMsErroAuto 		:= .F. 	
+	//forÁa a gravaÁ„o das informaÁıes de erro em array para manipulaÁ„o da gravaÁ„o ao invÈs de gravar direto no arquivo tempor·rio 
+	lAutoErrNoFile 	:= .T.
+	
 	// determina inserÁ„o ou update
-	aRet2 := ::isInsert(@lIns, @valChave)
-	if aRet2[1]
+	lIns := ::isInsert( @valChave)
+//	if aRet2[1]
 	   // Exec auto ou insert direto
-		if ::execAuto
-			if !lIns
-				opcao := ATUALIZAR
-			endif								
-			//::prepExecAuto()
-			::execAuto(opcao)
-			aRet4 := ::resExecAuto()
-			if !aRet4[1]
-				aRet[2] := aRet4[2]
-			endif 					
-		else
-			// Reclock
-			aRet3 := ::salvaRegistro(lIns, valChave)
-			if !aRet3[1]
-				aRet[2] := aRet3[2]
-			endif 		
-		endif		
+	if lIns
+		::geraFilial()
+		::geraNum()				
+	endif		   
+	if ::isExecAuto
+		if !lIns
+			opcao := ATUALIZAR				
+		endif								
+		//::prepExecAuto()
+		// numeraÁ„o
+		lMsErroEA := ::execAuto(opcao)
+		aRet4 := ::resExecAuto(lMsErroEA, lIns)
+		if !aRet4[1]
+			aRet := {.F., aRet4[2]}
+		endif 					
 	else
-		aRet[2] := aRet2[2]
-	endif
+		// Reclock
+		aRet3 := ::salvaRegistro(lIns, valChave)
+			
+		if !aRet3[1]
+			aRet := {.F., aRet3[2]}
+		endif 		
+	endif		
+//	else
+//		aRet := {.F., aRet2[2]}
+//	endif
 
 	//aRet := {.F., ::entidade + " n„o enconstrado no " + ::funcao}
 	restarea(axArea)
 return aRet
 
 
+method geraFilial()  class TSigaMDBas
+	local filCpo
+	filCpo := ::getFilialCpo()
+	if filCpo != nil
+		::setar(filCpo[CPOTEC] ,::filial())			
+	endif
+return
+
+method getFilialCpo() class TSigaMDBas	
+return ::getCampo(::campoFilial)
+
+method getAutoIncCpo()  class TSigaMDBas
+return ::getCampo(::campoInc)
+
+method geraNum()  class TSigaMDBas
+	local nPos
+	//local aRet := nil
+	local cpoInc
+	cpoInc := ::getAutoIncCpo()
+	if cpoInc != nil	
+		::setar(cpoInc[CPOTEC] ,GetSxeNum(::tabela, cpoInc[CPOTEC]))
+	endif	
+return 
+
+method confirmNum(lIns)  class TSigaMDBas
+	local incCpo
+	
+	incCpo := ::getAutoIncCpo()
+	if incCpo != nil .And. lIns
+		ConfirmSX8()
+	endif
+return
+
+method rollbackNum(lIns)  class TSigaMDBas
+	local incCpo
+	
+	incCpo := ::getAutoIncCpo()
+	if incCpo != nil	.And. lIns
+		RollBackSX8()
+	endif
+return
 
 method salvaRegistro(lIns, valChave)  class TSigaMDBas
 	local aRet := {.T., ""}
 	local tabela := ::tabela
 	local i
+   	Local bError         := { |e| oError := e , Break(e) }
+   	Local bErrorBlock 
 	
 	dbselectarea(tabela)	
 	&(tabela)->(dbsetorder(1))
@@ -632,39 +905,53 @@ method salvaRegistro(lIns, valChave)  class TSigaMDBas
 			return aRet							
 		endif
 	endif	
-	recLock(tabela, lIns)			
+	recLock(tabela, lIns)
+	bErrorBlock    := ErrorBlock( bError )			
 	for i := 1 to len(::campos)
 		if Self:campos[i][MUDADO] == .T.
-			&(tabela)->(&(Self:campos[i][CPOTEC])) := Self:campos[i][VALOR]
+			// TODO gerenciar erro
+			begin sequence
+				&(tabela)->(&(Self:campos[i][CPOTEC])) := Self:campos[i][VALOR]
+			Recover
+				ConOut( ProcName() + " " + Str(ProcLine()) + " " + oError:Description )
+			end sequence						
 		endif 						
 	next
+	Errorblock(bErrorBlock)	
 	&(tabela)->(MsUnlock())
+	::confirmNum(lIns)
 	//MsUnlock(&(tabela))	
 return aRet
 
 
-method isInsert(lIns, valChave) class TSigaMDBas
+method isInsert( valChave) class TSigaMDBas
 	local aRet := {.T.,""}
-	local nPos
+	local nPos, cpo
 	local i
+	local lIns
 
 	lIns := .F.
 	valChave := ""
 	for i := 1 to len(::chave)
-		nPos := ascan(::campos, {|x| x[CPOTEC] == ::chave[i] })
-		if nPos != 0
+		cpo := ::getCampo(::chave[i])
+		//nPos := ascan(::campos, {|x| x[CPOTEC] == ::chave[i] })
+//		if cpo != nil
 			// campo da chave foi mudado
-			if ::campos[nPos][MUDADO] == .T.
-				lIns := .T.
-			endif
-			valChave := valChave + ::campos[nPos][VALOR]
-		else
-			// TODO : erro			
-			aRet := {.F., "Campos de chave n„o encontrados"}
-			return aRet			
+		if cpo[MUDADO] == .T.
+			lIns := .T.
 		endif
+		if cpo[VALOR] == nil
+			lIns := .T.
+		else				  
+			valChave := valChave + cpo[VALOR]
+		endif
+//		else
+			// TODO : erro			
+//			aRet := {.F., "Campos de chave n„o encontrados"}
+//			return aRet			
+//		endif
 	next
-return aRet
+return lIns
 
 
 
@@ -682,26 +969,37 @@ method deletar() class TSigaMDBas
 	local lIns := .F.
 	local axArea := &(tabela)->(getarea())
 	local valChave := ""
+	local lMsErroEA
+	
+	lMsHelpAuto 		:= .T.
+	lMsErroAuto 		:= .F. 	
+	//forÁa a gravaÁ„o das informaÁıes de erro em array para manipulaÁ„o da gravaÁ„o ao invÈs de gravar direto no arquivo tempor·rio 
+	lAutoErrNoFile 	:= .T.
+		
 	// determina inserÁ„o ou update
-	aRet2 := ::isInsert(@lIns, @valChave)
-	if aRet2[1]
-		if ::execAuto
+	lIns := ::isInsert( @valChave)
+//	if aRet2[1]
+		if ::isExecAuto
 			//::prepExecAuto()
-			::execAuto(DELETAR)
-			aRet4 := ::resExecAuto()
-			if !aRet4[1]
-				aRet[2] := aRet4[2]
+			if !lIns
+				lMsErroEA := ::execAuto(DELETAR)
+				aRet4 := ::resExecAuto(lMsErroEA, lIns)
+				if !aRet4[1]
+					aRet := {.F., aRet4[2]}
+				endif
 			endif
 		else
 			// Reclock
-			aRet3 := ::deletaRegistro(valChave)
-			if !aRet3[1]
-				aRet[2] := aRet3[2]
-			endif 		
+			if !lIns
+				aRet3 := ::deletaRegistro(valChave)
+				if !aRet3[1]
+					aRet := {.F., aRet3[2]}
+				endif 		
+			endif
 		endif
-	else
-		aRet[2] := aRet2[2]
-	endif		
+//	else
+//		aRet := {.F., aRet2[2]}
+//	endif		
 	
 	restarea(axArea)	
 return aRet
@@ -738,7 +1036,11 @@ method execAuto(opcao) class TSigaMDBas
 
 return
 
-	
+method setEAChave(eaChave) class TSigaMDBas
+	::eaChave := eaChave
+return
+
+
 /*/{Protheus.doc} getEAVector
 Retorna o vector de dados para chamar o ExecAuto
 @type method
@@ -746,22 +1048,33 @@ Retorna o vector de dados para chamar o ExecAuto
 /*/
 method getEAVector() class TSigaMDBas
 	local i
+	local cCpoTec, cpoVal, lCpoMud
 	local aVetor := {}
-	private lMsErroAuto := .F.
+	local nPos
+	local eaChave
+	//private lMsErroAuto := .F.
 	
-	for i := 1 to len(::campos)
-		aadd(aVetor , {::campos[i][CPOTEC],::campos[i][VALOR],nil})	
+	self:ordCampos()	
+	for i := 1 to len(self:campos)
+		nPos := ascan(::eaChave, {|x| x == self:campos[i][CPOTEC]} )
+		if (self:campos[i][MUDADO] == .T.) .Or. (nPos != 0 .And. self:campos[i][VALOR] != nil)
+			// ou faz parta da chave primaria
+			cCpoTec := self:campos[i][CPOTEC]
+			cpoVal := self:campos[i][VALOR]
+			aadd(aVetor , {cCpoTec,cpoVal,nil})
+		endif	
 	next
 return aVetor
 
 
-method resExecAuto()   class TSigaMDBas
+method resExecAuto(lMsErroEA, lIns)   class TSigaMDBas
 	local aiRet := {.T., ""}
 	local ciText0
 	local aiErro
 	local niX
-	
-	If lMsErroAuto	
+
+	If lMsErroEA
+		::rollbackNum(lIns)
 		ciTexto		:=	" Erro Rotina Autom·tica "+ Chr(13)+Chr(10)	
 		aiErro 		:= GetAutoGRLog()
 		For niX := 1 To Len(aiErro)
@@ -769,6 +1082,8 @@ method resExecAuto()   class TSigaMDBas
 		Next niX								
 		
 		aiRet		:=	{.F.,ciTexto}
+	else
+		::confirmNum(lIns)
 	endif							  
 return aiRet
 
@@ -840,8 +1155,8 @@ return
 
 method getValKey(parentKey) class TSigaMDBas
 	local valChave := ""
-	local aRet := {.T., ""}
-	local cpoKey
+//	local aRet := {.T., ""}
+	local cpoKey, cpo
 	local i
 	 
 	if parentKey == nil
@@ -851,18 +1166,27 @@ method getValKey(parentKey) class TSigaMDBas
 	endif
 	
 	for i := 1 to len(cpoKey)
-		nPos := ascan(::campos, {|x| x[CPOTEC] == cpoKey[i] })
+		cpo := ::getCampo(cpoKey[i])
+		//nPos := ascan(::campos, {|x| x[CPOTEC] == cpoKey[i] })
 		//nPos := ascan(::campos, {|x| x[2] == cpoKey[i] })
-		if nPos != 0
-			valChave := valChave + ::campos[nPos][VALOR]
-		else
+//		if cpo != nil
+		Do case
+			case cpo[TIPO] == "N"
+				valChave := valChave + str(cpo[VALOR],cpo[TAMANHO], cpo[DECIMAL])				
+			case cpo[TIPO] == "D"
+				valChave := valChave + dtos(cpo[VALOR])				
+			otherwise
+				valChave := valChave + cpo[VALOR]	
+		end case
+
+//		else
 			// TODO : erro			
-			aRet := {.F., "Campos de chave n„o encontrados"}
-			return aRet			
-		endif
+//			aRet := {.F., "Campos de chave n„o encontrados"}
+//			return aRet			
+//		endif
 	next	
-	aRet[2] := valChave
-return aRet
+	//aRet[2] := valChave
+return valChave
 
 
 /*/{Protheus.doc} hydrateM
@@ -872,30 +1196,43 @@ Preeche o objeto a partir da variavel de memoria M
 method hydrateM() class  TSigaMDBas
 	local tipo
 	local i
-	
+   	Local bError         := { |e| oError := e , Break(e) }
+   	Local bErrorBlock
+
+	bErrorBlock    := ErrorBlock( bError )	
 	for i:= 1 to len(::campos)
-		//tipo := Type(M->(&(self:campos[i][CPOTEC]))) 
-		//if tipo != "U" .And. tipo != "UE" .And. tipo != "UI"
+		begin sequence
 			::campos[i][VALOR] := M->(&(self:campos[i][CPOTEC]))
-		//endif  
+		Recover
+			ConOut( ProcName() + " " + Str(ProcLine()) + " " + oError:Description )
+		end sequence
 	next 
+	Errorblock(bErrorBlock)	
 return
 
 
 /*/{Protheus.doc} hydratePos
 Hydrata o modelo com o registro posicionado
 @type method
-/*/method hydratePos() class  TSigaMDBas
-	local tipo
+/*/
+method hydratePos() class  TSigaMDBas
+	::fillCampos()
+/*	local tipo
 	local i
 	local sTabela := ::tabela
+   	Local bError         := { |e| oError := e , Break(e) }
+   	Local bErrorBlock	
 	
+	bErrorBlock    := ErrorBlock( bError )	
 	for i:= 1 to len(::campos)
-//		tipo := Type(M->(&(self:campos[i][CPOTEC]))) 
-		//if tipo != "U" .And. tipo != "UE" .And. tipo != "UI"
+		begin sequence
+			::campos[i][VALOR] := (&(tabela))->(&(Self:campos[i][CPOTEC]))
 			::campos[i][VALOR] := &(sTabela)->(&(self:campos[i][CPOTEC]))
-		//endif  
+		Recover
+			ConOut( ProcName() + " " + Str(ProcLine()) + " " + oError:Description )
+		end sequence
 	next 
+	Errorblock(bErrorBlock)*/	
 return
 
 /*/{Protheus.doc} hydrateACols
@@ -906,7 +1243,7 @@ Preeche o objeto a partir do aHeader e aCols
 @return TSColecao, os objetos do aCols
 /*/
 method hydrateACols(paHeader, paCols) class  TSigaMDBas
-	local nPos
+	local nPos, cpo
 	local colObj
 	local oObj
 	local cCreate	
@@ -917,9 +1254,10 @@ method hydrateACols(paHeader, paCols) class  TSigaMDBas
 		cCreate := GetClassName(Self) + "():New()"
 		oObj := &(cCreate)
 		for i := 1 to Len(paHeader)
-			nPos := ascan(oObj:campos, {|x| x[CPOTEC] == alltrim(paHeader[i][2])})
-			if nPos != 0
-				oObj:campos[nPos][VALOR] := paCols[j][i] 	
+			cpo := oObj:getCampo(alltrim(paHeader[i][2]))
+			//nPos := ascan(oObj:campos, {|x| x[CPOTEC] == alltrim(paHeader[i][2])})
+			if cpo != nil
+				cpo[VALOR] := paCols[j][i] 	
 			endif		
 		next
 		colObj:add(oObj)
@@ -928,6 +1266,23 @@ method hydrateACols(paHeader, paCols) class  TSigaMDBas
 	//Local _Prod := aCols[n,xProd]
 return colObj
 
+
+method extractACols(paHeader, colecao)  class  TSigaMDBas
+	local oIterat, oItem, i
+	local aCols := {}, aCol := {}
+	
+	oIterat := colecao:getIterator()
+	oItem := colecao:first()
+	while !oIterat:eoc()
+		aCol := {}
+		for i := 1 to len(paHeader)
+	 		aadd(aCol, oItem:valor(paHeader[i][2]))
+	 	next
+	 	aadd(aCol, .F.)
+		Aadd(aCols,	aCol)
+	 	oItem := oIterat:seguinte()			 	
+	enddo 	
+return aCols
 
 /*/{Protheus.doc} all
 Retorna todos os elementos da tabela
@@ -1014,29 +1369,52 @@ Retorna o nome tÈcnico do campo
 @return character, nome tÈcnico do campo
 /*/
 method retCpoTec(campo)  class  TSigaMDBas
-	local nPos
+	local nPos, cpo
 	local cpoVar := ""
 	
-	nPos := ascan(::campos, {|x| x[CPOPOR] == campo })
-	if nPos != 0
-		cpoVar :=  ::campos[nPos][CPOTEC]
-	else
-		nPos := ascan(::campos, {|x| x[CPOTEC] == campo })
-		if 	nPos != 0
-			cpoVar :=  ::campos[nPos][CPOTEC]
-		endif
+	cpo := ::getCampo(campo)
+//	nPos := ascan(::campos, {|x| x[CPOPOR] == campo })
+	if cpo != nil
+		cpoVar :=  cpo[CPOTEC]
 	endif
 return cpoVar
+
+
+method ordCampos()   class  TSigaMDBas
+	local  curTab, nPos, nX, cpo
+	local aHeaderInt := {}
+	local axArea := SX3->(getarea())
+
+	// Define os campos de acordo com o array
+	DbSelectArea("SX3")
+	SX3->(DbSetOrder(1))
+	SX3->(DbGoTop())
+	If SX3->(DbSeek(::tabela))
+		curTab := SX3->X3_ARQUIVO
+		while !SX3->(Eof()) .And. curTab == SX3->X3_ARQUIVO
+			cpo := ::getCampo(Alltrim(SX3->X3_CAMPO))
+			//nPos := ascan(self:campos, {|x| x[CPOTEC] == Alltrim(SX3->X3_CAMPO)})
+			if cpo != nil
+				cpo[ORDEM] := SX3->X3_ORDEM
+			endif				
+			SX3->(DbSkip())
+		enddo 
+	endif
+
+	aSort(self:campos, , , { |x, y| x[ORDEM] < y[ORDEM] } )
+	
+	restarea(axArea)
+	
+return
 
 /*/{Protheus.doc} simulAHeader
 Retorna um aHeader
 @type method
-@param tabela, character, Tabela
 @param aFields, array, Lista do campos a incluir no aHeader, se nil -> todos
 @param aNoCampos, array, Lista dos campos a ser excluidos do aHeader
 @return array, aHeader
 /*/
-method simulAHeader( aFlds, aNoCampos)    class  TSigaMDBas
+method simulAHeader( aFlds, aNoCampos, lValid)    class  TSigaMDBas
 	local  curTab, nPos, nX
 	local aHeaderInt := {}
 	local axArea := SX3->(getarea())
@@ -1070,9 +1448,14 @@ method simulAHeader( aFlds, aNoCampos)    class  TSigaMDBas
 		// posiciona sobre o campo
 		cpoTec := ::retCpoTec(aFlds[nX])
 		If SX3->(DbSeek(cpoTec))	
-			// adiciona as informaÁıes do campo para o getdados	  	
-			Aadd(aHeaderInt, {AllTrim(X3Titulo()),SX3->X3_CAMPO,SX3->X3_PICTURE,SX3->X3_TAMANHO,SX3->X3_DECIMAL,SX3->X3_VALID,;
-				SX3->X3_USADO,SX3->X3_TIPO,SX3->X3_F3,SX3->X3_CONTEXT,SX3->X3_CBOX,SX3->X3_RELACAO})
+			// adiciona as informaÁıes do campo para o getdados
+			if (lValid == nil) .Or. (lValid != nil .And. lValid == .T.)  	
+				Aadd(aHeaderInt, {AllTrim(X3Titulo()),SX3->X3_CAMPO,SX3->X3_PICTURE,SX3->X3_TAMANHO,SX3->X3_DECIMAL,SX3->X3_VALID,;
+					SX3->X3_USADO,SX3->X3_TIPO,SX3->X3_F3,SX3->X3_CONTEXT,SX3->X3_CBOX,SX3->X3_RELACAO})
+			else
+				Aadd(aHeaderInt, {AllTrim(X3Titulo()),SX3->X3_CAMPO,SX3->X3_PICTURE,SX3->X3_TAMANHO,SX3->X3_DECIMAL,/*SX3->X3_VALID*/,;
+					SX3->X3_USADO,SX3->X3_TIPO,SX3->X3_F3,SX3->X3_CONTEXT,SX3->X3_CBOX,SX3->X3_RELACAO})
+			endif
 		Endif		  		  	
 	Next nX
 
@@ -1106,3 +1489,35 @@ method simulACols(aValores)   class  TSigaMDBas
 		/*.f. -> Campo do delete do array GETDADOS*/
 	next																			
 Return aColsInt
+
+
+method setOrderInternal(index)  class  TSigaMDBas
+	// se index È numerico
+		// se inferior ou igual a 9 
+		// se superior a 9
+	// se caracter
+		// se len == 1
+			// transformar
+		// se len > 1 
+			// usar alias
+	local idx := index
+	local tabela := ::tabela
+	local aAlf := {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
+	local nPos
+	if valType(idx) == "N"
+		&(tabela)->(dbsetorder(idx))
+	else
+		if Len(idx) == 1
+			// transforma letra em numero
+			nPos := ascan(aAlf, {|x| x == idx})
+			if nPos != 0
+				idx := 9 + nPos
+			else
+				idx := val(idx)				
+			endif			
+			&(tabela)->(dbsetorder(idx))
+		else
+			&(tabela)->(dbordernickname(idx))
+		endif
+	endif  	
+return

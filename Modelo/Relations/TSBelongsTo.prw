@@ -79,20 +79,20 @@ Obter os objetos da relação
 @return array, {lRet, obj} lRet: .T. se encontrou e obj = instancia de TSigaMDBas. lRet: .F. se não, obj : Mensagem de erro 
 /*/
 method obterOrFail() class TSBelongsTo
-	local xRet
+	local xRet, valKey
 	local ind := ::indexOtherKey
 	local pai
 	local fk
 	if ::indexOtherKey == nil
-		ind := 1
+		ind := "1"
 	endif
 	   
 	pai := Self:parent
 	fk :=  Self:foreignKey  
-	xRet := pai:getValKey(fk)
+	valKey := pai:getValKey(fk)
 
-	if xRet[1]
-		xRet := ::related:findOrFail( xRet[2], ind)
-	endif	
+//	if xRet[1]
+		xRet := ::related:findOrFail( valKey, ind)
+//	endif	
 return xRet
 

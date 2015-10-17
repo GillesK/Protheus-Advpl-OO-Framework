@@ -51,6 +51,9 @@ Class TSOneOMany From TSigaMDRel
     
 	method New() constructor
 	method obterOrFail()
+	method salvar()
+	method salvarVarios()
+	method getEAVector()	
 EndClass
 
 
@@ -81,12 +84,68 @@ Obter os objetos da relação
 @return array, {lRet, obj} lRet: .T. se encontrou e obj = instancia de TSColecao. lRet: .F. se não, obj : Mensagem de erro 
 /*/
 method obterOrFail() class TSOneOMany
-	local xRet
+	local xRet, valKey
 	local pai := Self:parent
 	local lk := Self:localKey
-	xRet := pai:getValKey(lk)
-	if xRet[1]
-		xRet := self:related:findAllOrFail(  xRet[2], ::indexFk, ::numCpoFk)
-	endif	
+	valKey := pai:getValKey(lk)
+//	if xRet[1]
+		xRet := self:related:findAllOrFail(  valKey, ::indexFk, ::numCpoFk)
+//	endif	
 return xRet
 
+
+method salvar(modelo) class TSOneOMany
+	local i
+	local aChave
+	local pai
+	// procurar chave
+	aChave := modelo:getChave(::indexFk)
+	
+	pai := self:parent
+	modelo:geraFilial()
+//	$model->setAttribute($this->getPlainForeignKey(), $this->getParentKey());
+	for i := 1 to len(self:localKey)
+		//::parent:valor(self:localKey[i])
+		//nPos := ascan(::parent:campos, {|x| x[CPOTEC] == self:localKey[i] })
+		//nPos := ascan(::campos, {|x| x[2] == cpoKey[i] })
+		if modelo:temFilial
+			modelo:setar(aChave[i+1], pai:valor(self:localKey[i]))
+		else
+			modelo:setar(aChave[i], pai:valor(self:localKey[i]))
+		endif		
+	next
+return modelo:salvar()
+
+
+method salvarVarios(modelos) class TSOneOMany
+	local oIterat, modelo
+	local pai 
+	
+	pai := self:parent
+	if pai:isExecAuto
+		pai:setFilhos(modelos)
+	else
+		oIterat := modelos:getIterator()
+		modelo := oIterat:first()
+		while !oIterat:eoc()
+			::salvar(modelo)		
+			modelo := oIterat:seguinte()
+		enddo	
+	endif
+return
+
+
+method getEAVector() class TSOneOMany
+	local aVector := {}
+	local i, pai, oIterat
+	local modelo
+//	local aVetMod 
+	
+	pai := self:parent
+	oIterat := pai:filhos:getIterator()
+	modelo := oIterat:first()
+	while !oIterat:eoc()
+		aadd(aVector, modelo:getEAVector())
+		modelo := oIterat:seguinte()
+	enddo
+return aVector

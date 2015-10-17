@@ -48,7 +48,7 @@ method exec() class TTestSigaMDBas
 	Self:assert(Alltrim(xReturn:valor('descricao')), "BENS DE CONSUMO")
 	
 	// Grupo de produto setar
-	oGrpProd:setar("descricao", "BENS DE CONSUMO MODIF")
+	oGrpProd:setar("descricao", "BENS DE CONSUMO MODIF 2")
 	Self:assert(Alltrim(oGrpProd:valor('descricao')), "BENS DE CONSUMO MODIF")
 	
 	// Grupo de produto salvar atualizacao

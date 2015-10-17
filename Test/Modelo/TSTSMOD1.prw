@@ -23,7 +23,9 @@ user function TSTSMOD1(sConfFile, sLogDir)
 	// read env file and record
 	// create log file
 	//oTstFactory := TSUTFactor():New(sConfFile, sLogDir)
-	oTstFactory := TSUTFactor():New("C:\Totvs\TotvsTest\sigaware\modelo\env.ini", "C:\Totvs\TotvsTest\sigaware\modelo\")
+	oTstFactory := TSUTFactor():New("C:\Totvs\TotvsTest\sigaware\modelo\env.ini";
+				, "C:\Totvs\TotvsTest\sigaware\modelo\";
+				,"SBM")
 	
 	//oTestCalc := TTestCalc():New(oTstFactory)
 	//oTestCalc:exec()
