@@ -42,6 +42,7 @@ Class TSColecao
 	method getIterator()
 	method find()
 	method sort()	
+	method hydrateAlias()
 EndClass 
 
 
@@ -111,3 +112,5 @@ Sort
 /*/
 method sort(nNum1, nNum2, bCode) Class TSColecao
 return asort(::aCol, nNum1, nNum2, bCode)
+
+
