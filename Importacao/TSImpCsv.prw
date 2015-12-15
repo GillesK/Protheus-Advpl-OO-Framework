@@ -192,8 +192,7 @@ Tratamento específico de um campo. Para classes filhas
 @return character, dado tratado
 /*/
 Method tratEspec(nX, cInput) class TSImpCsv
-		
-return 
+return  cInput
 
 
 /*/{Protheus.doc} doImport
@@ -202,6 +201,7 @@ Método principal para executar a importação
 /*/
 Method doImport()  class TSImpCsv
 
+	local aRet := {.T., ""}
 	static aExcCol := {}
 	static nHandle, nHLog, nHLogExec, nRegistro := 2
 //	static aVetor := {}            
@@ -211,10 +211,9 @@ Method doImport()  class TSImpCsv
 	static cLinha, cLinhaLog
 	static logDir := "c:\Totvs\LogImport\"
 	static cUserId := __cUserId
-	static logFile := "ImportacaoCsv_Log_" + cUserId  + "_" + dtos(Date()) + "_" + ;
-		    			SUBSTR(TIME(), 1, 2) + SUBSTR(TIME(), 4, 2) + SUBSTR(TIME(), 7, 2) ;
-		    			+ ".log"
+	static logFile
 	private lImp := .F.	
+	
 
 //	private sTable 
 //	private nProcess := ::aDef[AScanX(::aDef, {|x,y|x[1]==val(::sOption) })][3]
@@ -222,7 +221,10 @@ Method doImport()  class TSImpCsv
 //	if nProcess != 2
 	//	::sTable := ::aDef[AScanX(::aDef, {|x,y|x[1]==val(::sOption) })][2]
 //	Endif
-		
+	logFile := GetClassName(self) + "_ImportacaoCsv_Log_" + cUserId  + "_" + dtos(Date()) + "_" + ;
+		    			SUBSTR(TIME(), 1, 2) + SUBSTR(TIME(), 4, 2) + SUBSTR(TIME(), 7, 2) ;
+		    			+ ".log"
+		    					
 	if !self:prepFiles()
 		return
 	endif
@@ -258,7 +260,10 @@ Method doImport()  class TSImpCsv
 			if (Len(aDadosTemp) > 1)
 				self:criaVect()
 				nTamArX := len(::aVetor)
-				self:callExec()				
+				aRet := self:callExec()
+				if aRet != nil .And. !aRet[1]
+					FWrite(nHLog, "Registro: " + str(nRegistro)  + " Erro: " + aRet[2] + ENTER)
+				endif				
 				/*Do Case	
 				   // tipo de processamento				   	
 					Case nProcess == 1  // ExecAuto padrão
@@ -284,7 +289,8 @@ Method doImport()  class TSImpCsv
 	else
 		MsgStop("O layout do arquivo de dados é diferente do esperado. Por favor contate o suporte TI / Protheus", "TImpCsv:Erro")
 	EndIf
-		 
+
+	FWrite(nHLog, dtoc(Date()) + " " + time() + " " + "Importação terminada " + ENTER)		 
 	FT_FUSE()
 	FClose(nHLog)    
 		 
@@ -464,6 +470,7 @@ method confFile() class TSImpCsv
 	local cLinha
 	local aTit := {}
 	local ret := .T.
+	local nX
 	
 	if Len(::aTitulos) != 0
 		cLinha  := aHead[::nLinTit]

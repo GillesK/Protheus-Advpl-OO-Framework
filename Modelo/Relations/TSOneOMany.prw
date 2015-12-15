@@ -48,6 +48,7 @@ Class TSOneOMany From TSigaMDRel
     data localKey
     
     data numCpoFk
+    data comFilial
     
 	method New() constructor
 	method obterOrFail()
@@ -74,8 +75,8 @@ method New(parent, relatedType, indexFk, localKey) class TSOneOMany
 	_Super:New(parent, relatedType)
 	
 	::indexFk := indexFk
-	::localKey := localKey	
-	::numCpoFk := len(localKey) + 1
+	::localKey := localKey
+	::numCpoFk := len(localKey) + 1		
 return  (Self)
 
 /*/{Protheus.doc} obterOrFail
@@ -89,7 +90,11 @@ method obterOrFail() class TSOneOMany
 	local lk := Self:localKey
 	valKey := pai:getValKey(lk)
 //	if xRet[1]
+//	if comFilial != nil .And. comFilial == .T.	
+	//	xRet := self:related:findAllOrFail(  valKey, ::indexFk, ::numCpoFk, "")
+//	else
 		xRet := self:related:findAllOrFail(  valKey, ::indexFk, ::numCpoFk)
+	//endif
 //	endif	
 return xRet
 

@@ -140,7 +140,7 @@ Função da entidade. Deve ser informado no construtor da classe filha
 	// 1 Nome externo, 2 nome interno, 3 tipo, 4 valor, 5 mudado, 6 chave
 	
 	data campos
-
+	data recNumber
 	// chave primaria
 	data chave
 
@@ -242,7 +242,10 @@ Deve ser informado no contrutor da classe filha
 	
 	method setOrderInternal()
 	method clone()
-	method setMemory()	
+	method setMemory()
+	method getFields()	
+	method getAHeader()
+	method getACols()
 EndClass
 
 /*/{Protheus.doc} New
@@ -262,9 +265,12 @@ Method New() Class TSigaMDBas
 	
 return (Self)
 
+
+
 method setFilhos(filhos) class TSigaMDBas
 	::filhos := filhos
 return
+
 
 /*/{Protheus.doc} iniCampos
 Método para inicializar a definição dos campos e da chave primaria.
@@ -574,7 +580,7 @@ method findOrFail(pChave, pFilter, index,  filial)  class TSigaMDBas
 		&(tabela)->(dbgotop())
 		
 		If &(tabela)->(DBSeek(filial+pChave))
-			self:fillCampos() 
+			self:fillCampos()  
 			aRet[2] := Self
 		else
 			self:resetCampos()
@@ -868,6 +874,7 @@ method fillCampos() class TSigaMDBas
 			ConOut( ProcName() + " " + Str(ProcLine()) + " " + oError:Description )
 		end sequence
 	next
+	::recNumber := &(tabela)->(RECNO())
 	Errorblock(bErrorBlock)
 	
 //		if ValType(&(tabela+"->"+Self:campos[i][2])) <> "U" //ValType(&(tabela+"->"+Self:campos[i][2]))
@@ -920,12 +927,14 @@ method setar(campo, valor) class  TSigaMDBas
 //	endif		
 return /*xReturn*/
 
+
+
 /*/{Protheus.doc} salvar
 Salvar as modificações do modelo na base. Gerencia a inserção como a modificação
 @type method
 @return array, {lRet, cMessage} lRet: .T. se conseguiu salvar .F. se não, cMessage : Mensagem de erro
 /*/
-Method salvar() class TSigaMDBas
+Method salvar(/*pIns*/) class TSigaMDBas
 	local aRet := {.T., ::entidade + " salva no " +  ::funcao}
 	local aRet2 := {}
 	local aRet3 := {}
@@ -952,7 +961,12 @@ Method salvar() class TSigaMDBas
 	if lIns
 		::geraFilial()
 		::geraNum()				
-	endif		   
+	endif		 
+	//********************* TESTE
+/*	if pIns != nil
+		lIns := pIns
+	endif*/
+	//********************* FIM TESTE 
 	if ::isExecAuto
 		if !lIns
 			opcao := ATUALIZAR				
@@ -1047,6 +1061,7 @@ method salvaRegistro(lIns, valChave)  class TSigaMDBas
 			// TODO gerenciar erro
 			begin sequence
 				&(tabela)->(&(Self:campos[i][CPOTEC])) := Self:campos[i][VALOR]
+				Self:campos[i][MUDADO] == .F.
 			Recover
 				ConOut( ProcName() + " " + Str(ProcLine()) + " " + oError:Description )
 			end sequence						
@@ -1145,7 +1160,8 @@ method deletaRegistro(valChave) class  TSigaMDBas
 	local tabela := ::tabela
 	
 	dbselectarea(tabela)	
-	&(tabela)->(dbsetorder(1))
+	::setOrderInternal(::pkIndex)	
+//	&(tabela)->(dbsetorder(1))
 	&(tabela)->(dbgotop())
 				
 	if !(&(tabela)->(DBSeek(valChave)))
@@ -1197,6 +1213,7 @@ method getEAVector() class TSigaMDBas
 			cCpoTec := self:campos[i][CPOTEC]
 			cpoVal := self:campos[i][VALOR]
 			aadd(aVetor , {cCpoTec,cpoVal,nil})
+			self:campos[i][MUDADO] := .F.
 		endif	
 	next
 return aVetor
@@ -1371,12 +1388,34 @@ method hydratePos() class  TSigaMDBas
 return
 
 
+/*/{Protheus.doc} hydrateAlias
+(long_description)
+@type method
+@param aliasQry, array, (Descrição do parâmetro)
+/*/
 method hydrateAlias(aliasQry) class  TSigaMDBas
 	local i
    	Local bError         := { |e| oError := e , Break(e) }
    	Local bErrorBlock	
+   	local oQuery, aLastQuery, colCpo, oIterat, cpo, campo 
 	
-	bErrorBlock    := ErrorBlock( bError )	
+	bErrorBlock    := ErrorBlock( bError )
+/*	aLastQuery    := GetLastQuery()	
+	oQuery := TSQuery():New()
+	colCpo := oQuery:getCampos(aLastQuery[2])
+	oIterat := colCpo:getIterator()	
+	cpo := oIterat:first()
+	while !oIterat:eoc()
+		begin sequence
+			campo := ::getCampo(cpo)
+			campo[VALOR] := (aliasQry)->(&(cpo))
+			//::setCampo(cpo, (aliasQry)->(&(cpo)))
+		Recover
+			ConOut( ProcName() + " " + Str(ProcLine()) + " " + oError:Description )
+		end sequence		
+		cpo := oIterat:seguinte()
+	enddo*/
+			
 	for i:= 1 to len(::campos)
 		begin sequence
 			::campos[i][VALOR] := (aliasQry)->(&(Self:campos[i][CPOTEC]))
@@ -1384,15 +1423,27 @@ method hydrateAlias(aliasQry) class  TSigaMDBas
 			ConOut( ProcName() + " " + Str(ProcLine()) + " " + oError:Description )
 		end sequence
 	next 
+	for i:= 1 to len(::campos)
+		begin sequence
+			::campos[i][VALOR] := (aliasQry)->(&(Self:campos[i][CPOPOR]))
+		Recover
+			ConOut( ProcName() + " " + Str(ProcLine()) + " " + oError:Description )
+		end sequence
+	next 	
 	Errorblock(bErrorBlock)	
 return
 
+
+/*/{Protheus.doc} hydAllAlias
+Pre-encher uma coleção de objetos com a query
+@type method
+@param aliasQry, array, alias da query
+/*/
 method hydAllAlias(aliasQry) class  TSigaMDBas
    	local colObj, cNewObj, oNewObj	
    	local axArea
    			
  //  	axArea := aliasQry->(getarea())
-   	
 	colObj := TSColecao():New()
 	(aliasQry)->(DbGoTop())
 	While (aliasQry)->(!EOF())
@@ -1405,6 +1456,7 @@ method hydAllAlias(aliasQry) class  TSigaMDBas
 	(aliasQry)->(DbGoTop())	
 //	restarea(axArea)		
 return colObj
+
 
 /*/{Protheus.doc} hydrateACols
 Preeche o objeto a partir do aHeader e aCols
@@ -1424,13 +1476,14 @@ method hydrateACols(paHeader, paCols) class  TSigaMDBas
 	for j := 1 to len(paCols)
 		cCreate := GetClassName(Self) + "():New()"
 		oObj := &(cCreate)
-		for i := 1 to Len(paHeader)
+		oObj:hydAColsPos(paHeader, paCols, j)
+/*		for i := 1 to Len(paHeader)
 			cpo := oObj:getCampo(alltrim(paHeader[i][2]))
 			//nPos := ascan(oObj:campos, {|x| x[CPOTEC] == alltrim(paHeader[i][2])})
 			if cpo != nil
 				cpo[VALOR] := paCols[j][i] 	
 			endif		
-		next
+		next*/
 		colObj:add(oObj)
 	next
 	//Local xProd := aScan(aHeader,{|x| AllTrim(x[2])=="C6_PRODUTO" })
@@ -1438,6 +1491,13 @@ method hydrateACols(paHeader, paCols) class  TSigaMDBas
 return colObj
 
 
+/*/{Protheus.doc} hydAColsPos
+Preeche o objeto a partir do aHeader e a linha do aCols indicada 
+@type method
+@param paHeader, array, aHeader
+@param paCols, array, aCols
+@param nAt, numérico, posição no aCols
+/*/
 method hydAColsPos(paHeader, paCols, nAt)  class  TSigaMDBas
 	local i, cpo
 	for i := 1 to Len(paHeader)
@@ -1468,6 +1528,8 @@ method extractACols(paHeader, colecao)  class  TSigaMDBas
 	enddo 	
 return aCols
 
+
+
 /*/{Protheus.doc} all
 Retorna todos os elementos da tabela
 @type method
@@ -1485,7 +1547,8 @@ method all(pFilter) class  TSigaMDBas
 
 	axArea := &(tabela)->(getarea())
 	dbSelectArea(::tabela)
-	&(tabela)->(dbSetOrder(1))
+	::setOrderInternal(::pkIndex)	
+//	&(tabela)->(dbSetOrder(1))
 	if pFilter != nil
 		&(tabela)->(DbSetFilter({|| &pFilter }, pFilter))
 	endif			
@@ -1603,6 +1666,7 @@ method ordCampos()   class  TSigaMDBas
 	
 return
 
+
 /*/{Protheus.doc} simulAHeader
 Retorna um aHeader
 @type method
@@ -1614,27 +1678,13 @@ method simulAHeader( aFlds, aNoCampos, lValid)    class  TSigaMDBas
 	local  curTab, nPos, nX
 	local aHeaderInt := {}
 	local axArea := SX3->(getarea())
+	local cValid
 
 	// Define os campos de acordo com o array
 	DbSelectArea("SX3")
 	
-	if ((aFlds == nil .And. aNoCampos == nil) .Or. (aNoCampos != nil)) 
-		aFlds := {}
-		SX3->(DbSetOrder(1))
-		SX3->(DbGoTop())
-		If SX3->(DbSeek(::tabela))
-			curTab := SX3->X3_ARQUIVO
-			while !SX3->(Eof()) .And. curTab == SX3->X3_ARQUIVO
-				nPos := 0
-				if aNoCampos != nil
-					nPos := ascan(aNoCampos, {|x| ::retCpoTec(x) == SX3->X3_CAMPO})
-				endif
-				if nPos == 0 
-					Aadd(aFlds, SX3->X3_CAMPO)
-				endif				
-				SX3->(DbSkip())
-			enddo 
-		endif
+	if ((aFlds == nil .And. aNoCampos == nil) .Or. (aNoCampos != nil))
+		aFlds := ::getFields(aFlds, aNoCampos) 
 	endif
 		
 	SX3->(DbSetOrder(2))
@@ -1646,13 +1696,15 @@ method simulAHeader( aFlds, aNoCampos, lValid)    class  TSigaMDBas
 //		SX3->(DbGoTop())		
 		If SX3->(DbSeek(cpoTec))	
 			// adiciona as informações do campo para o getdados
-			if (lValid == nil) .Or. (lValid != nil .And. lValid == .T.)  	
-				Aadd(aHeaderInt, {AllTrim(X3Titulo()),SX3->X3_CAMPO,SX3->X3_PICTURE,SX3->X3_TAMANHO,SX3->X3_DECIMAL,SX3->X3_VALID,;
-					SX3->X3_USADO,SX3->X3_TIPO,SX3->X3_F3,SX3->X3_CONTEXT,SX3->X3_CBOX,SX3->X3_RELACAO})
+//			cValid := nil
+			if (lValid == nil) .Or. (lValid != nil .And. lValid == .T.)
+				Aadd(aHeaderInt, {AllTrim(X3Titulo()),SX3->X3_CAMPO,SX3->X3_PICTURE,SX3->X3_TAMANHO,SX3->X3_DECIMAL;
+					,SX3->X3_VALID,SX3->X3_USADO,SX3->X3_TIPO,SX3->X3_F3,SX3->X3_CONTEXT,SX3->X3_CBOX,SX3->X3_RELACAO})			
+				//cValid := SX3->X3_VALID
 			else
-				Aadd(aHeaderInt, {AllTrim(X3Titulo()),SX3->X3_CAMPO,SX3->X3_PICTURE,SX3->X3_TAMANHO,SX3->X3_DECIMAL,/*SX3->X3_VALID*/,;
-					SX3->X3_USADO,SX3->X3_TIPO,SX3->X3_F3,SX3->X3_CONTEXT,SX3->X3_CBOX,SX3->X3_RELACAO})
-			endif
+				Aadd(aHeaderInt, {AllTrim(X3Titulo()),SX3->X3_CAMPO,SX3->X3_PICTURE,SX3->X3_TAMANHO,SX3->X3_DECIMAL;
+					,"","",SX3->X3_TIPO,SX3->X3_F3,"" })			
+			endif  	
 		Endif		  		  	
 	Next nX
 
@@ -1669,35 +1721,50 @@ method simulAHeader( aFlds, aNoCampos, lValid)    class  TSigaMDBas
 return aHeaderInt
 
 
-method getColBrowse(aHeaderInt, aFlds, aNoCampos, lValid)     class  TSigaMDBas
+
+method getFields(aFlds, aNoCampos) class  TSigaMDBas
+	aFlds := {}
+	DbSelectArea("SX3")	
+	SX3->(DbSetOrder(1))
+	SX3->(DbGoTop())
+	If SX3->(DbSeek(::tabela))
+		curTab := SX3->X3_ARQUIVO
+		while !SX3->(Eof()) .And. curTab == SX3->X3_ARQUIVO
+			nPos := 0
+			if aNoCampos != nil
+				nPos := ascan(aNoCampos, {|x| ::retCpoTec(x) == SX3->X3_CAMPO})
+			endif
+			if nPos == 0 
+				Aadd(aFlds, SX3->X3_CAMPO)
+			endif				
+			SX3->(DbSkip())
+		enddo 
+	endif	
+return aFlds
+
+
+/*/{Protheus.doc} getColBrowse
+Recupera a definição de colunas para trabalhar com FWMBrowse de tabela temporaria
+@type method
+@param aHeaderInt, array, (Descrição do parâmetro)
+@param aFlds, array, (Descrição do parâmetro)
+@param aNoCampos, array, (Descrição do parâmetro)
+@param lValid, ${param_type}, (Descrição do parâmetro)
+/*/
+method getColBrowse(aHeaderInt, aFlds, aNoCampos)     class  TSigaMDBas
 	//local aColunas
 	local  curTab, nPos, nX
 	//local aHeaderInt := {}
 	local axArea := SX3->(getarea())
 
-	// Define gilleos campos de acordo com o array
+	// Define os campos de acordo com o array
 	if aHeaderInt == nil
 		aHeaderInt := {}
 	endif
 	DbSelectArea("SX3")
 	
 	if ((aFlds == nil .And. aNoCampos == nil) .Or. (aNoCampos != nil)) 
-		aFlds := {}
-		SX3->(DbSetOrder(1))
-		SX3->(DbGoTop())
-		If SX3->(DbSeek(::tabela))
-			curTab := SX3->X3_ARQUIVO
-			while !SX3->(Eof()) .And. curTab == SX3->X3_ARQUIVO
-				nPos := 0
-				if aNoCampos != nil
-					nPos := ascan(aNoCampos, {|x| ::retCpoTec(x) == SX3->X3_CAMPO})
-				endif
-				if nPos == 0 
-					Aadd(aFlds, SX3->X3_CAMPO)
-				endif				
-				SX3->(DbSkip())
-			enddo 
-		endif
+		aFlds := ::getFields(aFlds, aNoCampos)
 	endif
 		
 	SX3->(DbSetOrder(2))
@@ -1728,6 +1795,7 @@ method getColBrowse(aHeaderInt, aFlds, aNoCampos, lValid)     class  TSigaMDBas
 		
 	
 return aHeaderInt
+
 
 /*/{Protheus.doc} simuACols
 Simula um aCols
@@ -1780,11 +1848,71 @@ method setOrderInternal(index)  class  TSigaMDBas
 return
 
 
-method clone()  class  TSigaMDBas
-	local cCreate, oObj
+/*/{Protheus.doc} clone
+Clona o objeto
+@type method
+@return obj, objeto clonado
+/*/
+method clone(lMudado)  class  TSigaMDBas
+	local cCreate, oObj, i
 	cCreate := GetClassName(Self) + "():New()"
 	oObj := &(cCreate)
 
 	oObj:campos := aClone(self:campos)
-		
+	if lMudado == nil .Or. lMudado == .T.
+		for i := 1 to len(oObj:campos)
+			if oObj:campos[i][VALOR] != nil
+				oObj:campos[i][MUDADO] := .T.
+			endif
+		next
+	endif
 return oObj
+
+
+method getAHeader(lValid) class TSigaMDBas
+	local aHeaderInt := {}
+	local nX
+	local axArea := SX3->(getarea())
+	local cValid
+
+	::ordCampos()
+	DbSelectArea("SX3")
+	
+	SX3->(DbSetOrder(2))
+	SX3->(DbGoTop())		
+	// Faz a contagem de campos no array
+	For nX := 1 to Len(::campos)
+		// posiciona sobre o campo
+		cpoTec := ::campos[nX][CPOTEC]
+//		SX3->(DbGoTop())		
+		If SX3->(DbSeek(cpoTec))	
+			// adiciona as informações do campo para o getdados
+//			cValid := nil
+			if (lValid == nil) .Or. (lValid != nil .And. lValid == .T.)
+				Aadd(aHeaderInt, {AllTrim(X3Titulo()),SX3->X3_CAMPO,SX3->X3_PICTURE,SX3->X3_TAMANHO,SX3->X3_DECIMAL;
+					,SX3->X3_VALID,SX3->X3_USADO,SX3->X3_TIPO,SX3->X3_F3,SX3->X3_CONTEXT,SX3->X3_CBOX,SX3->X3_RELACAO})			
+			else
+				Aadd(aHeaderInt, {AllTrim(X3Titulo()),SX3->X3_CAMPO,SX3->X3_PICTURE,SX3->X3_TAMANHO,SX3->X3_DECIMAL;
+					,"","",SX3->X3_TIPO,SX3->X3_F3,"" })			
+			endif  	
+		Endif		  		  	
+	Next nX
+	
+	restarea(axArea)
+return aHeaderInt
+
+
+method getACols()  class TSigaMDBas
+	local aColsIn := {}
+	local nX
+	
+	::ordCampos()
+	For nX := 1 to Len(::campos)
+		// posiciona sobre o campo
+		aadd(aColsIn, ::campos[nX][VALOR])		  		  	
+	Next nX
+	
+	aadd(aColsIn, .F.)
+return aColsIn
+
+

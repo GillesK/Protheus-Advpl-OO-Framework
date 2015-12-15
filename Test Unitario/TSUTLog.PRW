@@ -32,11 +32,11 @@ Constructor
 @type method
 @param logDir, character, pasta (caminho absoluto) onde sera escrito o arquivo de log dos testes
 /*/
-Method New(logDir) Class TSUTLog
+Method New(testName, logDir) Class TSUTLog
 
 //	::logFile := logFile	  
 //	local cUserId := __cUserId	
-	Local logFile := "Test_Log_"  + dtos(Date()) + "_" + ;
+	Local logFile := testName + "teste_Log_"  + dtos(Date()) + "_" + ;
 		    			SUBSTR(TIME(), 1, 2) + SUBSTR(TIME(), 4, 2) + SUBSTR(TIME(), 7, 2) ;
 		    			+ ".log"		
 	::logDir := logDir		    			

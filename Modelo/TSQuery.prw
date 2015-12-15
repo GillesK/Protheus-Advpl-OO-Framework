@@ -5,6 +5,13 @@
 #include "msobject.ch"
 
 
+/*/{Protheus.doc} TSQuery
+Classe que representa um query de base de dados
+@type class
+@author Gilles
+@since 15/11/2015
+@version 1.0
+/*/
 class TSQuery
 
 	method New() constructor
@@ -16,6 +23,11 @@ method New()  class  TSQuery
 return self
 
 	
+/*/{Protheus.doc} getCampos
+Retorna uma coleção com os nomes dos campos selecionados pela query
+@type method
+@param cQuery, character, (Descrição do parâmetro)
+/*/
 method getCampos(cQuery) class  TSQuery
 	local colCpo
 	local nPosSel, nPosFrom

@@ -64,6 +64,7 @@ Class TSUTFactor
 	
 	data envFile
 	data logDir
+	data testName
 	
 	data oLog
 	data tables
@@ -89,10 +90,11 @@ senha=xxxxxxx
 @param sEnvFile, character, caminha absoluto para o arquivo de definição de ambiente.
 @param sLogDir, character, Pasta onde vai ser escrito o arquivo de log
 /*/
-Method New(sEnvFile, sLogDir, cTables) Class TSUTFactor
+Method New(testName, sEnvFile, sLogDir, cTables) Class TSUTFactor
+	::testName := testName
 	::envFile := sEnvFile
 	::logDir := sLogDir
-	::oLog := TSUTLog():New(sLogDir)
+	::oLog := TSUTLog():New(testName, sLogDir)
 	::tables := cTables
 	// Read env File
 	self:readEnvFile(::envFile)	

@@ -58,14 +58,14 @@ return Self
 
 
 method callExec() class TSICGeneri
-
+	local aRet := {.T., ""}
    	//nTamArX := len(::aVetor)
    
    if nTamArX > 0   
-   		self:update(.T., 1)				
+   		aRet := self:update(.T., 1)				
 	EndIf
 	
-return 
+return aRet
 
 /*/{Protheus.doc} update
 Update na base
@@ -86,7 +86,7 @@ Method update(lIns, nIndIni) class TSICGeneri
 		EndIf	
 	Next Nx
 	&(sTable)->(MsUnlock())
-return
+return {.T., ""}
 
 
 
