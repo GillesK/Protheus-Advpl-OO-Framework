@@ -32,6 +32,12 @@ class TSTransObj
 	method hydrateACols()
 	method hydAColsPos()		
 	method numCampos()
+	method getCampo()
+	method compare()
+	method compareA()
+	method equalVal()
+	method equalValA()	
+	method concat()
 endclass
 
 method New()  class  TSTransObj
@@ -108,6 +114,67 @@ method equal(key, item)  class  TSTransObj
 	endif
 return lRet
 
+
+method getCampo(cpoName)  Class TSTransObj
+	local nPos
+	local xReturn := nil
+		
+	nPos := ascan(::campos, {|x| x[CHAVE] == cpoName })
+	if nPos != 0
+		xReturn :=  ::campos[nPos]
+	endif	
+return xReturn
+
+
+method compare(key, value, comp) Class TSTransObj
+	local lRet := .F.
+	local ope 	
+	default comp := "=="
+	private prvVal1, prvVal2
+	
+	prvVal1 := ::getCampo(key)[VALOR]
+	prvVal2 := value
+// 	ope := "self:getCampo(key)[VALOR] " + comp + " value"
+//	valor := 
+	ope := "prvVal1 " +  comp +  " prvVal2" 
+	if &ope
+		lRet := .T.
+	endif
+return lRet
+
+method compareA(keys, values, comp) Class TSTransObj
+	local lRet := .F.
+	local ope , i	
+	default comp := "=="
+	private prvVal1, prvVal2 := ""
+	
+	prvVal1 := ::concat(keys)
+	for i := 1 to len(values)
+		prvVal2 += values[i]
+	next	
+	ope := "prvVal1 " +  comp +  " prvVal2" 
+	if &ope
+		lRet := .T.
+	endif
+return lRet
+
+method equalVal(key,value) class TSTransObj
+ 	local lRet
+ 	lRet := ::compare(key,value)
+return lRet
+
+method equalValA(keys,values) class TSTransObj
+ 	local lRet
+ 	lRet := ::compareA(keys,values)
+return lRet
+
+
+method concat(keys) Class TSTransObj
+	local ret := "", i
+	for i := 1 to len(keys)
+		ret += ::getCampo(keys[i])[VALOR]
+	next
+return ret
 
 /*/{Protheus.doc} hydrateAlias
 Preenche o objeto com os campos da query atualmente posicionado
@@ -217,7 +284,7 @@ method getAHeader(aHeaderInt, aFlds, lValid)    class  TSTransObj
 				//cValid := SX3->X3_VALID
 			else
 				Aadd(aHeaderInt, {AllTrim(X3Titulo()),SX3->X3_CAMPO,SX3->X3_PICTURE,SX3->X3_TAMANHO,SX3->X3_DECIMAL;
-					,"","",SX3->X3_TIPO,SX3->X3_F3,"" })			
+					,"","",SX3->X3_TIPO,SX3->X3_F3,"", SX3->X3_CBOX})			
 			endif  	
 		Endif		  		  	
 	Next nX

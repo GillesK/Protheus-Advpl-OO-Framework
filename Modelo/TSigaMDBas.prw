@@ -246,7 +246,18 @@ Deve ser informado no contrutor da classe filha
 	method getFields()	
 	method getAHeader()
 	method getACols()
+	method getNum()
+	method compare()
+	method compareA()
+	method equalVal()
+	method equalValA()			
+	method concat()
+	
+	method getEAItem(campo, opcao)	
 EndClass
+
+
+
 
 /*/{Protheus.doc} New
 Constructor
@@ -319,23 +330,15 @@ method addCpoDef(aCampoDef)  class TSigaMDBas
 	local i
 	local cOrdem := "01"
 	for i := 1 to Len(aCampoDef)	
-		// adicionar autoInc
-/*		if Len(aCampoDef[i]) == 3
-			aadd(aCampoDef[i], .F.)
-		endif
-		if Len(aCampoDef[i]) == 4
-			aadd(aCampoDef[i], .F.)
-		endif*/		
-		// Adicionar Chave
-		//aadd(aCampoDef[i], .F.)
-		// valor
-		// adicionar tamanho e decimal
+		// adicionar tamanho
 		if Len(aCampoDef[i]) == 3
 			aadd(aCampoDef[i], 0)
 		endif		
+		//  e decimal
 		if Len(aCampoDef[i]) == 4
 			aadd(aCampoDef[i], 0)
-		endif				
+		endif
+		// valor				
 		aadd(aCampoDef[i], nil)
 		//mudado
 		aadd(aCampoDef[i], .F.)
@@ -455,7 +458,7 @@ method getChave(index) class  TSigaMDBas
 	if nPos != 0 
 		aRet := ::chaves[nPos][CHAVE_CPO]
 	else
-		nPos := ascan(::chaves, {|x| x[CHAVE_ALIAS] = index})
+		nPos := ascan(::chaves, {|x| Len(x) == 3 .And. x[CHAVE_ALIAS] = index})
 		if nPos != 0 
 			aRet := ::chaves[nPos][CHAVE_CPO]
 		endif		
@@ -934,7 +937,7 @@ Salvar as modificações do modelo na base. Gerencia a inserção como a modificação
 @type method
 @return array, {lRet, cMessage} lRet: .T. se conseguiu salvar .F. se não, cMessage : Mensagem de erro
 /*/
-Method salvar(/*pIns*/) class TSigaMDBas
+Method salvar(/*pIns*/num) class TSigaMDBas
 	local aRet := {.T., ::entidade + " salva no " +  ::funcao}
 	local aRet2 := {}
 	local aRet3 := {}
@@ -947,6 +950,7 @@ Method salvar(/*pIns*/) class TSigaMDBas
 	local valChave := ""
 	local opcao := INSERIR
 	local lMsErroEA
+	default num := ""
 	// TODO chamada do log
 	
 	lMsHelpAuto 		:= .T.
@@ -960,7 +964,9 @@ Method salvar(/*pIns*/) class TSigaMDBas
 	   // Exec auto ou insert direto
 	if lIns
 		::geraFilial()
-		::geraNum()				
+		num := ::geraNum()		
+	else
+		num := ::getNum() 		
 	endif		 
 	//********************* TESTE
 /*	if pIns != nil
@@ -969,7 +975,7 @@ Method salvar(/*pIns*/) class TSigaMDBas
 	//********************* FIM TESTE 
 	if ::isExecAuto
 		if !lIns
-			opcao := ATUALIZAR				
+			opcao := ATUALIZAR								
 		endif								
 		//::prepExecAuto()
 		// numeração
@@ -990,6 +996,8 @@ Method salvar(/*pIns*/) class TSigaMDBas
 //		aRet := {.F., aRet2[2]}
 //	endif
 
+//	aadd(aRet, num)
+	
 	//aRet := {.F., ::entidade + " não enconstrado no " + ::funcao}
 	restarea(axArea)
 return aRet
@@ -1013,16 +1021,30 @@ method geraNum()  class TSigaMDBas
 	local nPos
 	//local aRet := nil
 	local cpoInc
+	local num := ""
 	cpoInc := ::getAutoIncCpo()
-	if cpoInc != nil	
-		::setar(cpoInc[CPOTEC] ,GetSxeNum(::tabela, cpoInc[CPOTEC]))
-	endif	
-return 
+	if cpoInc != nil
+		num := GetSxeNum(::tabela, cpoInc[CPOTEC])
+		if cpoInc != nil	
+			::setar(cpoInc[CPOTEC] ,num)
+		endif	
+	endif
+return num
+
+
+method getNum() class TSigaMDBas
+	local cpoInc
+	local num := ""
+	cpoInc := ::getAutoIncCpo()
+	if cpoInc != nil
+		num := cpoInc[VALOR]
+	endif
+return num
 
 method confirmNum(lIns)  class TSigaMDBas
 	local incCpo
 	
-	incCpo := ::getAutoIncCpo()
+	incCpo := ::getAutoIncCpo()	
 	if incCpo != nil .And. lIns
 		ConfirmSX8()
 	endif
@@ -1042,7 +1064,10 @@ method salvaRegistro(lIns, valChave)  class TSigaMDBas
 	local tabela := ::tabela
 	local i
    	Local bError         := { |e| oError := e , Break(e) }
-   	Local bErrorBlock 
+   	Local bErrorBlock
+   	local vc := ""
+   	default lIns := .F.
+   	default valChave := ::isInsert(@vc) 
 	
 	dbselectarea(tabela)	
 	::setOrderInternal(::pkIndex)
@@ -1079,9 +1104,9 @@ method isInsert( valChave) class TSigaMDBas
 	local nPos, cpo
 	local i
 	local lIns
+	default valChave := ""
 
 	lIns := .F.
-	valChave := ""
 	for i := 1 to len(::chave)
 		cpo := ::getCampo(::chave[i])
 		//nPos := ascan(::campos, {|x| x[CPOTEC] == ::chave[i] })
@@ -1197,27 +1222,30 @@ Retorna o vector de dados para chamar o ExecAuto
 @type method
 @return array, array contendo os dados no formato esperado pela ExecAuto
 /*/
-method getEAVector() class TSigaMDBas
+method getEAVector(opcao) class TSigaMDBas
 	local i
 	local cCpoTec, cpoVal, lCpoMud
 	local aVetor := {}
 	local nPos
 	local eaChave
+	local item
 	//private lMsErroAuto := .F.
 	
 	self:ordCampos()	
 	for i := 1 to len(self:campos)
 		nPos := ascan(::eaChave, {|x| x == self:campos[i][CPOTEC]} )
 		if (self:campos[i][MUDADO] == .T.) .Or. (nPos != 0 .And. self:campos[i][VALOR] != nil)
-			// ou faz parta da chave primaria
-			cCpoTec := self:campos[i][CPOTEC]
-			cpoVal := self:campos[i][VALOR]
-			aadd(aVetor , {cCpoTec,cpoVal,nil})
+			item := ::getEAItem(self:campos[i], opcao)
+			aadd(aVetor ,item)
+			// TODO regra especifica
 			self:campos[i][MUDADO] := .F.
 		endif	
 	next
 return aVetor
 
+
+method getEAItem(campo, opcao)  class TSigaMDBas
+return {campo[CPOTEC],campo[VALOR],nil}
 
 method resExecAuto(lMsErroEA, lIns)   class TSigaMDBas
 	local aiRet := {.T., ""}
@@ -1916,3 +1944,53 @@ method getACols()  class TSigaMDBas
 return aColsIn
 
 
+
+method compare(key, value, comp) Class TSigaMDBas
+	local lRet := .F.
+	local ope, valor, valin
+	default comp := "=="
+	private prvVal1, prvVal2
+	
+	prvVal1 := ::getCampo(key)[VALOR]
+	prvVal2 := value
+// 	ope := "self:getCampo(key)[VALOR] " + comp + " value"
+//	valor := 
+	ope := "prvVal1 " +  comp +  " prvVal2" 
+	if &ope
+		lRet := .T.
+	endif	
+return lRet
+
+method compareA(keys, values, comp) Class  TSigaMDBas
+	local lRet := .F.
+	local ope , i	
+	default comp := "=="
+	private prvVal1, prvVal2 := ""
+	
+	prvVal1 := ::concat(keys)
+	for i := 1 to len(values)
+		prvVal2 += values[i]
+	next	
+	ope := "prvVal1 " +  comp +  " prvVal2" 
+	if &ope
+		lRet := .T.
+	endif
+return lRet
+
+method equalVal(key,value) class  TSigaMDBas
+ 	local lRet
+ 	lRet := ::compare(key,value)
+return lRet
+
+method equalValA(keys,values) class  TSigaMDBas
+ 	local lRet
+ 	lRet := ::compareA(keys,values)
+return lRet
+
+
+method concat(keys) Class TSigaMDBas
+	local ret := "", i
+	for i := 1 to len(keys)
+		ret += ::getCampo(keys[i])[VALOR]
+	next
+return ret

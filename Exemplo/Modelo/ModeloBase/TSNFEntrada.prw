@@ -10,11 +10,11 @@
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
-ฑฑบPrograma  ณ TSClienteบ Autor ณ gilles koffmann บ Data  ณ  17/08/15   บฑฑ
+ฑฑบPrograma  ณ TSNFEntradaบ Autor ณ gilles koffmann บ Data  ณ  16/10/15   บฑฑ
 ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
 ฑฑบEmpresa   ณ Sigaware Pb บE-Mailณ gilles@sigawarepb.com.br                 บฑฑ
 ฑฑฬออออออออออุอออออออออออออออออออสออออออฯอออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบDescricao ณ Classe de Cliente          					    		    บฑฑ
+ฑฑบDescricao ณ Classe da Nota Fioscal de Entrada          	    		    บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
 ฑฑบUso       ณ Elfa								                            บฑฑ
@@ -24,8 +24,8 @@
 */
 
 
-/*/{Protheus.doc} TSCliente
-Classe representando um cliente (SA1).
+/*/{Protheus.doc} TSNFEntrada
+Classe representando uma nota fiscal de entrada (SF1).
 Herda de TSigaMDBas
 @type class
 @author Gilles Koffmann - Sigaware Pb
@@ -33,43 +33,46 @@ Herda de TSigaMDBas
 @version 1.0
 @see TSigaMDBas.html
 /*/
-Class TSCliente From TSigaMDBas
+Class TSNFEntrada From TSigaMDBas
 	method New() Constructor
 	method iniCampos()
-	method execAuto()
+//	method execAuto()
+	method itens()
+	method fornecedor()
 EndClass
 
 
-Method New( ) Class TSCliente 
+Method New( ) Class TSNFEntrada 
 	_Super:New()
-	::tabela 	  := 		"SA1"	
-	::entidade			:=	"Cliente"
-	::funcao			:= "Cadastro de Cliente"		
-	::isExecAuto := 			.T.	
+	::tabela 	  := 		"SF1"	
+	::entidade	  :=	"Nota Fiscal de Entrada"
+	::funcao	  := 	"Nota Fiscal de Entrada"		
+//	::isExecAuto   := .T.
 return (Self)
 
 
-Method iniCampos() class TSCliente
+Method iniCampos() class TSNFEntrada
 	local cpoDef
-	// Nome externo, nome interno, tipo	
-	cpoDef := {{"filial"					, "A1_FILIAL"		, "C"};
-				,{"codigo"					, "A1_COD"			, "C"};
-				,{"loja"					, "A1_LOJA"		, "C"};
-				,{"estado"					, "A1_EST"			, "C"};
-				,{"grupoTributario"		, "A1_GRPTRIB"	, "C"};
-				,{"tipo"					, "A1_TIPO"		, "C"};
-				,{"regiaoSetor"			, "A1_XREGIAO"	, "C"};
-				,{"setor"					, "A1_SETOR"		, "C"};
-				,{"cnpjCpf"				, "A1_CGC"			, "C"};
-				,{"razaoSocial"			, "A1_NOME"		, "C"}}
+	// Nome externo, nome interno, tipo, AutoInc	, campo filial
+	cpoDef := {{"filial"					,"F1_FILIAL"		, "C"};
+				,{"numero"					,"F1_DOC"			, "C"};
+				,{"serie"					,"F1_SERIE"		, "C"};
+				,{"fornecedor"			,"F1_FORNECE"		, "C"};
+				,{"lojaFornecedor"		,"F1_LOJA"			, "C"};
+				,{"tipo"					,"F1_TIPO"			, "C"}}
 
 	::addCpoDef(cpoDef)	
 
-	::setChave({{"1",{"A1_FILIAL", "A1_COD", "A1_LOJA"}}})			
+	::setChave({{"1",{"F1_FILIAL", "F1_DOC", "F1_SERIE", "F1_FORNECE", "F1_LOJA", "F1_TIPO"}}})
+	
+//	::setEAChave({"C5_NUM"})
 return
 
 
+Method itens() class TSNFEntrada
+return ::hasMany("TSItemNFEntrada", "1", {"F1_DOC", "F1_SERIE", "F1_FORNECE", "F1_LOJA"})
 
-/*method execAuto(opcao) class TSCliente
-	MSExecAuto({|x,y| Mata030(x,y)},::getEAVector(),opcao)
-return*/
+method fornecedor()  class TSNFEntrada
+return ::belongsTo("TSFornecedor", {"F1_FORNECE", "F1_LOJA"}, "1")
+
+// mata103

@@ -43,6 +43,9 @@ Class TSColecao
 	method find()
 	method sort()	
 	method hydrateAlias()
+	method findA()
+	method sortA()
+	method excluir()
 EndClass 
 
 
@@ -99,8 +102,36 @@ Encontrar um elemento na coleção
 @type method
 @param bCode, blóco de codigo, Mesma forma que para ascan
 /*/
-method find(bCode)  Class TSColecao	
-return ascan(::aCol, bCode)
+method find( key, value, bCode)  Class TSColecao
+	local oObj := nil
+	local nPos
+	if key == nil	
+		nPos := ascan(::aCol, bCode)
+	else
+		nPos := ascan(::aCol, {|x| x:equalVal(key, value)})
+	endif
+	if nPos != 0
+		oObj := ::aCol[nPos]
+	endif
+return oObj
+
+
+method findA( keys, values, bCode)  Class TSColecao
+	local oObj := nil
+	local nPos
+	local i
+	local cCompare := ""
+	local value := ""
+	
+	if keys == nil	
+		nPos := ascan(::aCol, bCode)
+	else 
+		nPos := ascan(::aCol, {|x| x:equalValA(keys, values)})	
+	endif
+	if nPos != 0
+		oObj := ::aCol[nPos]
+	endif
+return oObj
 
 
 /*/{Protheus.doc} sort
@@ -114,3 +145,18 @@ method sort(nNum1, nNum2, bCode) Class TSColecao
 return asort(::aCol, nNum1, nNum2, bCode)
 
 
+method sortA(keys, comp, bCode) Class TSColecao
+	local bCode
+	local compare
+	default comp := "<"
+
+//	compare  := "x:concat(keys) " + comp + " y:concat(keys)"
+//return asort(::aCol, , , {|x,y| &compare})
+return asort(::aCol, , , {|x,y| x:concat(keys) < y:concat(keys)})
+
+method excluir(pos)  Class TSColecao
+	local curLen
+	curLen := self:length()
+	ADel(::aCol, pos)
+	ASize(::aCol, curLen -1)
+return 

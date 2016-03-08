@@ -147,10 +147,12 @@ method getEAVector() class TSOneOMany
 //	local aVetMod 
 	
 	pai := self:parent
-	oIterat := pai:filhos:getIterator()
-	modelo := oIterat:first()
-	while !oIterat:eoc()
-		aadd(aVector, modelo:getEAVector())
-		modelo := oIterat:seguinte()
-	enddo
+	if pai:filhos != nil
+		oIterat := pai:filhos:getIterator()
+		modelo := oIterat:first()
+		while !oIterat:eoc()
+			aadd(aVector, modelo:getEAVector())
+			modelo := oIterat:seguinte()
+		enddo
+	endif
 return aVector

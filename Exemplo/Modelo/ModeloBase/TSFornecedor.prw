@@ -16,7 +16,7 @@
 ฑฑบDescricao ณ Classe de Fornecedor          					    		    บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Framework copyright Sigaware Pb                            บฑฑ
+ฑฑบUso       ณ Elfa								                            บฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
@@ -38,6 +38,8 @@ Class TSFornecedor From TSigaMDBas
 		
 	method iniCampos()
 	method execAuto()
+	
+	method icmsInterestadual()
 EndClass
 
 
@@ -46,21 +48,26 @@ Method New( ) Class TSFornecedor
 	::tabela 	  := 		"SA2"	
 	::entidade			:=	"Fornecedor"
 	::funcao			:=	"Cadastro de Fornecedor"		
-	::execAuto := 			.T.	
+	::isExecAuto := 			.T.	
 return (Self)
 
 
 Method iniCampos() class TSFornecedor
 	local cpoDef
 	// Nome externo, nome interno, tipo	
-	cpoDef := {{"filial", "A2_FILIAL", "C"};
-				,{"codigo", "A2_COD", "C"};
-				,{"loja", "A2_LOJA", "C"};
-				,{"estado", "A2_EST", "C"}}
+	cpoDef := {{"filial"			, "A2_FILIAL"		, "C"};
+				,{"codigo"			, "A2_COD"			, "C"};
+				,{"loja"			, "A2_LOJA"		, "C"};
+				,{"estado"			, "A2_EST"			, "C"};
+				,{"razaoSocial"	, "A2_NOME"		, "C"}}
 
 	::addCpoDef(cpoDef)	
 
-	::setChave({{1,{"A2_FILIAL", "A2_COD"}}})
+	//::addCpoFilial("A2_FILIAL")
+	//::addPkIndex()
+	//::addAutoIncCpo()
+	
+	::setChave({{"1",{"A2_FILIAL", "A2_COD", "A2_LOJA"}}})
 		
 return
 
@@ -68,3 +75,6 @@ return
 method execAuto(opcao) class TSFornecedor
 	MSExecAuto({|x,y| Mata020(x,y)},::getEAVector(),opcao)
 return
+
+method icmsInterestadual()  class TSFornecedor
+return ::belongsTo('TELicIcmsInterestadual', {'A2_EST'}, "1" )

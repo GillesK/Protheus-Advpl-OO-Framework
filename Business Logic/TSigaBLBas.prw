@@ -33,7 +33,12 @@ Classe base para definição de regras de negocio (Business Logic)
 /*/
 Class TSigaBLBas  
 
+	data idFunc
+	data erroTitulo
+		
 	method New() Constructor
+	method getErroTit()
+	method mailDebug()
 		
 EndClass
 
@@ -41,9 +46,26 @@ EndClass
 /*/{Protheus.doc} New
 Constructor
 @type method
-
 /*/
 Method New() Class TSigaBLBas
 	
 return (Self)
 
+
+method getErroTit()  Class TSigaBLBas
+	local cTit
+	cTit := ::erroTitulo + ::idFunc
+return cTit
+
+
+
+method mailDebug(cMsg) class TSigaBLBas
+//	local cPara
+//	cPara := SuperGetMv("EF_AEMAIER", .F. , "licitacao@grupoelfa.com.br, aprovacaowf@grupoelfa.com.br",  )
+	// send mail TI
+	U_ENVMAIL("wf.elfadf@atmahospitalar.com.br", "gilles.koffmann@gmail.com" , "Erro AE" ,cMsg, ,.T.,)									
+
+return
+
+	
+return

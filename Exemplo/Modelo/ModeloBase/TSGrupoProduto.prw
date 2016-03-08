@@ -17,7 +17,7 @@
 ฑฑบDescricao ณ Classe de Grupo de Produto          					    		    บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Framework copyright sigaware Pb                            บฑฑ
+ฑฑบUso       ณ Elfa									                           บฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
@@ -51,7 +51,7 @@ Method New( ) Class TSGrupoProduto
 	::entidade			:=			"Grupo de Produto"
 	::funcao			:=		"Cadastro de grupo de produto"
 	// Uso de execAuto para inserir, atualizar e deletar	
-	::execAuto := 			.F.
+	::isExecAuto := 			.F.
 return (Self)
 
 
@@ -59,13 +59,13 @@ Method iniCampos() class TSGrupoProduto
 	// Nome externo, nome interno, tipo
 	local cpoDef
 	// defini็ใo dos campos e aliases
-	cpoDef := {{"filial", "BM_FILIAL", "C"};
-				,{"codigo", "BM_GRUPO", "C"};
-				,{"descricao", "BM_DESC", "C"}}
+	cpoDef := {{"filial"			, "BM_FILIAL"		, "C"};
+				,{"codigo"			, "BM_GRUPO"		, "C"};
+				,{"descricao"		, "BM_DESC"		, "C"}}
 	::addCpoDef(cpoDef)	
 	
 	// defini็ใo das chaves: equivalente aos indexos	
-	::setChave({{1,{"BM_FILIAL", "BM_GRUPO"}}})				
+	::setChave({{"1",{"BM_FILIAL", "BM_GRUPO"}}})				
 return
 
 
@@ -74,7 +74,7 @@ return
 // Defini็ใo da rela็ใo com o modelo grupo tributario
 method produto()  class TSGrupoProduto
 
-return ::HasMany('TSProduto', 4, {'BM_GRUPO'} )
+return ::HasMany('TSProduto', "4", {'BM_GRUPO'} )
 
 
 

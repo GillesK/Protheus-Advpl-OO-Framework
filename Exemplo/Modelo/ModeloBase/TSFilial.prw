@@ -17,7 +17,7 @@
 ฑฑบDescricao ณ Classe de Filial          					    		    บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Framework copyright Sigaware Pb                            บฑฑ
+ฑฑบUso       ณ Elfa								                            บฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
@@ -44,6 +44,7 @@ Method New( ) Class TSFilial
 	::tabela 			:= 		"SM0"
 	::entidade			:=		"Filial"
 	::funcao				:= "Cadastro de Filial"		
+	::temFilial := .F.
 //	dbselectarea(::tabela)
 //	self:fillCampos()
 return (Self)
@@ -53,11 +54,11 @@ return (Self)
 Method iniCampos() class TSFilial
 	local cpoDef
 	// Nome externo, nome interno, tipo	
-	cpoDef := {{"empresa", "M0_CODIGO", "C"};
-				,{"filial", "M0_CODFIL", "C"};
-				,{"estadoEntrega", "M0_ESTENT", "C"}}
+	cpoDef := {{"empresa"			, "M0_CODIGO"		, "C"};
+				,{"filial"				, "M0_CODFIL"		, "C"};
+				,{"estadoEntrega"		, "M0_ESTENT"		, "C"}}
 
 	::addCpoDef(cpoDef)	
 
-	::setChave({{1,{"M0_CODIGO", "M0_CODFIL"}}})
+	::setChave({{"1",{"M0_CODIGO", "M0_CODFIL"}}})
 return

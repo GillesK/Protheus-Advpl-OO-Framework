@@ -7,7 +7,8 @@
 Class TSUtils
 
 	method New() constructor
-	method replaceStr(cIn, cToken, cValor)	
+	method replaceStr(cIn, cToken, cValor)
+	method listStack()	
 endclass
 
 
@@ -26,6 +27,16 @@ method replaceStr(cIn, cToken, cValor) class TSUtils
 	endif
 	
 return cMsg
+
+
+method listStack() class TSUtils
+	Local n := 1
+	local cStack := ""
+	 
+	Do While !Empty(ProcName(n))
+		cStack += AllTrim(ProcName(n++))
+	EndDo
+Return cStack
 
 /*method defAHeader class TSGetDados
 

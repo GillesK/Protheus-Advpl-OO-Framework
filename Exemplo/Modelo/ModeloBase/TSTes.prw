@@ -10,14 +10,14 @@
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
-ฑฑบPrograma  ณ TSTesบ Autor ณ gilles koffmann บ Data  ณ  17/08/15   บฑฑ
+ฑฑบPrograma  ณ TSTes		บ Autor ณ gilles koffmann บ Data  ณ  17/08/15   บฑฑ
 ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
-ฑฑบEmpresa   ณ Sigaware Pb บE-Mailณ gilles@sigawarepb.com.br                 บฑฑ
+ฑฑบEmpresa   ณ Sigaware Pb บE-Mailณ gilles@sigawarepb.com.br             บฑฑ
 ฑฑฬออออออออออุอออออออออออออออออออสออออออฯอออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบDescricao ณ Classe de Tes          					    		    บฑฑ
+ฑฑบDescricao ณ Classe de Tes          					    				    บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Framework copyright Sigaware Pb                            บฑฑ
+ฑฑบUso       ณ Elfa								                           บฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
@@ -53,18 +53,18 @@ return (Self)
 Method iniCampos() class TSTes
 	local cpoDef
 	// Nome externo, nome interno, tipo	
-	cpoDef := {{"filial", "F4_FILIAL", "C"};
-				,{"codigo", "F4_CODIGO", "C"};
-				,{"tipo", "F4_TIPO", "C"};
-				,{"mensagemPadrao", "F4_XMENPAD", "C"};
-				,{"geraDuplicata", "F4_DUPLIC", "C"}}
+	cpoDef := {{"filial"					, "F4_FILIAL"		, "C"};
+				,{"codigo"					, "F4_CODIGO"		, "C"};
+				,{"tipo"					, "F4_TIPO"		, "C"};
+				,{"mensagemPadrao"		, "F4_XMENPAD"	, "C"};
+				,{"geraDuplicata"			, "F4_DUPLIC"		, "C"}}
 
 	::addCpoDef(cpoDef)	
 
-	::setChave({{1,{"F4_FILIAL", "F4_CODIGO"}}})			
+	::setChave({{"1",{"F4_FILIAL", "F4_CODIGO"}}})			
 return
 
 //method pedidoVendaItem()  class TSTes
 //return ::hasMany("TSPedidoVendaItem", "C6_TES", 
 method mensagemNota() class TSTes
-return ::belongsTo("TSFormula", {"F4_XMENPAD"}, 1)
+return ::belongsTo("TSFormula", {"F4_XMENPAD"}, "1")
