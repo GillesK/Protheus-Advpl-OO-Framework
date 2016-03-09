@@ -17,7 +17,7 @@
 ฑฑบDescricao ณ Classe de Item dePedido de Compra   			    		    บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Elfa								                            บฑฑ
+ฑฑบUso       ณ Framework copyright Sigaware Pb                            บฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
@@ -77,12 +77,8 @@ Method iniCampos() class TSItemPedidoCompra
 				,{"recordNumber"					,"C7_REC_WT"	, "N"};
 				,{"AUTDELETA"						,"AUTDELETA"	, "C"};
 				,{"tipoOperacao"					,"C7_OPER"		, "C"};
-				,{"dataPrevistaFaturamento"		,"C7_XDTFAT"	, "D"};
-				,{"reposicaoLicitacao"			,"C7_XLICREP"	, "C"};
 				,{"centroCusto"					,"C7_CC"		, "C"};
-				,{"desconto"						,"C7_DESC"		, "N"};
-				,{"repasse"						,"C7_XDESIT2"	, "N"};
-				,{"tipoItem"						,"C7_XPRDEMP"	, "C"}}
+				,{"desconto"						,"C7_DESC"		, "N"}}
 
 				//,{"fornecedor"			,"C7_FORNECE", "C"};
 				//,{"loja"					,"C7_LOJA", "C"};

@@ -98,8 +98,10 @@ method length() Class TSColecao
 return len(::aCol)
 
 /*/{Protheus.doc} find
-Encontrar um elemento na coleção
+Encontrar um elemento na coleção. (relacionado a TSigaMDBas e TSTransObj)
 @type method
+@param key, character, chave (relacionado a TSigaMDBas e TSTransObj)
+@param values, mixed, valor
 @param bCode, blóco de codigo, Mesma forma que para ascan
 /*/
 method find( key, value, bCode)  Class TSColecao
@@ -116,6 +118,13 @@ method find( key, value, bCode)  Class TSColecao
 return oObj
 
 
+/*/{Protheus.doc} findA
+Encontra o objeto (relacionado a TSigaMDBas e TSTransObj)
+@type method
+@param keys, array, array de chaves (relacionado a TSigaMDBas e TSTransObj)
+@param values, array, array de valores
+@param bCode, bloco de código, bloco de codigo do ascan
+/*/
 method findA( keys, values, bCode)  Class TSColecao
 	local oObj := nil
 	local nPos
@@ -145,6 +154,13 @@ method sort(nNum1, nNum2, bCode) Class TSColecao
 return asort(::aCol, nNum1, nNum2, bCode)
 
 
+/*/{Protheus.doc} sortA
+Ordena a coleção. (relacionado a TSigaMDBas e TSTransObj)
+@type method
+@param keys, array, chaves participando do sort
+@param comp, character, operador de comparação
+@param bCode, bloco de código, bloco de código do sort (TODO)
+/*/
 method sortA(keys, comp, bCode) Class TSColecao
 	local bCode
 	local compare
@@ -154,6 +170,11 @@ method sortA(keys, comp, bCode) Class TSColecao
 //return asort(::aCol, , , {|x,y| &compare})
 return asort(::aCol, , , {|x,y| x:concat(keys) < y:concat(keys)})
 
+/*/{Protheus.doc} excluir
+Excluir 1 item da coleção
+@type method
+@param pos, numérico, posição do item a excluir
+/*/
 method excluir(pos)  Class TSColecao
 	local curLen
 	curLen := self:length()

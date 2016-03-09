@@ -18,7 +18,7 @@
 ฑฑบDescricao ณ Classe de Solicita็ใo de Compras Header		    		    บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Elfa								                            บฑฑ
+ฑฑบUso       ณ Framework copyright Sigaware Pb                            บฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
@@ -39,7 +39,6 @@ Class TSSolicitacaoCompra From TSigaMDBas
 	method iniCampos()
 	method execAuto()
 	method itens()
-	method isEmpenho()
 
 EndClass
 
@@ -59,8 +58,7 @@ Method iniCampos() class TSSolicitacaoCompra
 	cpoDef := {{"filial"						, "C1_FILIAL"		, "C"};
 				,{"numero"						, "C1_NUM"			, "C"};				
 				,{"nomeSolicitante"			, "C1_SOLICIT"	, "C"};
-				,{"dataEmissao"				, "C1_EMISSAO"	, "D"};
-				,{"numeroEmpenhoLicitacao"	, "C1_XNUMEMP"	, "C"}}
+				,{"dataEmissao"				, "C1_EMISSAO"	, "D"}}
 
 	::addCpoDef(cpoDef)	
 	::addCpoInc("C1_NUM")
@@ -75,13 +73,6 @@ return
 Method itens() class TSSolicitacaoCompra
 return ::hasMany("TSItemSolicitacaoCompra", "1", {"C1_NUM"})
 
-
-Method isEmpenho() class TSSolicitacaoCompra
-	local aRet := .F.
-	if !Empty(::valor("numeroEmpenhoLicitacao"))
-		aRet := .T.
-	endif
-return aRet
 
 
 method execAuto(opcao, lItens) class  TSSolicitacaoCompra

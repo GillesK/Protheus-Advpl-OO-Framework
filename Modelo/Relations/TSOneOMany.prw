@@ -122,6 +122,11 @@ method salvar(modelo) class TSOneOMany
 return modelo:salvar()
 
 
+/*/{Protheus.doc} salvarVarios
+Salvar os filhos
+@type method
+@param modelos, coleção, coleção dos filhos
+/*/
 method salvarVarios(modelos) class TSOneOMany
 	local oIterat, modelo
 	local pai 

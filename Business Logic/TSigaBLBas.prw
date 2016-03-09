@@ -60,12 +60,9 @@ return cTit
 
 
 method mailDebug(cMsg) class TSigaBLBas
-//	local cPara
-//	cPara := SuperGetMv("EF_AEMAIER", .F. , "licitacao@grupoelfa.com.br, aprovacaowf@grupoelfa.com.br",  )
-	// send mail TI
-	U_ENVMAIL("wf.elfadf@atmahospitalar.com.br", "gilles.koffmann@gmail.com" , "Erro AE" ,cMsg, ,.T.,)									
+										
 
 return
 
 	
-return
+

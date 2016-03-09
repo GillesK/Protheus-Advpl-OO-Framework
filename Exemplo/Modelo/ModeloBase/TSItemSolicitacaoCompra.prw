@@ -18,7 +18,7 @@
 ฑฑบDescricao ณ Classe de Item Solicita็ใo de Compras 		    		    บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Elfa								                            บฑฑ
+ฑฑบUso       ณ Framework copyright Sigaware Pb                            บฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
@@ -37,7 +37,7 @@ Herda de TSigaMDBas
 Class TSItemSolicitacaoCompra From TSigaMDBas
 	method New() Constructor
 	method iniCampos()
-	method itemEmpenho()
+
 	method produto()
 //	method execAuto()
 //	method itens()
@@ -59,47 +59,28 @@ Method iniCampos() class TSItemSolicitacaoCompra
 	cpoDef := {{"filial"							, "C1_FILIAL"		, "C"};
 				,{"numero"							, "C1_NUM"			, "C"};
 				,{"item"							, "C1_ITEM"		, "C"};
-				,{"codigoEmpenhoLicitacao"		, "C1_XCDEMP"		, "C"};
 				,{"produto"						, "C1_PRODUTO"	, "C"};
 				,{"descricaoProduto"				, "C1_DESCRI"		, "C"};
 				,{"quantidade"					, "C1_QUANT"		, "N"};
 				,{"armazem"						, "C1_LOCAL"		, "C"};
-				,{"unidadeMedida"					, "C1_UM"			, "C"};
-				,{"quantidadePedidoVenda"		, "C1_XQTDPV"		, "N"};
-				,{"quantidadeNFEntrada"			, "C1_XQTDNF"		, "N"};				
+				,{"unidadeMedida"					, "C1_UM"			, "C"};				
 				,{"dataPrevisionalNecessidade"	, "C1_DATPRF"		, "D"};
 				,{"observacao"					, "C1_OBS"			, "C"};
 				,{"flagAprovacao"					, "C1_APROV"		, "C"};
-				,{"dataEntregaMax"				, "C1_XENTMAX"	, "D"};
 				,{"centroCusto"					, "C1_CC"			, "C"};
 				,{"fornecedor"					, "C1_FORNECE"	, "C"};
 				,{"lojaFornecedor"				, "C1_LOJA"		, "C"};
-				,{"dataAprovacao"					, "C1_XDTAPR"		, "D"};
-				,{"notaFiscalDevolucao"			, "C1_XNFDEV"		, "C"};
-				,{"tipoNotaFiscal"				, "C1_XNFTIP"		, "C"};
 				,{"recordNumber"					, "C1_REC_WT"		, "N"};
-				,{"AUTDELETA"						,"AUTDELETA"		, "C"};
-				,{"numeroEmpenhoLicitacao"		, "C1_XNUMEMP"	, "C"};
-				,{"produtoSubstituido"			, "C1_XPRDSUB"	, "C"};
-				,{"tipoConversao"					, "C1_XTIPCON"	, "C"};
-				,{"fatorConversao"				, "C1_XCONV"		, "N"};
-				,{"quantidadeSubstituicao"		, "C1_XQTDSUB"	, "N"};
-				,{"quantidadeReposicao"			, "C1_XQTDREP"	, "N"};
-				,{"precoUnitario"					, "C1_XPRECO"		, "N"};
-				,{"desconto"						, "C1_XDESREF"	, "N"};
-				,{"repasse"						, "C1_XREPREF"	, "N"}}
+				,{"AUTDELETA"						,"AUTDELETA"		, "C"}}
 				
 	::addCpoDef(cpoDef)	
 
-	::setChave({{"1",{"C1_FILIAL", "C1_NUM", "C1_ITEM"}};
-				,{"Z",{"C1_FILIAL", "C1_XCDEMP"},"XCDEMP"}})
+	::setChave({{"1",{"C1_FILIAL", "C1_NUM", "C1_ITEM"}}})
 				
 //	::setEAChave({"C1_FILIAL", "C1_NUM", "C1_ITEM", "C1_PRODUTO", "C1_QUANT"})			
 return
 
 
-method itemEmpenho()  class TSItemSolicitacaoCompra
-return ::belongsTo("TELicItemEmpenho", {"C1_XCDEMP"}, "1")
 
 
 method produto() class  TSItemSolicitacaoCompra

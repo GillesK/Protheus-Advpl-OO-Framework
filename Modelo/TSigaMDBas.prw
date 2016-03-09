@@ -480,77 +480,6 @@ Procura uma entidade pela indexo definido no parametro Index
 @param filial, character, Filial
 @return array, {lRet, oObj} lRet: .T. se encontrou com oObj = self, .F. se não, oObj : Mensagem de erro
 /*/
-/*method findOrFail(pChave, index, filial)  class TSigaMDBas
-	local tabela := ::tabela
-	local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao} 
-	local axArea
-	local aCpo
-	local lFound := .F.
-	local nPosIni, nPosFim, nPosFil
-	local cChavTyp, cpoIni
-	
-	if !Empty(pChave)
-		if filial == nil
-			filial := ::filial()
-		endif
-		if index == nil
-			index := "1"
-		endif
-		axArea := &(tabela)->(getarea())
-		dbselectarea(::tabela)
-		::setOrderInternal(index)
-		//&(tabela)->(dbsetorder(index))
-		&(tabela)->(dbgotop())
-		
-		Do Case
-			Case ::findModel == CHAVE_FIND_MODEL
-				If &(tabela)->(DBSeek(filial+pChave))
-					self:fillCampos() 
-					aRet[2] := Self
-				else
-					self:resetCampos()
-					aRet := {.F., ::entidade + " " + pChave + " não enconstrado no " + ::funcao}
-				Endif
-			Case ::findModel == BETWEEN_FIND_MODEL
-				// get campos ini e fim
-				aCpo := ::getChave(index)
-				//nPosFil := ascan(::campos, {|x| x[CPOTEC] == aChave[1] })
-				// TODO testar se tem filial
-				cpoIni := ::getCampo(aCpo[2])
-				cChavTyp := pChave
-				if cpoIni[TIPO] == "D"
-					cChavTyp := stod(pChave)
-				endif					
-				//nPosFim := ascan(::campos, {|x| x[CPOTEC] == aChave[3] })
-				If &(tabela)->(DBSeek(filial))
-					while !&(tabela)->(Eof()) .And. &(tabela)->(&(aCpo[1])) == filial
-						if cChavTyp >= &(tabela)->(&(aCpo[2])) 
-							if cChavTyp <= &(tabela)->(&(aCpo[3])) 
-								lFound := .T.
-								self:fillCampos()
-								aRet[2] := Self 
-								exit
-							endif
-						endif
-						&(tabela)->(dbskip())
-					enddo		
-					if !lFound
-						self:resetCampos()
-						aRet := {.F., ::entidade + " " + pChave + " não enconstrado no " + ::funcao}
-					endif
-				else
-					self:resetCampos()
-					aRet := {.F., ::entidade + " " + pChave + " não enconstrado no " + ::funcao}					
-				endif	
-		EndCase
-		
-		restarea(axArea)
-	else
-		self:resetCampos()
-		aRet := {.F., ::entidade + " resetado: chave vazia"}
-	endif	
-
-return aRet*/ 
 
 
 method findOrFail(pChave, pFilter, index,  filial)  class TSigaMDBas
@@ -631,86 +560,6 @@ Encontra todas as instancias representado pelo index e chave
 @param filial, character, Filial
 @return array, {lRet, oObj} lRet: .T. se encontrou com oObj = coleção (TSColecao) de self, .F. se não, oObj : Mensagem de erro
 /*/
-
-/*method findAllOrFail( pChave, index, numCpo, filial)  class TSigaMDBas
-	local tabela := ::tabela
-	local aRet := {.T., ::entidade + " enconstrado no " +  ::funcao}
-//	local aRet := nil 
-	local axArea
-	local oRes := TSColecao():New()
-	local aValCurr := {}
-	local cNewObj
-	local oNewObj
-	local lCont := .T.
-	local i, j
-	local nPos
-	local aCpo
-	
-	if !Empty(pChave)
-		if index == nil
-			index := "1"
-		endif
-		if filial == nil
-			filial := ::filial()
-		endif
-		axArea := &(tabela)->(getarea())
-		dbselectarea(::tabela)
-		::setOrderInternal(index)
-		//&(tabela)->(dbsetorder(index))
-		&(tabela)->(dbgotop())
-		
-		aCpo := ::getChave(index)
-		if 	numCpo == nil
-			if aCpo == nil
-				aRet := {.F., "Chave não encontrada"}
-			else
-				numCpo := Len(aCpo) 
-			endif
-		endif
-
-		If &(tabela)->(DBSeek(filial+pChave))
-			//nPos := ascan(::chaves, {|x| x[CHAVE_IND] = index})
-			if aCpo != nil 
-				for i := 1 to numCpo
-					aadd(aValCurr, &(tabela)->(&(aCpo[i])))										
-				Next
-			endif
-			while !&(tabela)->(EOF()) .And. lCont 
-				for j := 1 to Len(aValCurr)
-					if aValCurr[j] != &(tabela)->(&(aCpo[j]))
-						lCont := .F.
-						exit
-					endif
-				next
-				if !lCont
-					exit
-				endif
-				// criar nova entidade
-				cNewObj := GetClassName(self)+ "():New()"
-				oNewObj := &(cNewObj)
-					
-				oNewObj:fillCampos()
-					
-				oRes:add(oNewObj)	 
-	//				aadd(aRes, oNewObj) 
-				// reter os valores				 
-					//self:fillCampos() 			
-					//aRet := Self
-				&(tabela)->(DbSkip())
-			endDo
-			aRet[2] := oRes
-		else
-			self:resetCampos()
-			aRet := {.F., ::entidade + " " + pChave + " não enconstrado no " + ::funcao}
-		Endif
-		restarea(axArea)							
-			//aRet := findAllBOFCpo(index, Len (::chaves[nPos][CHAVE_CPO]), pChave)
-	else
-		self:resetCampos()
-		aRet := {.F., ::entidade + " resetado: chave vazia"}
-	endif
-
-return aRet*/
 
 
 
@@ -1059,6 +908,12 @@ method rollbackNum(lIns)  class TSigaMDBas
 	endif
 return
 
+/*/{Protheus.doc} salvaRegistro
+Salva o registro com reclock
+@type method
+@param lIns, lógico, .T. se estamos inserindo
+@param valChave, character, Valor da chave
+/*/
 method salvaRegistro(lIns, valChave)  class TSigaMDBas
 	local aRet := {.T., ""}
 	local tabela := ::tabela
@@ -1897,6 +1752,11 @@ method clone(lMudado)  class  TSigaMDBas
 return oObj
 
 
+/*/{Protheus.doc} getAHeader
+Recupera a definição dos campos no formato aHeader de MsNewGetDados 
+@type method
+@param lValid, lógico, .T.: os campos serão validados
+/*/
 method getAHeader(lValid) class TSigaMDBas
 	local aHeaderInt := {}
 	local nX
@@ -1930,6 +1790,10 @@ method getAHeader(lValid) class TSigaMDBas
 return aHeaderInt
 
 
+/*/{Protheus.doc} getACols
+recupera os valores dos campos no formato aCols do MsNewGetDados
+@type method
+/*/
 method getACols()  class TSigaMDBas
 	local aColsIn := {}
 	local nX
@@ -1944,7 +1808,13 @@ method getACols()  class TSigaMDBas
 return aColsIn
 
 
-
+/*/{Protheus.doc} compare
+Compara o valor de 1 campo ao valor passado
+@type method
+@param key, character, Chave do campo
+@param value, character, valor a comparar
+@param comp, character, tipo de comparação
+/*/
 method compare(key, value, comp) Class TSigaMDBas
 	local lRet := .F.
 	local ope, valor, valin
@@ -1961,6 +1831,13 @@ method compare(key, value, comp) Class TSigaMDBas
 	endif	
 return lRet
 
+/*/{Protheus.doc} compareA
+Compara o valor de varios campos com valores passados
+@type method
+@param keys, array, array de chaves
+@param values, array, array de valores
+@param comp, character, (Descrição do parâmetro)
+/*/
 method compareA(keys, values, comp) Class  TSigaMDBas
 	local lRet := .F.
 	local ope , i	
@@ -1977,17 +1854,35 @@ method compareA(keys, values, comp) Class  TSigaMDBas
 	endif
 return lRet
 
+
+/*/{Protheus.doc} equalVal
+Compara valor
+@type method
+@param key, array, chave
+@param value, array, valor a comparar
+/*/
 method equalVal(key,value) class  TSigaMDBas
  	local lRet
  	lRet := ::compare(key,value)
 return lRet
 
+/*/{Protheus.doc} equalValA
+Compara valores
+@type method
+@param keys, array, chaves
+@param values, array, valores
+/*/
 method equalValA(keys,values) class  TSigaMDBas
  	local lRet
  	lRet := ::compareA(keys,values)
 return lRet
 
 
+/*/{Protheus.doc} concat
+Concatena os valores de campos. TODO : compatibilizar com outro tipo que string
+@type method
+@param keys, array, chaves
+/*/
 method concat(keys) Class TSigaMDBas
 	local ret := "", i
 	for i := 1 to len(keys)

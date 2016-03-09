@@ -126,6 +126,13 @@ method getCampo(cpoName)  Class TSTransObj
 return xReturn
 
 
+/*/{Protheus.doc} compare
+Compara o valor de 1 campo ao valor passado
+@type method
+@param key, character, Chave do campo
+@param value, character, valor a comparar
+@param comp, character, tipo de comparação
+/*/
 method compare(key, value, comp) Class TSTransObj
 	local lRet := .F.
 	local ope 	
@@ -142,6 +149,14 @@ method compare(key, value, comp) Class TSTransObj
 	endif
 return lRet
 
+
+/*/{Protheus.doc} compareA
+Compara o valor de varios campos com valores passados
+@type method
+@param keys, array, array de chaves
+@param values, array, array de valores
+@param comp, character, (Descrição do parâmetro)
+/*/
 method compareA(keys, values, comp) Class TSTransObj
 	local lRet := .F.
 	local ope , i	
@@ -158,17 +173,33 @@ method compareA(keys, values, comp) Class TSTransObj
 	endif
 return lRet
 
+/*/{Protheus.doc} equalVal
+Compara valor
+@type method
+@param key, array, chave
+@param value, array, valor a comparar
+/*/
 method equalVal(key,value) class TSTransObj
  	local lRet
  	lRet := ::compare(key,value)
 return lRet
 
+/*/{Protheus.doc} equalValA
+Compara valores
+@type method
+@param keys, array, chaves
+@param values, array, valores
+/*/
 method equalValA(keys,values) class TSTransObj
  	local lRet
  	lRet := ::compareA(keys,values)
 return lRet
 
-
+/*/{Protheus.doc} concat
+Concatena os valores de campos. TODO : compatibilizar com outro tipo que string
+@type method
+@param keys, array, chaves
+/*/
 method concat(keys) Class TSTransObj
 	local ret := "", i
 	for i := 1 to len(keys)
@@ -253,6 +284,13 @@ return colObj
 
 
 
+/*/{Protheus.doc} getAHeader
+Recupera a definição aHeader (MsNewGetDados)  
+@type method
+@param aHeaderInt, array, array de resultado
+@param aFlds, array, Fields a incluir
+@param lValid, lógico, validar o campo ou não
+/*/
 method getAHeader(aHeaderInt, aFlds, lValid)    class  TSTransObj
 	local  curTab, nPos, nX
 //	local aHeaderInt := {}

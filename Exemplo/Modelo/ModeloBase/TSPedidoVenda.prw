@@ -17,7 +17,7 @@
 ฑฑบDescricao ณ Classe de Pedido de Venda Header          	    		    บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Elfa								                            บฑฑ
+ฑฑบUso       ณ Framework copyright Sigaware Pb                            บฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
@@ -69,17 +69,14 @@ Method iniCampos() class TSPedidoVenda
 				,{"moeda"						,"C5_MOEDA"		, "N"};
 				,{"condicaoPagamento"		,"C5_CONDPAG"		, "C"};
 				,{"tabelaPreco"				,"C5_TABELA"		, "C"};
-				,{"regiao"						,"C5_XREGIAO"		, "C"};
 				,{"setor"						,"C5_SETOR"		, "C"};
 				,{"codigoVendedor1"			,"C5_VEND1"		, "C"};
 				,{"tipoLiberacao"				,"C5_TIPLIB"		, "C"};
 				,{"pedidoLiberadoTotal"		,"C5_LIBEROK"		, "C"};
 				,{"codigoTransportadora"		,"C5_TRANSP"		, "C"};
 				,{"idUsuario"					,"C5_IDUSU"		, "C"};
-				,{"liberaPedidoLicitacao"	,"C5_XLIBLIC"		, "C"};
 				,{"notaFiscal"				,"C5_NOTA"			, "C"};
-				,{"bloqueioRegra"				,"C5_BLQ"			, "C"};
-				,{"cartaEnviadaLicitacao"	,"C5_XLICCAR"	, "C"}}
+				,{"bloqueioRegra"				,"C5_BLQ"			, "C"}}
 
 
 	::addCpoDef(cpoDef)	

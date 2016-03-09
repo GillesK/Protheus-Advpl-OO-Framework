@@ -16,7 +16,7 @@
 ฑฑบDescricao ณ Classe de Fornecedor          					    		    บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Elfa								                            บฑฑ
+ฑฑบUso       ณ Framework copyright Sigaware Pb                            บฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
@@ -38,8 +38,7 @@ Class TSFornecedor From TSigaMDBas
 		
 	method iniCampos()
 	method execAuto()
-	
-	method icmsInterestadual()
+
 EndClass
 
 
@@ -76,5 +75,3 @@ method execAuto(opcao) class TSFornecedor
 	MSExecAuto({|x,y| Mata020(x,y)},::getEAVector(),opcao)
 return
 
-method icmsInterestadual()  class TSFornecedor
-return ::belongsTo('TELicIcmsInterestadual', {'A2_EST'}, "1" )

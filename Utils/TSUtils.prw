@@ -4,6 +4,13 @@
        
 
 
+/*/{Protheus.doc} TSUtils
+Classe de utilidades
+@type class
+@author Gilles
+@since 08/03/2016
+@version 1.0
+/*/
 Class TSUtils
 
 	method New() constructor
@@ -12,9 +19,21 @@ Class TSUtils
 endclass
 
 
+/*/{Protheus.doc} New
+Constructor
+@type method
+/*/
 method New() class TSUtils
 return Self
 
+
+/*/{Protheus.doc} replaceStr
+(long_description)
+@type method
+@param cIn, character, cadeia de character que estamos escaneando
+@param cToken, character, Token que estamos procurando dentro de cIn
+@param cValor, character, valor que vai substituir o token
+/*/
 method replaceStr(cIn, cToken, cValor) class TSUtils
 	local cMsg := cIn
 	local nPos
@@ -29,6 +48,10 @@ method replaceStr(cIn, cToken, cValor) class TSUtils
 return cMsg
 
 
+/*/{Protheus.doc} listStack
+Lista a stacj atual
+@type method
+/*/
 method listStack() class TSUtils
 	Local n := 1
 	local cStack := ""

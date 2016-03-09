@@ -17,7 +17,7 @@
 ฑฑบDescricao ณ Classe de Item dePedido de Venda   			    		    บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Elfa								                            บฑฑ
+ฑฑบUso       ณ Framework copyright Sigaware Pb                            บฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
@@ -68,19 +68,14 @@ Method iniCampos() class TSItemPedidoVenda
 				,{"unidadeMedida"				, "C6_UM"			, "C"};				
 				,{"valorTotal"				, "C6_VALOR"		, "N"};
 				,{"quantidadeVendida"		, "C6_QTDVEN"		, "N"};
-				,{"quantidadeLiberada"		, "C6_QTDLIB"		, "N"};
-				,{"quantidadeLiberadaRep"	, "C6_XQTDLIB"	, "N"};								
+				,{"quantidadeLiberada"		, "C6_QTDLIB"		, "N"};								
 				,{"precoLista"				, "C6_PRUNIT"		, "N"};
 				,{"precoUnitario"				, "C6_PRCVEN"		, "N"};
 				,{"valorDesconto"				, "C6_VALDESC"	, "N"};
 				,{"armazem"					, "C6_LOCAL"		, "C"};				
 				,{"codigoFiscal"				, "C6_CF"			, "C"};
 				,{"dataEntrega"				, "C6_ENTREG"		, "D"};
-				,{"codigoEmpenhoLicitacao"	, "C6_XCDEMP"		, "C"};
-				,{"tipoOperacao"				, "C6_OPER"		, "C"};
-				,{"numeroSolicitacaoCompra"	, "C6_XNUMSC"		, "C"};
-				,{"itemSolicitacaoCompra"	, "C6_XITEMSC"	, "C"};
-				,{"numeroNFEntrada"			, "C6_XNUMNFE"	, "C"};				
+				,{"tipoOperacao"				, "C6_OPER"		, "C"};				
 				,{"cliente"					, "C6_CLI"			, "C"};				
 				,{"lojaCliente"				, "C6_LOJA"		, "C"};
 				,{"lote"						, "C6_LOTECTL"	, "C"};
@@ -117,8 +112,7 @@ method simulMod() class TSItemPedidoVenda
 	self:setar("dataValidade" 				, self:valor("dataValidade"))
 	self:setar("numeroSolicitacaoCompra" 	, self:valor("numeroSolicitacaoCompra"))
 	self:setar("itemSolicitacaoCompra" 	, self:valor("itemSolicitacaoCompra"))		
-	self:setar("numeroNFEntrada" 			, self:valor("numeroNFEntrada"))			
-	self:setar("codigoEmpenhoLicitacao" 	, self:valor("codigoEmpenhoLicitacao"))			
+	self:setar("numeroNFEntrada" 			, self:valor("numeroNFEntrada"))						
 return
 
 

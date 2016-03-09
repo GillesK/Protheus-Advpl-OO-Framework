@@ -17,7 +17,7 @@
 ฑฑบDescricao ณ Classe de Tes          					    				    บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Elfa								                           บฑฑ
+ฑฑบUso       ณ Framework copyright Sigaware Pb                           บฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
@@ -37,7 +37,7 @@ Class TSTes From TSigaMDBas
 	method New() Constructor
 	method iniCampos()
 	method execAuto()
-	method mensagemNota()
+
 EndClass
 
 
@@ -56,7 +56,6 @@ Method iniCampos() class TSTes
 	cpoDef := {{"filial"					, "F4_FILIAL"		, "C"};
 				,{"codigo"					, "F4_CODIGO"		, "C"};
 				,{"tipo"					, "F4_TIPO"		, "C"};
-				,{"mensagemPadrao"		, "F4_XMENPAD"	, "C"};
 				,{"geraDuplicata"			, "F4_DUPLIC"		, "C"}}
 
 	::addCpoDef(cpoDef)	
@@ -66,5 +65,3 @@ return
 
 //method pedidoVendaItem()  class TSTes
 //return ::hasMany("TSPedidoVendaItem", "C6_TES", 
-method mensagemNota() class TSTes
-return ::belongsTo("TSFormula", {"F4_XMENPAD"}, "1")
