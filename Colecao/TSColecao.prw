@@ -42,7 +42,6 @@ Class TSColecao
 	method getIterator()
 	method find()
 	method sort()	
-	method hydrateAlias()
 	method findA()
 	method sortA()
 	method excluir()

@@ -29,6 +29,8 @@
 #define CHAVE_FIND_MODEL			1
 #define BETWEEN_FIND_MODEL		2
 
+#DEFINE ENTER CHR(13)+CHR(10)
+ 
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -165,16 +167,60 @@ Deve ser informado no contrutor da classe filha
 	data isExecAuto
 	data filhos
 
+// *************** PUBLIC BEGIN *****************//
 	method New() Constructor
+	
+	// FILHOS BEGIN
+	method addCpoDef()
+	method setChave()	
+	method addCpoInc(pCpoInc)
+	method setEAChave(eaChave)	
+	method getEAVector()
+
+	// sobrecarregar BEGIN
+	method iniCampos()
+	method execAuto()
+	// sobrecarregar END
+			
+	method hasOne()
+	method belongsTo() 
+	method hasMany()
+	method belongsToMany()	
+	method hasManyThrough()	
+	// FILHOS END
 	
 	method findOrFail()
 	method find()
-	
 	method findAllOrFail()	
 	method findAll()
-								
-	method valor()	
+	method all()
+									
+	method valor()
+	method setar()
+	method clone()
+		
+	method filial()
+	method isInsert()	
 	method salvar()
+	method salvaRegistro()	
+	method deletar()
+	
+	method hydrateM()
+	method hydrateACols()
+	method hydratePos()
+	method hydrateAlias()
+	method hydAllAlias()
+	method hydAColsPos()
+
+	method getColBrowse()	
+	method simulAHeader()
+	method simulACols()
+	method getAHeader()
+	method getACols()
+	
+	method toString()	
+// *************** PUBLIC END *****************//	
+// *************** PROTECTED BEGIN ************************//	
 	method getFilialCpo()	
 	method geraFilial() 
 	method getAutoIncCpo()
@@ -183,12 +229,9 @@ Deve ser informado no contrutor da classe filha
 	method rollbackNum(lIns)
 	
 	method setFilhos()
-	method deletar()
-	method setar()		
-	method getEAVector()
-	method setEAChave(eaChave)	
+	
 	method ordCampos()
-	method execAuto()
+
 	method resExecAuto()	
 //	Method procErroBatch()
 	method fillCampos()
@@ -199,39 +242,18 @@ Deve ser informado no contrutor da classe filha
 //	method defDBCampos()
 //	method defDBIndices()
 //	method defDBGatilhos()
-	
-	method iniCampos()
-	method addCpoDef()
-	method setChave()
+
 	method getChave()	
-	method addCpoInc(pCpoInc) 
+ 
 	method setCpoFilial(pCpoFilial) 
 	method setPkIndex(pPkIndex)
 	
-	method salvaRegistro()
-	method isInsert()
 	method deletaRegistro(valChave)	
-
-	method hasOne()
-	method belongsTo() 
-	method hasMany()
-	method belongsToMany()	
-	method hasManyThrough()	
-	method filial()
+	
 	method getValKey()
 	
-	method hydrateM()
-	method hydrateACols()
-	method hydratePos()
-	method hydrateAlias()
-	method hydAllAlias()
-	method hydAColsPos()		
-	method getColBrowse()
 	method extractACols(paHeader, colecao)	
 		
-	method all()
-	method simulAHeader()
-	method simulACols()
 	method retCpoTec()
 //	method getCampo(cpoName)	
 	method getCampo()
@@ -241,19 +263,21 @@ Deve ser informado no contrutor da classe filha
 	method setVar()
 	
 	method setOrderInternal()
-	method clone()
+	
 	method setMemory()
 	method getFields()	
-	method getAHeader()
-	method getACols()
+	
 	method getNum()
+	
 	method compare()
 	method compareA()
 	method equalVal()
 	method equalValA()			
 	method concat()
 	
-	method getEAItem(campo, opcao)	
+	method getEAItem(campo, opcao)
+	method getValString()	
+// *************** PROTECTED END ************************//	
 EndClass
 
 
@@ -717,6 +741,7 @@ method fillCampos() class TSigaMDBas
 	local i 
    	Local bError         := { |e| oError := e , Break(e) }
    	Local bErrorBlock
+   	local oError
 
 	bErrorBlock    := ErrorBlock( bError )
 	for i := 1 to len(::campos)
@@ -919,11 +944,14 @@ method salvaRegistro(lIns, valChave)  class TSigaMDBas
 	local tabela := ::tabela
 	local i
    	Local bError         := { |e| oError := e , Break(e) }
+   	local oError
    	Local bErrorBlock
    	local vc := ""
+   	local axArea
    	default lIns := .F.
    	default valChave := ::isInsert(@vc) 
 	
+	axArea := &(tabela)->(getarea())	
 	dbselectarea(tabela)	
 	::setOrderInternal(::pkIndex)
 //	&(tabela)->(dbsetorder(1))
@@ -933,9 +961,9 @@ method salvaRegistro(lIns, valChave)  class TSigaMDBas
 			aRet := {.F., "Registro não encontrado na base para fazer atualização"}
 			return aRet							
 		endif
-	endif	
-	recLock(tabela, lIns)
-	bErrorBlock    := ErrorBlock( bError )			
+	endif
+	bErrorBlock    := ErrorBlock( bError )
+	recLock(tabela, lIns)		
 	for i := 1 to len(::campos)
 		if Self:campos[i][MUDADO] == .T.
 			// TODO gerenciar erro
@@ -946,10 +974,17 @@ method salvaRegistro(lIns, valChave)  class TSigaMDBas
 				ConOut( ProcName() + " " + Str(ProcLine()) + " " + oError:Description )
 			end sequence						
 		endif 						
-	next
-	Errorblock(bErrorBlock)	
-	&(tabela)->(MsUnlock())
-	::confirmNum(lIns)
+	next	
+	
+	begin sequence	
+		&(tabela)->(MsUnlock())	
+		::confirmNum(lIns)
+	Recover 
+		aRet := {.F., oError:Description}
+		//ConOut( ProcName() + " " + Str(ProcLine()) + " " + oError:Description )
+	end sequence
+	Errorblock(bErrorBlock)
+	restarea(axarea)	
 	//MsUnlock(&(tabela))	
 return aRet
 
@@ -1038,7 +1073,9 @@ return aRet
 method deletaRegistro(valChave) class  TSigaMDBas
 	local aRet := {.T., ""}
 	local tabela := ::tabela
+	local axarea
 	
+	axArea := &(tabela)->(getarea())	
 	dbselectarea(tabela)	
 	::setOrderInternal(::pkIndex)	
 //	&(tabela)->(dbsetorder(1))
@@ -1052,6 +1089,7 @@ method deletaRegistro(valChave) class  TSigaMDBas
 		&(tabela)->(MsUnlock())
 		//MsUnlock(&(tabela))									
 	endif
+	restarea(axArea)
 return aRet
 
 /*/{Protheus.doc} execAuto
@@ -1205,14 +1243,15 @@ method getValKey(parentKey) class TSigaMDBas
 		//nPos := ascan(::campos, {|x| x[CPOTEC] == cpoKey[i] })
 		//nPos := ascan(::campos, {|x| x[2] == cpoKey[i] })
 //		if cpo != nil
-		Do case
+		valChave += ::getValString(cpo)
+/*		Do case
 			case cpo[TIPO] == "N"
 				valChave := valChave + str(cpo[VALOR],cpo[TAMANHO], cpo[DECIMAL])				
 			case cpo[TIPO] == "D"
 				valChave := valChave + dtos(cpo[VALOR])				
 			otherwise
 				valChave := valChave + cpo[VALOR]	
-		end case
+		end case*/
 
 //		else
 			// TODO : erro			
@@ -1224,6 +1263,22 @@ method getValKey(parentKey) class TSigaMDBas
 return valChave
 
 
+method getValString(cpo) class  TSigaMDBas
+	local value := ""
+	Do case
+		case cpo[TIPO] == "N"
+			if cpo[TAMANHO] != nil .and. cpo[TAMANHO] != 0 
+				value := str(cpo[VALOR],cpo[TAMANHO], cpo[DECIMAL])
+			else
+				value := str(cpo[VALOR])
+			endif
+		case cpo[TIPO] == "D"
+			value := dtos(cpo[VALOR])				
+		otherwise
+			value := cpo[VALOR]	
+	end case		
+return value
+
 /*/{Protheus.doc} hydrateM
 Preeche o objeto a partir da variavel de memoria M 
 @type method
@@ -1233,6 +1288,7 @@ method hydrateM() class  TSigaMDBas
 	local i
    	Local bError         := { |e| oError := e , Break(e) }
    	Local bErrorBlock
+   	local oError
 
 	bErrorBlock    := ErrorBlock( bError )	
 	for i:= 1 to len(::campos)
@@ -1281,6 +1337,7 @@ method hydrateAlias(aliasQry) class  TSigaMDBas
    	Local bError         := { |e| oError := e , Break(e) }
    	Local bErrorBlock	
    	local oQuery, aLastQuery, colCpo, oIterat, cpo, campo 
+   	local oError
 	
 	bErrorBlock    := ErrorBlock( bError )
 /*	aLastQuery    := GetLastQuery()	
@@ -1605,6 +1662,44 @@ return aHeaderInt
 
 
 
+/*/{Protheus.doc} getAHeader
+Recupera a definição dos campos no formato aHeader de MsNewGetDados 
+@type method
+@param lValid, lógico, .T.: os campos serão validados
+/*/
+method getAHeader(lValid) class TSigaMDBas
+	local aHeaderInt := {}
+	local nX
+	local axArea := SX3->(getarea())
+	local cValid
+
+	::ordCampos()
+	DbSelectArea("SX3")
+	
+	SX3->(DbSetOrder(2))
+	SX3->(DbGoTop())		
+	// Faz a contagem de campos no array
+	For nX := 1 to Len(::campos)
+		// posiciona sobre o campo
+		cpoTec := ::campos[nX][CPOTEC]
+//		SX3->(DbGoTop())		
+		If SX3->(DbSeek(cpoTec))	
+			// adiciona as informações do campo para o getdados
+//			cValid := nil
+			if (lValid == nil) .Or. (lValid != nil .And. lValid == .T.)
+				Aadd(aHeaderInt, {AllTrim(X3Titulo()),SX3->X3_CAMPO,SX3->X3_PICTURE,SX3->X3_TAMANHO,SX3->X3_DECIMAL;
+					,SX3->X3_VALID,SX3->X3_USADO,SX3->X3_TIPO,SX3->X3_F3,SX3->X3_CONTEXT,SX3->X3_CBOX,SX3->X3_RELACAO})			
+			else
+				Aadd(aHeaderInt, {AllTrim(X3Titulo()),SX3->X3_CAMPO,SX3->X3_PICTURE,SX3->X3_TAMANHO,SX3->X3_DECIMAL;
+					,"","",SX3->X3_TIPO,SX3->X3_F3,"" })			
+			endif  	
+		Endif		  		  	
+	Next nX
+	
+	restarea(axArea)
+return aHeaderInt
+
+
 method getFields(aFlds, aNoCampos) class  TSigaMDBas
 	aFlds := {}
 	DbSelectArea("SX3")	
@@ -1699,6 +1794,25 @@ method simulACols(aValores)   class  TSigaMDBas
 Return aColsInt
 
 
+/*/{Protheus.doc} getACols
+recupera os valores dos campos no formato aCols do MsNewGetDados
+@type method
+/*/
+method getACols()  class TSigaMDBas
+	local aColsIn := {}
+	local nX
+	
+	::ordCampos()
+	For nX := 1 to Len(::campos)
+		// posiciona sobre o campo
+		aadd(aColsIn, ::campos[nX][VALOR])		  		  	
+	Next nX
+	
+	aadd(aColsIn, .F.)
+return aColsIn
+
+
+
 method setOrderInternal(index)  class  TSigaMDBas
 	// se index é numerico
 		// se inferior ou igual a 9 
@@ -1752,60 +1866,6 @@ method clone(lMudado)  class  TSigaMDBas
 return oObj
 
 
-/*/{Protheus.doc} getAHeader
-Recupera a definição dos campos no formato aHeader de MsNewGetDados 
-@type method
-@param lValid, lógico, .T.: os campos serão validados
-/*/
-method getAHeader(lValid) class TSigaMDBas
-	local aHeaderInt := {}
-	local nX
-	local axArea := SX3->(getarea())
-	local cValid
-
-	::ordCampos()
-	DbSelectArea("SX3")
-	
-	SX3->(DbSetOrder(2))
-	SX3->(DbGoTop())		
-	// Faz a contagem de campos no array
-	For nX := 1 to Len(::campos)
-		// posiciona sobre o campo
-		cpoTec := ::campos[nX][CPOTEC]
-//		SX3->(DbGoTop())		
-		If SX3->(DbSeek(cpoTec))	
-			// adiciona as informações do campo para o getdados
-//			cValid := nil
-			if (lValid == nil) .Or. (lValid != nil .And. lValid == .T.)
-				Aadd(aHeaderInt, {AllTrim(X3Titulo()),SX3->X3_CAMPO,SX3->X3_PICTURE,SX3->X3_TAMANHO,SX3->X3_DECIMAL;
-					,SX3->X3_VALID,SX3->X3_USADO,SX3->X3_TIPO,SX3->X3_F3,SX3->X3_CONTEXT,SX3->X3_CBOX,SX3->X3_RELACAO})			
-			else
-				Aadd(aHeaderInt, {AllTrim(X3Titulo()),SX3->X3_CAMPO,SX3->X3_PICTURE,SX3->X3_TAMANHO,SX3->X3_DECIMAL;
-					,"","",SX3->X3_TIPO,SX3->X3_F3,"" })			
-			endif  	
-		Endif		  		  	
-	Next nX
-	
-	restarea(axArea)
-return aHeaderInt
-
-
-/*/{Protheus.doc} getACols
-recupera os valores dos campos no formato aCols do MsNewGetDados
-@type method
-/*/
-method getACols()  class TSigaMDBas
-	local aColsIn := {}
-	local nX
-	
-	::ordCampos()
-	For nX := 1 to Len(::campos)
-		// posiciona sobre o campo
-		aadd(aColsIn, ::campos[nX][VALOR])		  		  	
-	Next nX
-	
-	aadd(aColsIn, .F.)
-return aColsIn
 
 
 /*/{Protheus.doc} compare
@@ -1889,3 +1949,13 @@ method concat(keys) Class TSigaMDBas
 		ret += ::getCampo(keys[i])[VALOR]
 	next
 return ret
+
+
+method toString()  class  TSigaMDBas
+	local cMsg := ""
+	local i
+	for i := 1 to Len(::campos)
+		cMsg += ::campos[i][CPOPOR] + " " + ::campos[i][CPOTEC] + " " + ::getValString(::campos[i]) + ENTER  
+	next
+return cMsg
+

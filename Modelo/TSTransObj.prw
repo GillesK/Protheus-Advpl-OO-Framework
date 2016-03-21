@@ -6,6 +6,7 @@
 
 #define CHAVE 1
 #define VALOR	2
+#DEFINE ENTER CHR(13)+CHR(10)
 
 /*/{Protheus.doc} TSTransObj
 Classe que representa um entidade com chaves e valores. Serve quando
@@ -23,6 +24,7 @@ class TSTransObj
 	method valor()
 	method chave()
 	method setCampo()
+	method setar()
 	method hydrateAlias()
 	method hydAllAlias()
 	method equal()
@@ -38,6 +40,8 @@ class TSTransObj
 	method equalVal()
 	method equalValA()	
 	method concat()
+	method toString()
+	method getValString()
 endclass
 
 method New()  class  TSTransObj
@@ -75,12 +79,17 @@ Seta o valor, se a chave ja existe, muda o valor. Se a chave não existe ela é cr
 @param value, ${param_type}, (Descrição do parâmetro)
 /*/
 method setCampo(key, value)  class  TSTransObj
+	local nPos
 	nPos := ascan(::campos, {|x| x[1] == key})
 	if nPos != 0 
 		::campos[nPos][VALOR] := value
 	else
 		aadd(::campos, {key, value}) 
 	endif   
+return
+
+method setar(key, value) class  TSTransObj
+	::setCampo(key, value)
 return
 
 /*/{Protheus.doc} cloneCampo
@@ -212,19 +221,22 @@ Preenche o objeto com os campos da query atualmente posicionado
 @type method
 @param aliasQry, array, Alias da query
 /*/
-method hydrateAlias(aliasQry, aCampos) class  TSTransObj
+method hydrateAlias(aliasQry, aCampos, colCpo) class  TSTransObj
 	local i
    	Local bError         := { |e| oError := e , Break(e) }
    	Local bErrorBlock	
    	local fldName, fldVal
    	local aLastQuery, oQuery, aCpo, oIterat, cpo
+   	//local colCpo
 	
 	bErrorBlock    := ErrorBlock( bError )
-	if aCampos == nil 
-		aLastQuery    := GetLastQuery()
+	if aCampos == nil
+		if colCpo == nil 
+			aLastQuery    := GetLastQuery()
 	
-		oQuery := TSQuery():New()
-		colCpo := oQuery:getCampos(aLastQuery[2])
+			oQuery := TSQuery():New()
+			colCpo := oQuery:getCampos(aLastQuery[2])
+		endif
 		oIterat := colCpo:getIterator()	
 		cpo := oIterat:first()
 		while !oIterat:eoc()
@@ -265,15 +277,22 @@ Preenche uma coleção de objetos TTransObj com o resultado da query
 method hydAllAlias(aliasQry, aCampos) class  TSTransObj
    	local colObj, oNewObj	
    	local axArea
+   	local aLastQuery, oQuery
+   	local colCpo := nil
    			
  //  	axArea := aliasQry->(getarea())
-   	
+	if aCampos == nil
+		aLastQuery    := GetLastQuery()
+		oQuery := TSQuery():New()
+		colCpo := oQuery:getCampos(aLastQuery[2])
+	endif
+	   	
 	colObj := TSColecao():New()
 	(aliasQry)->(DbGoTop())
 	While (aliasQry)->(!EOF())
 		oNewObj := TSTransObj():New()
 //		oNewObj := &(cNewObj)
-		oNewObj:hydrateAlias(aliasQry, aCampos)
+		oNewObj:hydrateAlias(aliasQry, aCampos, colCpo)
 		colObj:add(oNewObj)		
 		(aliasQry)->(DbSkip())
 	enddo
@@ -388,3 +407,24 @@ method hydAColsPos(paHeader, paCols, nAt)  class  TSTransObj
 	next
 return self
 
+
+method toString()  class  TSTransObj
+	local cMsg := ""
+	local i
+	for i := 1 to Len(::campos)
+		cMsg += ::campos[i][CHAVE] + " " + ::getValString(::campos[i]) + ENTER  
+	next
+return cMsg
+
+
+method getValString(cpo) class  TSTransObj
+	local value
+	Do case
+		case valType(cpo[VALOR]) == "N"
+			value := str(cpo[VALOR])
+		case valtype(cpo[VALOR]) == "D"
+			value := dtos(cpo[VALOR])				
+		otherwise
+			value := cpo[VALOR]	
+	end case		
+return value

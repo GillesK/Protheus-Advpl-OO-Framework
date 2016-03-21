@@ -28,7 +28,7 @@ return Self
 
 
 /*/{Protheus.doc} replaceStr
-(long_description)
+Substitui em cIn o cToken por cValor
 @type method
 @param cIn, character, cadeia de character que estamos escaneando
 @param cToken, character, Token que estamos procurando dentro de cIn

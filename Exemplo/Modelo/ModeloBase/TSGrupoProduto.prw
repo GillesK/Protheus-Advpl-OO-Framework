@@ -4,8 +4,6 @@
 #INCLUDE 'fileio.ch'       
 #include "msobject.ch"     
 
-
-
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -39,7 +37,7 @@ Class TSGrupoProduto From TSigaMDBas
 	
 	Method iniCampos() 	
 //	method defDBCampos()
-	method produto()
+	method produtos()
 EndClass
 
 
@@ -61,7 +59,7 @@ Method iniCampos() class TSGrupoProduto
 	// definição dos campos e aliases
 	cpoDef := {{"filial"			, "BM_FILIAL"		, "C"};
 				,{"codigo"			, "BM_GRUPO"		, "C"};
-				,{"descricao"		, "BM_DESC"		, "C"}}
+				,{"descricao"		, "BM_DESC"			, "C"}}
 	::addCpoDef(cpoDef)	
 	
 	// definição das chaves: equivalente aos indexos	
@@ -69,14 +67,11 @@ Method iniCampos() class TSGrupoProduto
 return
 
 
-
-
-// Definição da relação com o modelo grupo tributario
-method produto()  class TSGrupoProduto
-
+// Definição da relação com o modelo Produto
+method produtos()  class TSGrupoProduto
+// Um grupo de produto é constituido de varios Produtos -> usar a relação HasMany
+// TSProduto: nome da classe 
+// "4" : indexo utilizado na classe TSProduto para fazer a relação. Chave estrangeira.
+// {'BM_GRUPO'} : Campos no grupo de produto que permitem acessar os produtos atraves do indexo 4
 return ::HasMany('TSProduto', "4", {'BM_GRUPO'} )
 
-
-
-
- 
