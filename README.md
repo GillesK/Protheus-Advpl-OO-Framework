@@ -18,9 +18,14 @@ Os outros elementos são utilidades que vão ajudar no seu projeto:
   <li> Importação CSV: Classe que faz todo o trabalho de leitura de arquivo e escritura na base. Para usar só precisa definir o mapping do arquivo de entrada para tabela </li>
   <li> Coleção e Iterator: Classe que define uma coleção como pode existir em java. </li>
   <li> Test Unitário: Classe que permite definir testes unitários para seus fontes. Muito útil para fazer testes que possam ser repetidos e que não precisem de interface de usuário.</li>
-  <li> Update de dicionario: Classe que faz o update do dicionario (tabela, campo, indice, gatilho). Só precisa definir os elementos que podem ser gerados através da rotina padrão do Protheus HSPGERAT() (Vai em formula, inserir, HSPGERAT(), tabulação) </li>
+  <li> Update de dicionario: Classe que faz o update do dicionario (tabela, campo, indice, gatilho). Só precisa definir os elementos que podem ser gerados através da rotina padrão do Protheus HSPGERAT(). Esta rotina vai procurar dentro do dicionario os elementos indicados e criar um array. (Vai em formula, inserir, HSPGERAT(), tabulação) </li>
 </ul>
 
-Ainda falta trabalho encima de documentação e exemplos para este outros elementos
-
 A documentação esta disponível <a href="http://www.sigawarepb.com.br/frameworkDoc" target="_blank">aqui</a>.
+
+Ainda falta trabalho encima de documentação e exemplos. 
+
+Feedback e críticas construtivas bem-vindas!!!
+
+
+
