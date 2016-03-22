@@ -1,5 +1,5 @@
 # Protheus-Advpl-OO-Framework
-Se você é desenvolvedor Advpl e gosta ou gostaria de trabalhar com os principios Orientados a Objeto, então o que segue é para você.
+Se você é desenvolvedor Advpl e gosta ou gostaria de trabalhar com os princípios Orientados a Objeto, então o que segue é para você.
 
 Antes de trabalhar com Protheus, eu era desenvolvedor e usava linguagens orientados a objeto como Delphi, Java e C#.
 
