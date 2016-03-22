@@ -7,7 +7,7 @@ O ORM é o elemento do framework que vai ter o impacto maior sobre como você va
 
 Para ver um exemplo do ORM:
 <ul>
-  <li> Faça o download do projeto </li>
+  <li> Faça o download do projeto (a forma mais fácil é usar o botão "Download Zip" encima)</li>
   <li> Modifique o fonte SIGEXMOD.prw que esta em Exemplo/Modelo para se adequar a sua base de dados (codExis e codNovo)  </li>
   <li> Compile o projeto </li>
   <li> Execute a função de usuario SIGEXMOD em passo a passo par ver o que esta acontecendo </li>
