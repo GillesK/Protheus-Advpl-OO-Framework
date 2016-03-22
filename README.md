@@ -7,10 +7,10 @@ O ORM é o elemento do framework que vai ter o impacto maior sobre como você va
 
 Para ver um exemplo do ORM:
 <ul>
-  <li> faça o download do projeto </li>
-  <li> modifique o fonte SIGEXMOD.prw que esta em Exemplo/Modelo para se adequar a sua base de dados (codExis e codNovo)  </li>
-  <li> compile o projeto </li>
-  <li> execute a função de usuario SIGEXMOD em passo a passo par ver o que esta acontecendo </li>
+  <li> Faça o download do projeto </li>
+  <li> Modifique o fonte SIGEXMOD.prw que esta em Exemplo/Modelo para se adequar a sua base de dados (codExis e codNovo)  </li>
+  <li> Compile o projeto </li>
+  <li> Execute a função de usuario SIGEXMOD em passo a passo par ver o que esta acontecendo </li>
 </ul>
 
 As classes definidas em Exemplo/Modelo/ModeloBase são uma boa base para começar um projeto com o ORM
