@@ -13,6 +13,8 @@ Para ver um exemplo do ORM:
   <li> execute a função de usuario SIGEXMOD em passo a passo par ver o que esta acontecendo </li>
 </ul>
 
+As classes definidas em Exemplo/Modelo/ModeloBase são uma boa base para começar um projeto com o ORM
+
 Os outros elementos são utilidades que vão ajudar no seu projeto:
 <ul>
   <li> Importação CSV: Classe que faz todo o trabalho de leitura de arquivo e escritura na base. Para usar só precisa definir o mapping do arquivo de entrada para tabela </li>
