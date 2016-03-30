@@ -145,7 +145,7 @@ method salvarVarios(modelos) class TSOneOMany
 return
 
 
-method getEAVector() class TSOneOMany
+method getEAVector(opcao) class TSOneOMany
 	local aVector := {}
 	local i, pai, oIterat
 	local modelo
@@ -156,7 +156,7 @@ method getEAVector() class TSOneOMany
 		oIterat := pai:filhos:getIterator()
 		modelo := oIterat:first()
 		while !oIterat:eoc()
-			aadd(aVector, modelo:getEAVector())
+			aadd(aVector, modelo:getEAVector(opcao))
 			modelo := oIterat:seguinte()
 		enddo
 	endif

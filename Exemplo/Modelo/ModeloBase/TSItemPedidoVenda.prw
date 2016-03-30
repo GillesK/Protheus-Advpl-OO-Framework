@@ -17,7 +17,7 @@
 ฑฑบDescricao ณ Classe de Item dePedido de Venda   			    		    บฑฑ
 ฑฑบ          ณ                                                            บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบUso       ณ Framework copyright Sigaware Pb                            บฑฑ
+ฑฑบUso       ณ Framework copyright Sigaware Pb                           บฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
@@ -40,7 +40,6 @@ Class TSItemPedidoVenda From TSigaMDBas
 	method tes()
 	method pedido()
 	method produto()
-	method itemEmpenho()
 	method simulMod()
 	method getEAItem()
 EndClass
@@ -68,7 +67,7 @@ Method iniCampos() class TSItemPedidoVenda
 				,{"unidadeMedida"				, "C6_UM"			, "C"};				
 				,{"valorTotal"				, "C6_VALOR"		, "N"};
 				,{"quantidadeVendida"		, "C6_QTDVEN"		, "N"};
-				,{"quantidadeLiberada"		, "C6_QTDLIB"		, "N"};								
+				,{"quantidadeLiberada"		, "C6_QTDLIB"		, "N"};
 				,{"precoLista"				, "C6_PRUNIT"		, "N"};
 				,{"precoUnitario"				, "C6_PRCVEN"		, "N"};
 				,{"valorDesconto"				, "C6_VALDESC"	, "N"};
@@ -96,9 +95,6 @@ return ::belongsTo("TSPedidoVenda", {"C6_NUM"}, "1" )
 Method produto() class TSItemPedidoVenda
 return ::belongsTo("TSProduto", {"C6_PRODUTO"}, "1")
 
-Method itemEmpenho() class TSItemPedidoVenda
-return ::belongsTo("TELicItemEmpenho", {"C6_XCDEMP"}, "1" )
-
 method simulMod() class TSItemPedidoVenda
 	self:setar("produto" 					, self:valor("produto"))
 	self:setar("quantidadeVendida" 			, self:valor("quantidadeVendida"))
@@ -108,17 +104,15 @@ method simulMod() class TSItemPedidoVenda
 	self:setar("valorTotal" 					, self:valor("valorTotal"))
 	self:setar("tes" 							, self:valor("tes"))			
 
+	self:setar("armazem" 						, self:valor("armazem"))
 	self:setar("lote" 						, self:valor("lote"))
-	self:setar("dataValidade" 				, self:valor("dataValidade"))
-	self:setar("numeroSolicitacaoCompra" 	, self:valor("numeroSolicitacaoCompra"))
-	self:setar("itemSolicitacaoCompra" 	, self:valor("itemSolicitacaoCompra"))		
-	self:setar("numeroNFEntrada" 			, self:valor("numeroNFEntrada"))						
+	self:setar("dataValidade" 				, self:valor("dataValidade"))		
 return
 
 
 method getEAItem(campo, opcao)  class TSItemPedidoVenda
-	if opcao == 4 .And. !::isInsert() .And. campo[CPOTEC] == "C6_ITEM" //atualiza็ใo
-		return {"LINPOS", "C6_ITEM", campo[VALOR]}
+	if opcao == 4 .And. !::isInsert() .And. campo[2] == "C6_ITEM" //atualiza็ใo
+		return {"LINPOS", "C6_ITEM", campo[6]}
 	else
 		return _Super:getEAItem(campo,opcao)
 	endif
