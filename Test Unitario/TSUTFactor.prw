@@ -150,16 +150,18 @@ Method readEnvFile(sConfFile) Class TSUTFactor
 		sLine  := FT_FReadLn(nHandle)
 		aLinha := separa(sLine, "=")
 		//(Self:(&(aLinha[1]))) := aLinha[2]
-		Do case
-			case aLinha[1] == "empresa"
-				::empresa := aLinha[2] 
-			case aLinha[1] == "filial"
-				::filial := aLinha[2]
-			case aLinha[1] == "usuario"
-				::usuario := aLinha[2] 
-			case aLinha[1] == "senha"
-				::senha := aLinha[2] 
-		EndCase						 					
+		if Len(aLinha) > 0
+			Do case
+				case aLinha[1] == "empresa"
+					::empresa := aLinha[2] 
+				case aLinha[1] == "filial"
+					::filial := aLinha[2]
+				case aLinha[1] == "usuario"
+					::usuario := aLinha[2] 
+				case aLinha[1] == "senha"
+					::senha := aLinha[2] 
+			EndCase	
+		endif					 					
 //		sRead := FReadStr(nHandle)     
 		FT_FSkip(nHandle)
 	EndDo

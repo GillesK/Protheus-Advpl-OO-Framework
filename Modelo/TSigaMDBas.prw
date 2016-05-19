@@ -166,6 +166,7 @@ Deve ser informado no contrutor da classe filha
 /*/	 		
 	data isExecAuto
 	data filhos
+	data confirm
 
 // *************** PUBLIC BEGIN *****************//
 	method New() Constructor
@@ -211,7 +212,10 @@ Deve ser informado no contrutor da classe filha
 	method hydrateAlias()
 	method hydAllAlias()
 	method hydAColsPos()
-
+	method hydrateMvc()
+	method hydColecao()
+	method hydItemCol()	
+	
 	method getColBrowse()	
 	method simulAHeader()
 	method simulACols()
@@ -276,7 +280,8 @@ Deve ser informado no contrutor da classe filha
 	method concat()
 	
 	method getEAItem(campo, opcao)
-	method getValString()	
+	method getValString()
+	
 // *************** PROTECTED END ************************//	
 EndClass
 
@@ -297,6 +302,7 @@ Method New() Class TSigaMDBas
 	//::resetCampos()
 	::isExecAuto := 	.F.
 //	::findModel := CHAVE_FIND_MODEL
+	::confirm := .F.
 	
 return (Self)
 
@@ -899,6 +905,9 @@ method geraNum()  class TSigaMDBas
 	cpoInc := ::getAutoIncCpo()
 	if cpoInc != nil
 		num := GetSxeNum(::tabela, cpoInc[CPOTEC])
+		if ::confirm
+			::confirmNum(.T.)
+		endif
 		if cpoInc != nil	
 			::setar(cpoInc[CPOTEC] ,num)
 		endif	
@@ -943,8 +952,8 @@ method salvaRegistro(lIns, valChave)  class TSigaMDBas
 	local aRet := {.T., ""}
 	local tabela := ::tabela
 	local i
+   	local oError	
    	Local bError         := { |e| oError := e , Break(e) }
-   	local oError
    	Local bErrorBlock
    	local vc := ""
    	local axArea
@@ -978,8 +987,13 @@ method salvaRegistro(lIns, valChave)  class TSigaMDBas
 	
 	begin sequence	
 		&(tabela)->(MsUnlock())	
-		::confirmNum(lIns)
+		if !::confirm
+			::confirmNum(lIns)
+		endif
 	Recover 
+		if !::confirm
+			::rollbackNum(lIns)
+		endif
 		aRet := {.F., oError:Description}
 		//ConOut( ProcName() + " " + Str(ProcLine()) + " " + oError:Description )
 	end sequence
@@ -1074,6 +1088,9 @@ method deletaRegistro(valChave) class  TSigaMDBas
 	local aRet := {.T., ""}
 	local tabela := ::tabela
 	local axarea
+   	local oError	
+   	Local bError         := { |e| oError := e , Break(e) }
+   	Local bErrorBlock	
 	
 	axArea := &(tabela)->(getarea())	
 	dbselectarea(tabela)	
@@ -1084,9 +1101,15 @@ method deletaRegistro(valChave) class  TSigaMDBas
 	if !(&(tabela)->(DBSeek(valChave)))
 		aRet := {.F., ::entidade + " " + valChave + " não encontrado na base para fazer atualização"}
 	else
-		recLock(tabela, .F.)
-		&(tabela)->(DbDelete())			
-		&(tabela)->(MsUnlock())
+		bErrorBlock    := ErrorBlock( bError )
+		begin sequence	
+			recLock(tabela, .F.)
+			&(tabela)->(DbDelete())			
+			&(tabela)->(MsUnlock())
+		Recover 
+			aRet := {.F., oError:Description}
+		end sequence
+		Errorblock(bErrorBlock)	
 		//MsUnlock(&(tabela))									
 	endif
 	restarea(axArea)
@@ -1147,7 +1170,9 @@ method resExecAuto(lMsErroEA, lIns)   class TSigaMDBas
 	local niX
 
 	If lMsErroEA
-		::rollbackNum(lIns)
+		if !::confirm
+			::rollbackNum(lIns)
+		endif
 		ciTexto		:=	" Erro Rotina Automática "+ Chr(13)+Chr(10)	
 		aiErro 		:= GetAutoGRLog()
 		For niX := 1 To Len(aiErro)
@@ -1156,7 +1181,9 @@ method resExecAuto(lMsErroEA, lIns)   class TSigaMDBas
 		
 		aiRet		:=	{.F.,ciTexto}
 	else
-		::confirmNum(lIns)
+		if !::confirm
+			::confirmNum(lIns)
+		endif
 	endif							  
 return aiRet
 
@@ -1302,6 +1329,7 @@ method hydrateM() class  TSigaMDBas
 return
 
 
+
 /*/{Protheus.doc} hydratePos
 Hydrata o modelo com o registro posicionado
 @type method
@@ -1397,6 +1425,36 @@ method hydAllAlias(aliasQry) class  TSigaMDBas
 //	restarea(axArea)		
 return colObj
 
+method hydItemCol(oItem) class  TSigaMDBas
+	local i	
+	local campo
+		
+	for i := 1 to oItem:numCampos()
+		campo := ::getCampo(oItem:chave(i))
+		if campo <> nil
+			campo[VALOR] := oItem:valor(i)
+		endif						
+	next i	
+return
+
+method hydColecao(colecao) class  TSigaMDBas
+	local colObj, cNewObj, oNewObj
+	local oIterat, oItem
+	local i
+	local campo
+	
+	colObj := TSColecao():New()
+	oIterat := colecao:getIterator()
+	oItem := oIterat:first()
+	while !oIterat:eoc()
+		cNewObj := GetClassName(self)+ "():New()"
+		oNewObj := &(cNewObj)				
+		// para todos os campos do item -> item
+		oNewObj:hydItemCol(oItem)
+		colObj:add(oNewObj)
+		oItem := oIterat:seguinte()
+	enddo
+return colObj
 
 /*/{Protheus.doc} hydrateACols
 Preeche o objeto a partir do aHeader e aCols
@@ -1946,7 +2004,7 @@ Concatena os valores de campos. TODO : compatibilizar com outro tipo que string
 method concat(keys) Class TSigaMDBas
 	local ret := "", i
 	for i := 1 to len(keys)
-		ret += ::getCampo(keys[i])[VALOR]
+		ret += ::getValString(::getCampo(keys[i]))//[VALOR]
 	next
 return ret
 
@@ -1958,4 +2016,22 @@ method toString()  class  TSigaMDBas
 		cMsg += ::campos[i][CPOPOR] + " " + ::campos[i][CPOTEC] + " " + ::getValString(::campos[i]) + ENTER  
 	next
 return cMsg
+
+
+method hydrateMvc(oModel) class  TSigaMDBas
+	local i
+	local oError
+   	Local bError         := { |e| oError := e , Break(e) }
+   	Local bErrorBlock
+
+	bErrorBlock    := ErrorBlock( bError )	
+	for i := 1 to Len(self:campos)
+		begin sequence
+			self:campos[i][VALOR] := oModel:getValue(self:campos[i][CPOTEC])
+		Recover
+			ConOut( ProcName() + " " + Str(ProcLine()) + " " + oError:Description )
+		end sequence	
+	next i
+	Errorblock(bErrorBlock)	
+return
 

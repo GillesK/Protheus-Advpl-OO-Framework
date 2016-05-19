@@ -63,9 +63,15 @@ method valor(key) class  TSTransObj
 			return ::campos[key][VALOR]
 		case ValType(key) == "C"
 			nPos := ascan(::campos, {|x| AllTrim(x[1]) == key})
-			if nPos != 0 
-				return ::campos[nPos][VALOR] 
-			endif   
+			//if nPos != 0 
+			// deliberately crash the system : no column with this name
+			return ::campos[nPos][VALOR] 
+			//else
+			//	return nil
+			//endif   
+		otherwise
+			// deliberately crash the system : no column index with this type
+			return ::campos[0][VALOR]
 	endcase
 return 
 

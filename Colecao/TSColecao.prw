@@ -45,6 +45,7 @@ Class TSColecao
 	method findA()
 	method sortA()
 	method excluir()
+	method atualizar()
 EndClass 
 
 
@@ -174,9 +175,15 @@ Excluir 1 item da coleção
 @type method
 @param pos, numérico, posição do item a excluir
 /*/
-method excluir(pos)  Class TSColecao
+method excluir(pos) Class TSColecao
 	local curLen
 	curLen := self:length()
 	ADel(::aCol, pos)
 	ASize(::aCol, curLen -1)
 return 
+
+method atualizar(pos, obj) Class TSColecao
+	if pos <= ::length()
+		::aCol[pos] := obj
+	endif
+return
